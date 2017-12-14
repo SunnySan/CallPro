@@ -10,6 +10,10 @@ public static final String	gcLineGatewayUrlSendTextPush				= "http://cms.gslssd.
 
 //Google Sign-In API
 public static final String	gcGoogleClientSecretFilePath				= "/js/client_id.json";
+//public static final String	gcGoogleClientSecretFilePathFull			= "/home/vasop/taisys-iot-demo/webapps/CallPro/js/client_id.json";
+//public static final String	gcGoogleGmailSecretFilePathFull			= "/mnt/host/webapps/CallPro/js/client_id.json";
+public static final String	gcGoogleGmailSecretFilePathFull			= "/mnt/host/webapps/CallPro/js/gmail_id.p12";
+
 public static final String	gcGoogleUrlForGettingAccessToken			= "https://www.googleapis.com/oauth2/v4/token";
 public static final String	gcGoogleAccessTokenRedirectUri				= "https://cms.gslssd.com";
 public static final String	gcGoogleDriveFolderName						= "CallPro";
@@ -19,15 +23,15 @@ public static final String	gcSystemUri									= "https://cms.gslssd.com/CallPro
 
 /*****************************************************************************/
 //Email相關設定
-public static final String	gcDefaultEmailSMTPServer				= "email-smtp.us-east-1.amazonaws.com";	//發送email的郵件主機(OA，可寄送至外部信箱)
+public static final String	gcDefaultEmailSMTPServer				= "smtp.gmail.com";	//發送email的郵件主機(OA，可寄送至外部信箱)
 public static final int		gcDefaultEmailSMTPServerPort			= 587;	//發送email的郵件主機port
-public static final String	gcDefaultEmailSMTPServerUserName		= "AKIAICACK43CDNRP6ASA";	//發送email的郵件主機UserName
-public static final String	gcDefaultEmailSMTPServerPassword		= "AiiImQh0LUDwr+g55QqIXrEvRSEjEELU9djBf6EfhzZ2";	//發送email的郵件主機Password
-public static final String	gcDefaultEmailFromAddress				= "sunny.sun@taisys.com";	//發送email的發信人email address
-public static final String	gcDefaultEmailFromName					= "電話管家";	//發送email的發信人名稱
-public static final String	gcDefaultEmailFromAddressVAS			= "support@taisys.com";	//發送內部email的發信人email address
-public static final String	gcDefaultEmailFromNameVAS				= "中華SSD專案通知";	//發送內部email的發信人名稱
-public static final String	gcDefaultEmailToAddressVAS				= "sunny.sun@taisys.com";	//發送內部email的收信人email address
+public static final String	gcDefaultEmailSMTPServerUserName		= "m@248.tw";	//發送email的郵件主機UserName
+public static final String	gcDefaultEmailSMTPServerPassword		= "sunny561227";	//發送email的郵件主機Password
+//public static final String	gcDefaultEmailSMTPServerUserName		= "sunny561227@gmail.com";	//發送email的郵件主機UserName
+//public static final String	gcDefaultEmailSMTPServerPassword		= "ovvrnpphywowqvkr";	//發送email的郵件主機Password
+
+public static final String	gcDefaultEmailFromAddress				= "m@call-pro.net";	//發送email的發信人email address
+public static final String	gcDefaultEmailFromName					= "Call-Pro服務中心";	//發送email的發信人名稱
 
 //ResultCode及ResultText定義
 public static final String	gcResultCodeSuccess						= "00000";
@@ -46,6 +50,8 @@ public static final String	gcResultCodeWrongIdOrPassword			= "00009";
 public static final String	gcResultTextWrongIdOrPassword			= "帳號密碼有誤，請重新登入!";
 public static final String	gcResultCodeAccountWasSuspended			= "00010";
 public static final String	gcResultTextAccountWasSuspended			= "您的帳號已被停用，請洽詢客服!";
+public static final String	gcResultCodeMoreThanOneAccount			= "00011";
+public static final String	gcResultTextMoreThanOneAccount			= "您的帳號有誤(超過一筆)，請洽詢客服!";
 public static final String	gcResultCodeDBTimeout					= "99001";
 public static final String	gcResultTextDBTimeout					= "資料庫連線失敗或逾時!";
 public static final String	gcResultCodeDBOKButMailBodyFail			= "99002";
@@ -62,6 +68,7 @@ public static final String	gcResultTextUnknownError				= "其他錯誤!";
 //日期格式
 public static final String	gcDateFormatDateDashTime				= "yyyyMMdd-HHmmss";
 public static final String	gcDateFormatSlashYMDTime				= "yyyy/MM/dd HH:mm:ss";
+public static final String	gcDateFormatDashYMDTime					= "yyyy-MM-dd HH:mm:ss";
 public static final String	gcDateFormatYMD							= "yyyyMMdd";
 public static final String	gcDateFormatSlashYMD					= "yyyy/MM/dd";
 public static final String	gcDateFormatdashYMD						= "yyyy-MM-dd";

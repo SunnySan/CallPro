@@ -192,6 +192,26 @@ public String getWeekAgo(String sDateFormat){
 }	//public String getDateTimeNow(String sDateFormat){
 
 /*********************************************************************************************************************/
+//判斷某個日期是否已過期
+public java.lang.Boolean isExpired(String sExpiryDate){
+	if (beEmpty(sExpiryDate)) return false;
+	java.lang.Boolean bExpired = true;
+	try {
+		TimeZone.setDefault(TimeZone.getTimeZone("Asia/Taipei"));	//將 Timezone 設為 GMT+8
+		java.util.Calendar cal = java.util.Calendar.getInstance();//使用預設時區和語言環境獲得一個日曆。  
+		java.util.Date dateNow = cal.getTime();	//目前時間
+		SimpleDateFormat sdf = new SimpleDateFormat(gcDateFormatDashYMDTime);
+		java.util.Date dateExpiry = sdf.parse(sExpiryDate);	//過期的時間
+		bExpired = dateNow.after(dateExpiry);	//若目前時間超過過期的時間，則回覆true
+	} catch (Exception e) {
+		e.printStackTrace();
+		writeLog("error", "Parsing date exception= " + e.toString());
+		return true;
+	}
+	return bExpired;
+}
+
+/*********************************************************************************************************************/
 
 //產生20碼的RequestId
 public String generateRequestId(){
@@ -532,8 +552,6 @@ public java.lang.Boolean sendHTMLMail(String sFromEmail, String sFromName, Strin
 	
 	String				sSMTPServer			= gcDefaultEmailSMTPServer;
 	int					iSMTPServerPort		= gcDefaultEmailSMTPServerPort;
-	String				sSMTPServerUserName	= gcDefaultEmailSMTPServerUserName;
-	String				sSMTPServerPassword	= gcDefaultEmailSMTPServerPassword;
 	
 	if (beEmpty(sFromEmail) || beEmpty(sFromName) || beEmpty(sToEmail) || beEmpty(sSubject) || beEmpty(sBody)){
 		return false;
@@ -564,20 +582,35 @@ public java.lang.Boolean sendHTMLMail(String sFromEmail, String sFromName, Strin
 	
 	try{
 		try{
+			final String				sSMTPServerUserName	= gcDefaultEmailSMTPServerUserName;
+			final String				sSMTPServerPassword	= gcDefaultEmailSMTPServerPassword;
 			Properties props = new Properties();
-			//以下是 AWS 設定
+			//以下是 Gmail 設定
 			props.put("mail.transport.protocol", "smtp");
+			props.put("mail.smtp.host", sSMTPServer);
 			props.put("mail.smtp.port", iSMTPServerPort);
 			props.put("mail.smtp.auth", "true");
 			props.put("mail.smtp.starttls.enable", "true");
 			props.put("mail.smtp.starttls.required", "true");
-			
+			/*
+			props.put("mail.smtp.host", sSMTPServer);
+			props.put("mail.smtp.auth", "true");
+			props.put("mail.smtp.starttls.enable", "true");
+			props.put("mail.smtp.port", iSMTPServerPort);
+			*/
 			/*
 			props.put("mail.smtp.host", sSMTPServer);
 			//props.put("mail.smtp.auth", "true");	//需要認證則為 true，記得在transport.connect的後兩個參數填入 id、pwd
 			*/
 
 			Session s = Session.getInstance(props);
+			/*
+			Session s = Session.getInstance(props, new javax.mail.Authenticator() {
+				protected javax.mail.PasswordAuthentication getPasswordAuthentication() {
+					return new javax.mail.PasswordAuthentication(sSMTPServerUserName, sSMTPServerPassword);
+				}
+			});
+			*/
 			//s.setDebug(true);	//需要 debug 時再打開
 			
 			javax.mail.internet.MimeMessage message = new MimeMessage(s);
@@ -648,7 +681,7 @@ public java.lang.Boolean sendHTMLMail(String sFromEmail, String sFromName, Strin
 			
 			message.saveChanges();
 			Transport transport = s.getTransport("smtp");
-			transport.connect(sSMTPServer, sSMTPServerUserName, sSMTPServerPassword);	//AWS
+			transport.connect(sSMTPServer, iSMTPServerPort, sSMTPServerUserName, sSMTPServerPassword);	//AWS
 			transport.sendMessage(message, message.getAllRecipients());
 			transport.close();
 		}catch(UnsupportedEncodingException e){
@@ -737,13 +770,13 @@ public Hashtable getAccountProfile(String sAccountName, String dbName){
 	if (htResponse.get("Account_Type").toString().equals("A")){	//系統管理者
 		sSQL = "SELECT Google_ID, Google_User_Name, Google_User_Picture_URL, Google_Email, DATE_FORMAT(Last_Login_Date, '%Y/%m/%d/ %H:%i')";
 		sSQL += " FROM callpro_account_admin";
-		fields = {"Google_ID", "Google_User_Name", "Google_User_Picture_URL", "Google_Email", "Last_Login_Date"};
+		fields = new String[] {"Google_ID", "Google_User_Name", "Google_User_Picture_URL", "Google_Email", "Last_Login_Date"};
 	}
 
 	if (htResponse.get("Account_Type").toString().equals("D")){	//加盟商
 		sSQL = "SELECT Google_ID, Google_User_Name, Google_User_Picture_URL, Google_Email, Contact_Phone, Contact_Address, Tax_ID_Number, Purchase_Quantity, Provision_Quantity, DATE_FORMAT(Expiry_Date, '%Y/%m/%d/ %H:%i'), DATE_FORMAT(Last_Login_Date, '%Y/%m/%d/ %H:%i')";
 		sSQL += " FROM callpro_account_dealer";
-		fields = {"Google_ID", "Google_User_Name", "Google_User_Picture_URL", "Google_Email", "Contact_Phone", "Contact_Address", "Tax_ID_Number", "Purchase_Quantity", "Provision_Quantity", "Expiry_Date", "Last_Login_Date"};
+		fields = new String[] {"Google_ID", "Google_User_Name", "Google_User_Picture_URL", "Google_Email", "Contact_Phone", "Contact_Address", "Tax_ID_Number", "Purchase_Quantity", "Provision_Quantity", "Expiry_Date", "Last_Login_Date"};
 	}
 	
 	if (notEmpty(sSQL)){
@@ -771,6 +804,49 @@ public Hashtable getAccountProfile(String sAccountName, String dbName){
 	return htResponse;
 
 }	//public Hashtable getAccountProfile(String sAccountName, String dbName){
+
+/*********************************************************************************************************************/
+//根據 Line channel 及 Line user ID，取得用戶資料
+public Hashtable getAccountProfileByLineId(String sLineChannel, String sLineUserId, String dbName){
+	Hashtable	htResponse		= new Hashtable();	//儲存回覆資料的 hash table
+	Hashtable	ht				= new Hashtable();
+	String		sSQL			= "";
+	String		s[][]			= null;
+	String		sResultCode		= gcResultCodeSuccess;
+	String		sResultText		= gcResultTextSuccess;
+	int			i				= 0;
+
+	sSQL = "SELECT A.Account_Sequence, A.Account_Name, A.Account_Type, A.Line_User_ID, A.Line_Channel_Name, A.Parent_Account_Sequence, A.Audit_Phone_Number, A.Status, DATE_FORMAT(B.Expiry_Date, '%Y/%m/%d/ %H:%i')";
+	sSQL += " FROM callpro_account A LEFT JOIN callpro_account_detail";
+	sSQL += " ON A.Account_Sequence = B.Main_Account_Sequence";
+	sSQL += " WHERE A.Line_User_ID='" + sLineUserId + "'";
+	sSQL += " AND A.Line_Channel_Name='" + sLineChannel + "'";
+
+	ht = getDBData(sSQL, dbName);
+	sResultCode = ht.get("ResultCode").toString();
+	sResultText = ht.get("ResultText").toString();
+	if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
+		s = (String[][])ht.get("Data");
+		if (s.length>1){	//資料不應該超過一筆
+			htResponse.put("ResultCode", gcResultCodeMoreThanOneAccount);
+			htResponse.put("ResultText", gcResultTextMoreThanOneAccount);
+			return htResponse;
+		}
+		i = 0;
+		htResponse.put("Account_Sequence", nullToString(s[0][i], ""));	i++;
+		htResponse.put("Account_Name", nullToString(s[0][i], ""));	i++;
+		htResponse.put("Account_Type", nullToString(s[0][i], ""));	i++;
+		htResponse.put("Line_User_ID", nullToString(s[0][i], ""));	i++;
+		htResponse.put("Line_Channel_Name", nullToString(s[0][i], ""));	i++;
+		htResponse.put("Parent_Account_Sequence", nullToString(s[0][i], ""));	i++;
+		htResponse.put("Audit_Phone_Number", nullToString(s[0][i], ""));	i++;
+		htResponse.put("Status", nullToString(s[0][i], ""));	i++;
+		htResponse.put("Expiry_Date", nullToString(s[0][i], ""));	i++;
+	}
+	htResponse.put("ResultCode", sResultCode);
+	htResponse.put("ResultText", sResultText);
+	return htResponse;
+}	//public Hashtable getAccountProfileByLineId(String sLineChannel, String sLineUserId, String dbName){
 
 /*********************************************************************************************************************/
 //讓單引號等字元可以寫入MySQL DB中，用法為escape(String)
