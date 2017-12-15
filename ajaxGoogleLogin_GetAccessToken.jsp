@@ -180,7 +180,7 @@ if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
 	//檢查 Status
 	s = (String[][])ht.get("Data");
 
-	if (beEmpty(s[0][1]) || !(s[0][1].equals("D")||s[0][1].equals("O")||s[0][1].equals("T")) || ((s[0][1].equals("O")||s[0][1].equals("T"))&&(beEmpty(s[0][2])||s[0][2].equals("B")))){
+	if (beEmpty(s[0][1]) || !(s[0][1].equals("D")||s[0][1].equals("O")||s[0][1].equals("T")) || ((s[0][1].equals("O")||s[0][1].equals("T"))&&(notEmpty(s[0][2])&&s[0][2].equals("B")))){
 		sResultCode = gcResultCodeUnknownError;
 		sResultText = "您的Call-Pro帳號類別不需註冊Google帳號";
 	}
