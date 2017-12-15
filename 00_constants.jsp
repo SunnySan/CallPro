@@ -10,9 +10,7 @@ public static final String	gcLineGatewayUrlSendTextPush				= "http://cms.gslssd.
 
 //Google Sign-In API
 public static final String	gcGoogleClientSecretFilePath				= "/js/client_id.json";
-//public static final String	gcGoogleClientSecretFilePathFull			= "/home/vasop/taisys-iot-demo/webapps/CallPro/js/client_id.json";
-//public static final String	gcGoogleGmailSecretFilePathFull			= "/mnt/host/webapps/CallPro/js/client_id.json";
-public static final String	gcGoogleGmailSecretFilePathFull			= "/mnt/host/webapps/CallPro/js/gmail_id.p12";
+//public static final String	gcGoogleGmailSecretFilePathFull			= "/mnt/host/webapps/CallPro/js/gmail_id.p12";
 
 public static final String	gcGoogleUrlForGettingAccessToken			= "https://www.googleapis.com/oauth2/v4/token";
 public static final String	gcGoogleAccessTokenRedirectUri				= "https://cms.gslssd.com";
@@ -31,7 +29,7 @@ public static final String	gcDefaultEmailSMTPServerPassword		= "sunny561227";	//
 //public static final String	gcDefaultEmailSMTPServerPassword		= "ovvrnpphywowqvkr";	//發送email的郵件主機Password
 
 public static final String	gcDefaultEmailFromAddress				= "m@call-pro.net";	//發送email的發信人email address
-public static final String	gcDefaultEmailFromName					= "Call-Pro服務中心";	//發送email的發信人名稱
+public static final String	gcDefaultEmailFromName					= "Call-Pro官網";	//發送email的發信人名稱
 
 //ResultCode及ResultText定義
 public static final String	gcResultCodeSuccess						= "00000";

@@ -11,7 +11,6 @@
 
 <%@include file="00_constants.jsp"%>
 <%@include file="00_utility.jsp"%>
-<%@include file="00_GoogleGmail.jsp"%>
 
 <%
 request.setCharacterEncoding("utf-8");
@@ -24,11 +23,6 @@ out.clear();	//注意，一定要有out.clear();，要不然client端無法解�
 
 /*********************開始做事吧*********************/
 JSONObject obj=new JSONObject();
-		//String CLIENT_SECRET_FILE	= gcGoogleGmailSecretFilePathFull;
-		
-		//sendGoogleMail(CLIENT_SECRET_FILE, "sunny561227@gmail.com", "m@248.tw", "test", "hello", null);
-		sendHTMLMail(gcDefaultEmailFromAddress, gcDefaultEmailFromName, "sunny561227@gmail.com", "Document from Jennifer", "test mail 宏碁", "", "", "", "");
-		if (1==1) return;
 
 String src		= nullToString(request.getParameter("src"), "");
 
@@ -128,7 +122,11 @@ try {
 					sMessageText = sMessageText.toLowerCase();
 					sReplyMessageText = sMessageText;
 					if (notEmpty(sMessageText)){	//用戶傳入文字訊息，判斷用戶資料並做對應的處理
-						if (sMessageText.startsWith("A,") || sMessageText.startsWith("a,")){	//Admin傳來的指令
+						if (sMessageText.indexOf("功能說明")>0){	//由LINE@Manager設定的關鍵字回覆即可
+							continue;
+						}else if (sMessageText.indexOf("\"")>-1 || sMessageText.indexOf("'")>-1){
+							sReplyMessageText = "訊息中請勿使用單引號或雙引號!";
+						} else if (sMessageText.startsWith("A,") || sMessageText.startsWith("a,")){			//Admin傳來的指令
 							sReplyMessageText = processAdminCommand(sSourceUserId, src, sMessageText);
 						}else if (sMessageText.startsWith("1,") || sMessageText.startsWith("2,") || sMessageText.startsWith("3,")){	//經銷商傳來的指令
 						}else{	//其他指令，可能是傳來授權碼
@@ -270,7 +268,7 @@ writeLog("debug", obj.toString());
 			sResultText = ht.get("ResultText").toString();
 			
 			if (sResultCode.equals(gcResultCodeSuccess)){	//成功
-				return "執行成功，請加盟商於5分鐘內輸入下列授權碼：\n" + sAuthorizationCode;
+				return "執行成功，請加盟商於5分鐘內輸入授權碼" + sAuthorizationCode + "+逗點+Gmail帳號，例如以下內容：\n" + sAuthorizationCode + ",abc@gmail.com";
 			}else{
 				writeLog("error", "Failed to insert data, SQL= " + sSQL + ", sResultText=" + sResultText);
 				return "作業失敗，錯誤訊息：" + sResultText;
@@ -311,11 +309,11 @@ writeLog("debug", obj.toString());
 			if (sGoogleEmail.indexOf("@gmail.com")<1) return "GMail信箱格式錯誤";
 		}
 		
-		sSQL = "SELECT id, A.Account_Sequence, A.Account_Name, A.Account_Type, A.Bill_Type, A.Parent_Account_Sequence, A.Audit_Phone_Number, DATE_FORMAT(A.Expiry_Date, '%Y-%m-%d %H:%i:%s'), A.Status";
+		sSQL = "SELECT A.id, A.Account_Sequence, A.Account_Name, A.Account_Type, A.Bill_Type, A.Parent_Account_Sequence, A.Audit_Phone_Number, DATE_FORMAT(A.Expiry_Date, '%Y-%m-%d %H:%i:%s'), A.Status";
 		sSQL += " FROM callpro_account A";
 		sSQL += " WHERE A.Account_Name='" + sMessageText + "'";
 		sSQL += " AND A.Status='Init'";
-		sSQL += " AND DATE_ADD( Create_Date , INTERVAL 5 MINUTE )>'" + sDate + "'";
+		sSQL += " AND DATE_ADD( A.Create_Date , INTERVAL 5 MINUTE )>'" + sDate + "'";
 	
 		ht = getDBData(sSQL, gcDataSourceName);
 		sResultCode = ht.get("ResultCode").toString();
@@ -333,6 +331,15 @@ writeLog("debug", obj.toString());
 			
 			if (beEmpty(sAccountType)){
 				return "無法取得您的帳號類型，請您的門號管理者、商家重新申請授權碼!";
+			}
+
+			if (sAccountType.equals("D") || ((sAccountType.equals("O")||sAccountType.equals("T"))&&!sBillType.equals("B"))){
+				if (aMsg.length<2){
+					return "請輸入您的授權碼+逗點+Gmail帳號，例如以下內容：\n" + aMsg[0] + "," + "abc@gmail.com";
+				}
+				if (!sendVerificationMailToGoogle(aMsg[1], sAccountSequence)){	//加盟商、非基本版的門號擁有者下一步須進行Google帳號註冊
+					return "Gmail通知信發送失敗，請確認您的Gmail郵件地址是否正確，然後再試一次!";
+				}
 			}
 			
 			sSQL = "UPDATE callpro_account SET";
@@ -363,7 +370,16 @@ writeLog("debug", obj.toString());
 				sSQL += "'" + "" + "',";
 				sSQL += "'" + "" + "',";
 				sSQL += "'" + "" + "',";
-				sSQL += "'" + "" + "',";
+				if (sAccountType.equals("D") || ((sAccountType.equals("O")||sAccountType.equals("T"))&&!sBillType.equals("B"))){
+					if (aMsg.length>1){
+						sSQL += "'" + aMsg[1] + "',";
+					}else{
+						sSQL += "'" + "" + "',";
+					}
+				}else{
+					sSQL += "'" + "" + "',";
+				}
+				
 				sSQL += "'" + "" + "',";
 				sSQL += "'" + "" + "',";
 				sSQL += "'" + "" + "',";
@@ -382,12 +398,7 @@ writeLog("debug", obj.toString());
 			
 			if (sResultCode.equals(gcResultCodeSuccess)){	//成功
 				if (sAccountType.equals("D") || ((sAccountType.equals("O")||sAccountType.equals("T"))&&!sBillType.equals("B"))){
-					if (sendVerificationMailToGoogle("")){	//加盟商、非基本版的門號擁有者下一步須進行Google帳號註冊
-						return "太棒了，您的帳號已經註冊完成，下一步須進行Google帳號註冊!";
-					}else{
-						return "Gmail發送失敗!";
-					}
-					//sReplyMessageText = sendVerificationMailToGoogle("");	//加盟商、非基本版的門號擁有者下一步須進行Google帳號註冊
+					return "您的帳號已確認，請至Gmail信箱收取通知信，點選通知信中的網頁連結以註冊您的Google帳號!";
 				}else{
 					return "太棒了，您的帳號已經註冊完成!";
 				}
@@ -434,13 +445,19 @@ writeLog("debug", obj.toString());
 
 	/*********************************************************************************************************************/
 	//發送Gmail帳號註冊信給用戶輸入的Gmail address
-	private java.lang.Boolean sendVerificationMailToGoogle(String gmailAddress){
-		//String CLIENT_SECRET_FILE	= application.getRealPath(gcGoogleClientSecretFilePath);
-		String CLIENT_SECRET_FILE	= gcGoogleGmailSecretFilePathFull;
-		
-		return sendGoogleMail(CLIENT_SECRET_FILE, "sunny561227@gmail.com", "m@call-pro.net", "test", "hello", null);
+	private java.lang.Boolean sendVerificationMailToGoogle(String gmailAddress, String sAccountSequence){
+		java.lang.Boolean bOK = false;
+		String sSubject = "Call-Pro帳號註冊通知信";
+		String sBody = "";
+		String sLink = gcSystemUri + "GoogleAccountRegistration.html?s=" + sAccountSequence + "&m=" + URLEncoder.encode(gmailAddress);
+		sBody = "親愛的用戶您好，";
+		sBody += "<p>感謝您使用Call-Pro服務，您的LINE帳號已確認，請點選下方連結註冊您的Google帳號，若未申請Call-Pro服務則請勿點選下方連結!";
+		sBody += "<p><a href='" + sLink + "'>" + sLink + "</a>";
+		sBody += "<p>Call-Pro祝您有美好的一天";
+		bOK = sendHTMLMail(gcDefaultEmailFromAddress, gcDefaultEmailFromName, gmailAddress, sSubject, sBody, "", "", "", "");
+		return bOK;
 
-	}	//private String sendVerificationMailToGoogle(String gmailAddress){
+	}	//private java.lang.Boolean sendVerificationMailToGoogle(String gmailAddress, String sAccountSequence){
 
 	/*********************************************************************************************************************/
 	private String generateMainMenu(String sReplyToken, String sSourceUserId, String sSourceRoomId, String sSourceGroupId, String sSourceType){	//產生主選單

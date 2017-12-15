@@ -37,8 +37,12 @@ out.clear();	//注意，一定要有out.clear();，要不然client端無法解�
 /*********************開始做事吧*********************/
 JSONObject obj=new JSONObject();
 
-String authorizationCode = nullToString(request.getParameter("GoogleCode"), "");
-if (beEmpty(authorizationCode)){
+String authorizationCode	= nullToString(request.getParameter("GoogleCode"), "");
+String Account_Sequence		= nullToString(request.getParameter("Account_Sequence"), "");
+String Google_Email			= nullToString(request.getParameter("Google_Email"), "");
+
+
+if (beEmpty(authorizationCode) || beEmpty(Account_Sequence) || beEmpty(Google_Email)){
 	obj.put("resultCode", gcResultCodeParametersNotEnough);
 	obj.put("resultText", gcResultTextParametersNotEnough);
 	out.print(obj);
@@ -48,9 +52,11 @@ if (beEmpty(authorizationCode)){
 
 //writeLog("debug", "Receive Google Authorization Code= " + authorizationCode);
 //session.removeAttribute("UserProfile");	//先清除 session 中的用戶資料
+/*
 session.removeAttribute("GoogleUserId");	//先清除 session 中的用戶資料
 session.removeAttribute("GoogleUserDisplayName");	//先清除 session 中的用戶資料
 session.removeAttribute("GoogleUserPictureUrl");	//先清除 session 中的用戶資料
+*/
 
 String CLIENT_SECRET_FILE	= application.getRealPath(gcGoogleClientSecretFilePath);
 String TOKEN_REQUEST_URL	= gcGoogleUrlForGettingAccessToken;
@@ -131,7 +137,7 @@ writeLog("debug", "Name= " + name);
 writeLog("debug", "familyName= " + familyName);
 writeLog("debug", "givenName= " + givenName);
 
-if (notEmpty(userId) && notEmpty(email)){	//Google正常回覆資料
+if (notEmpty(userId) && notEmpty(email) && notEmpty(accessToken)){	//Google正常回覆資料
 	//將用戶資料寫到將回覆 client 端及紀錄到 session 的 JSON物件中
 	name = nullToString(name, "");
 	pictureUrl = nullToString(pictureUrl, "");
@@ -139,9 +145,9 @@ if (notEmpty(userId) && notEmpty(email)){	//Google正常回覆資料
 	obj.put("GoogleUserDisplayName", name);
 	obj.put("GoogleUserPictureUrl", pictureUrl);
 }else{
-	writeLog("error", "Google respond empty userId or email");
+	writeLog("error", "Google respond empty userId or email or accessToken");
 	sResultCode = gcResultCodeUnknownError;
-	sResultText = "無法取得您的Google ID或Email";
+	sResultText = "無法取得您的Google ID或Email或token";
 	obj.put("resultCode", sResultCode);
 	obj.put("resultText", sResultText);
 	out.print(obj);
@@ -157,9 +163,12 @@ List<String> sSQLList			= new ArrayList<String>();
 String		sDate				= getDateTimeNow(gcDateFormatSlashYMDTime);
 String		sUser				= "System";
 
-sSQL = "SELECT A.Status";
-sSQL += " FROM phk_google_subscriber A";
-sSQL += " WHERE A.Google_ID='" + userId + "'";
+sSQL = "SELECT A.id, A.Account_Type, A.Bill_Type, DATE_FORMAT(A.Expiry_Date, '%Y-%m-%d %H:%i:%s'), A.Status";
+sSQL += " FROM callpro_account A LEFT JOIN callpro_account_detail B";
+sSQL += " ON A.Account_Sequence=B.Main_Account_Sequence";
+sSQL += " WHERE A.Account_Sequence='" + Account_Sequence + "'";
+sSQL += " AND B.Google_Email='" + Google_Email + "'";
+sSQL += " AND DATE_ADD( A.Create_Date , INTERVAL 5 MINUTE )>'" + sDate + "'";
 
 ht = getDBData(sSQL, gcDataSourceName);
 
@@ -170,72 +179,71 @@ sSQL = "";
 if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
 	//檢查 Status
 	s = (String[][])ht.get("Data");
-	if (beEmpty(s[0][0]) || (!s[0][0].equals("Init") && !s[0][0].equals("Active"))){	//帳號狀態不對
-		sResultCode = gcResultCodeAccountWasSuspended;
-		sResultText = gcResultTextAccountWasSuspended;
+
+	if (beEmpty(s[0][1]) || !(s[0][1].equals("D")||s[0][1].equals("O")||s[0][1].equals("T")) || ((s[0][1].equals("D")||s[0][1].equals("D"))&&(beEmpty(s[0][2])||s[0][2].equals("B")))){
+		sResultCode = gcResultCodeUnknownError;
+		sResultText = "您的Call-Pro帳號類別不需註冊Google帳號";
+	}
+
+	if (isExpired(s[0][3])){
+		sResultCode = gcResultCodeUnknownError;
+		sResultText = "您的帳號已過期，無法進行此操作";
+	}
+
+	if (beEmpty(s[0][4]) || s[0][4].indexOf("Google")<0){
+		sResultCode = gcResultCodeUnknownError;
+		sResultText = "無法取得您的帳號狀態，請重新取得授權碼再進行註冊";
+	}
+
+	if (!sResultCode.equals(gcResultCodeSuccess)){	//有問題
+		obj.put("resultCode", sResultCode);
+		obj.put("resultText", sResultText);
 		out.print(obj);
 		out.flush();
 		return;
 	}
-	
+
 	//更新既有資料
-	sSQL = "UPDATE phk_google_subscriber SET ";
+	sSQL = "UPDATE callpro_account SET ";
 	sSQL += "Update_User='" + sUser + "',";
 	sSQL += "Update_Date='" + sDate + "',";
+	if (s[0][4].indexOf("Call")>-1){	//等 User 真正用他的電話打過來確認
+		sSQL += "Status='Call'";
+	}else{
+		sSQL += "Status='Active'";
+	}
+	sSQL += " WHERE id=" + s[0][0];
+	sSQLList.add(sSQL);
+
+	sSQL = "UPDATE callpro_account_detail SET ";
+	sSQL += "Update_User='" + sUser + "',";
+	sSQL += "Update_Date='" + sDate + "',";
+	sSQL += "Google_ID='" + userId + "',";
 	sSQL += "Google_User_Name='" + name + "',";
 	sSQL += "Google_User_Picture_URL='" + pictureUrl + "',";
-	sSQL += "Google_Email='" + email + "',";
-	if (notEmpty(refreshToken)) sSQL += "Google_Refresh_Token='" + refreshToken + "',";
 	sSQL += "Last_Login_Date='" + sDate + "'";
-	sSQL += " WHERE Google_ID='" + userId + "'";
+	sSQL += " WHERE Main_Account_Sequence='" + Account_Sequence + "'";
+	sSQL += " AND Google_Email='" + Google_Email + "'";
 	sSQLList.add(sSQL);
 	ht = updateDBData(sSQLList, gcDataSourceName, false);
 	sResultCode = ht.get("ResultCode").toString();
 	sResultText = ht.get("ResultText").toString();
 	if (sResultCode.equals(gcResultCodeSuccess)){	//成功
-		writeLog("info", "Updated phk_google_subscriber data, Google user id= " + userId);
+		writeLog("info", "Updated callpro_account and callpro_account_detail data, callpro_account id= " + s[0][0]);
 	}else{
-		writeLog("error", "Fail to update phk_google_subscriber data (" + sResultCode + "): " + sResultText);
+		writeLog("error", "Fail to update callpro_account and callpro_account_detail data data (" + sResultCode + "): " + sResultText);
 		out.print(obj);
 		out.flush();
 		return;
 	}	//if (sResultCode.equals(gcResultCodeSuccess)){	//成功
 }else if (sResultCode.equals(gcResultCodeNoDataFound)){	//沒資料，新增一筆資料
-	if (beEmpty(refreshToken)){	//沒有refreshToken，會造成以後的Google API無法使用，不能寫入DB
-		writeLog("error", "Going to insert into phk_google_subscriber but has no Refresh Token");
-		obj.put("resultCode", gcResultCodeUnknownError);
-		obj.put("resultText", "無法取得您Google帳號的RefreshToken，請到您Google帳號的應用程式管理中移除電話管家服務，然後重新登入一次");
-		out.print(obj);
-		out.flush();
-		return;
-	}
-	sSQL = "INSERT INTO phk_google_subscriber (Create_User, Create_Date, Update_User, Update_Date, Google_ID, Google_User_Name, Google_User_Picture_URL, Google_Email, Google_Refresh_Token, Last_Login_Date, Status) VALUES (";
-	sSQL += "'" + sUser + "',";
-	sSQL += "'" + sDate + "',";
-	sSQL += "'" + sUser + "',";
-	sSQL += "'" + sDate + "',";
-	sSQL += "'" + userId + "',";
-	sSQL += "'" + name + "',";
-	sSQL += "'" + pictureUrl + "',";
-	sSQL += "'" + email + "',";
-	sSQL += "'" + refreshToken + "',";
-	sSQL += "'" + sDate + "',";
-	sSQL += "'" + "Init" + "'";
-	sSQL += ")";
-	sSQLList.add(sSQL);
-	ht = updateDBData(sSQLList, gcDataSourceName, false);
-	sResultCode = ht.get("ResultCode").toString();
-	sResultText = ht.get("ResultText").toString();
-	if (sResultCode.equals(gcResultCodeSuccess)){	//成功
-		writeLog("info", "Inserted data into phk_google_subscriber, Google user id= " + userId);
-	}else{
-		writeLog("error", "Fail to insert data into phk_google_subscriber (" + sResultCode + "): " + sResultText);
-		out.print(obj);
-		out.flush();
-		return;
-	}	//if (sResultCode.equals(gcResultCodeSuccess)){	//成功
+	obj.put("resultCode", sResultCode);
+	obj.put("resultText", "無法取得您的註冊資料，可能是註冊使用的時間已經超過限制，請重新註冊!");
+	out.print(obj);
+	out.flush();
+	return;
 }else{
-	writeLog("error", "Fail to select phk_google_subscriber data (" + sResultCode + "): " + sResultText);
+	writeLog("error", "Fail to select callpro_account and callpro_account_detail data (" + sResultCode + "): " + sResultText);
 	obj.put("resultCode", sResultCode);
 	obj.put("resultText", sResultText);
 	out.print(obj);
@@ -245,9 +253,11 @@ if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
 
 //將登入的 LINE 用戶資料寫到 session 中，以後的作業會用到
 //session.setAttribute("UserProfile", obj);	//將登入用戶資料存入 session 中
+/*
 session.setAttribute("GoogleUserId", userId);	//將登入用戶資料存入 session 中
 session.setAttribute("GoogleUserDisplayName", name);	//將登入用戶資料存入 session 中
 session.setAttribute("GoogleUserPictureUrl", pictureUrl);	//將登入用戶資料存入 session 中
+*/
 
 //回覆 client 端
 obj.put("resultCode", sResultCode);
