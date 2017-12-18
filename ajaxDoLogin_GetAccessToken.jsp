@@ -1,4 +1,4 @@
-<%@ page language="java" pageEncoding="utf-8" contentType="text/html;charset=utf-8" %>
+﻿<%@ page language="java" pageEncoding="utf-8" contentType="text/html;charset=utf-8" %>
 <%@ page trimDirectiveWhitespaces="true" %>
 
 <%@page import="java.net.InetAddress" %>
@@ -38,11 +38,8 @@ out.clear();	//注意，一定要有out.clear();，要不然client端無法解�
 JSONObject obj=new JSONObject();
 
 String authorizationCode	= nullToString(request.getParameter("GoogleCode"), "");
-String Account_Sequence		= nullToString(request.getParameter("Account_Sequence"), "");
-String Google_Email			= nullToString(request.getParameter("Google_Email"), "");
 
-
-if (beEmpty(authorizationCode) || beEmpty(Account_Sequence) || beEmpty(Google_Email)){
+if (beEmpty(authorizationCode)){
 	obj.put("resultCode", gcResultCodeParametersNotEnough);
 	obj.put("resultText", gcResultTextParametersNotEnough);
 	out.print(obj);
@@ -51,12 +48,11 @@ if (beEmpty(authorizationCode) || beEmpty(Account_Sequence) || beEmpty(Google_Em
 }
 
 //writeLog("debug", "Receive Google Authorization Code= " + authorizationCode);
-//session.removeAttribute("UserProfile");	//先清除 session 中的用戶資料
-/*
-session.removeAttribute("GoogleUserId");	//先清除 session 中的用戶資料
-session.removeAttribute("GoogleUserDisplayName");	//先清除 session 中的用戶資料
-session.removeAttribute("GoogleUserPictureUrl");	//先清除 session 中的用戶資料
-*/
+
+session.removeAttribute("Account_Sequence");	//先清除 session 中的用戶資料
+session.removeAttribute("Account_Type");	//先清除 session 中的用戶資料
+session.removeAttribute("Bill_Type");	//先清除 session 中的用戶資料
+session.removeAttribute("Audit_Phone_Number");	//先清除 session 中的用戶資料
 
 String CLIENT_SECRET_FILE	= application.getRealPath(gcGoogleClientSecretFilePath);
 String TOKEN_REQUEST_URL	= gcGoogleUrlForGettingAccessToken;
@@ -162,13 +158,17 @@ String		sSQL				= "";
 List<String> sSQLList			= new ArrayList<String>();
 String		sDate				= getDateTimeNow(gcDateFormatSlashYMDTime);
 String		sUser				= "System";
+int			i					= 0;
+int			j					= 0;
 
-sSQL = "SELECT A.id, A.Account_Type, A.Bill_Type, DATE_FORMAT(A.Expiry_Date, '%Y-%m-%d %H:%i:%s'), A.Status";
-sSQL += " FROM callpro_account A LEFT JOIN callpro_account_detail B";
-sSQL += " ON A.Account_Sequence=B.Main_Account_Sequence";
-sSQL += " WHERE A.Account_Sequence='" + Account_Sequence + "'";
-sSQL += " AND B.Google_Email='" + Google_Email + "'";
-sSQL += " AND DATE_ADD( A.Create_Date , INTERVAL 5 MINUTE )>'" + sDate + "'";
+sSQL = "SELECT A.id, B.id, A.Account_Sequence, A.Account_Name, A.Account_Type, A.Bill_Type, A.Audit_Phone_Number";
+sSQL += " FROM callpro_account_detail B LEFT JOIN callpro_account A";
+sSQL += " ON B.Main_Account_Sequence=A.Account_Sequence";
+sSQL += " WHERE B.Google_ID='" + userId + "'";
+sSQL += " AND A.Status='Active'";
+sSQL += " AND A.Expiry_Date>'" + sDate + "'";
+
+writeLog("debug", sSQL);
 
 ht = getDBData(sSQL, gcDataSourceName);
 
@@ -180,65 +180,50 @@ if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
 	//檢查 Status
 	s = (String[][])ht.get("Data");
 
-	if (beEmpty(s[0][1]) || !(s[0][1].equals("D")||s[0][1].equals("O")||s[0][1].equals("T")) || ((s[0][1].equals("O")||s[0][1].equals("T"))&&(notEmpty(s[0][2])&&s[0][2].equals("B")))){
-		sResultCode = gcResultCodeUnknownError;
-		sResultText = "您的Call-Pro帳號類別不需註冊Google帳號";
+	if (s.length==1){	//只有一筆資料
+		sSQL = "UPDATE callpro_account_detail SET ";
+		sSQL += "Update_User='" + sUser + "',";
+		sSQL += "Update_Date='" + sDate + "',";
+		sSQL += "Google_User_Name='" + name + "',";
+		sSQL += "Google_User_Picture_URL='" + pictureUrl + "',";
+		sSQL += "Last_Login_Date='" + sDate + "'";
+		sSQL += " WHERE id=" + s[0][1];
+		sSQLList.add(sSQL);
+		ht = updateDBData(sSQLList, gcDataSourceName, false);
+		sResultCode = ht.get("ResultCode").toString();
+		sResultText = ht.get("ResultText").toString();
+		if (sResultCode.equals(gcResultCodeSuccess)){	//成功
+			writeLog("info", "User login successfully, callpro_account.id=" + s[0][0] + ", name=" + s[0][3]);
+			session.setAttribute("Account_Sequence", s[0][2]);	//將登入用戶資料存入 session 中
+			session.setAttribute("Account_Type", s[0][4]);	//將登入用戶資料存入 session 中
+			session.setAttribute("Bill_Type", s[0][5]);	//將登入用戶資料存入 session 中
+			session.setAttribute("Audit_Phone_Number", s[0][6]);	//將登入用戶資料存入 session 中
+		}else{
+			writeLog("error", "Fail to update callpro_account_detail data data (" + sResultCode + "): " + sResultText);
+			out.print(obj);
+			out.flush();
+			return;
+		}	//if (sResultCode.equals(gcResultCodeSuccess)){	//成功
+	}	//if (s.length==1){	//只有一筆資料
+	obj.put("recordCount", String.valueOf(s.length));
+	String[] fields2 = {"aid", "bid", "Account_Sequence", "Account_Name", "Account_Type", "Bill_Type", "Audit_Phone_Number"};
+	//若不只一筆資料，須讓用戶選要以哪個身分登入
+	List  l1 = new LinkedList();
+	Map m1 = null;
+	for (i=0;i<s.length;i++){
+		m1 = new HashMap();
+		for (j=0;j<fields2.length;j++){
+			m1.put(fields2[j], nullToString(s[i][j], ""));
+		}
+		l1.add(m1);
 	}
-
-	if (isExpired(s[0][3])){
-		sResultCode = gcResultCodeUnknownError;
-		sResultText = "您的帳號已過期，無法進行此操作";
-	}
-
-	if (beEmpty(s[0][4]) || s[0][4].indexOf("Google")<0){
-		sResultCode = gcResultCodeUnknownError;
-		sResultText = "無法取得您的帳號狀態，請重新取得授權碼再進行註冊";
-	}
-
-	if (!sResultCode.equals(gcResultCodeSuccess)){	//有問題
-		obj.put("resultCode", sResultCode);
-		obj.put("resultText", sResultText);
-		out.print(obj);
-		out.flush();
-		return;
-	}
-
-	//更新既有資料
-	sSQL = "UPDATE callpro_account SET ";
-	sSQL += "Update_User='" + sUser + "',";
-	sSQL += "Update_Date='" + sDate + "',";
-	if (s[0][4].indexOf("Call")>-1){	//等 User 真正用他的電話打過來確認
-		sSQL += "Status='Call'";
-	}else{
-		sSQL += "Status='Active'";
-	}
-	sSQL += " WHERE id=" + s[0][0];
-	sSQLList.add(sSQL);
-
-	sSQL = "UPDATE callpro_account_detail SET ";
-	sSQL += "Update_User='" + sUser + "',";
-	sSQL += "Update_Date='" + sDate + "',";
-	sSQL += "Google_ID='" + userId + "',";
-	sSQL += "Google_User_Name='" + name + "',";
-	sSQL += "Google_User_Picture_URL='" + pictureUrl + "',";
-	sSQL += "Last_Login_Date='" + sDate + "'";
-	sSQL += " WHERE Main_Account_Sequence='" + Account_Sequence + "'";
-	sSQL += " AND Google_Email='" + Google_Email + "'";
-	sSQLList.add(sSQL);
-	ht = updateDBData(sSQLList, gcDataSourceName, false);
-	sResultCode = ht.get("ResultCode").toString();
-	sResultText = ht.get("ResultText").toString();
-	if (sResultCode.equals(gcResultCodeSuccess)){	//成功
-		writeLog("info", "Updated callpro_account and callpro_account_detail data, callpro_account id= " + s[0][0]);
-	}else{
-		writeLog("error", "Fail to update callpro_account and callpro_account_detail data data (" + sResultCode + "): " + sResultText);
-		out.print(obj);
-		out.flush();
-		return;
-	}	//if (sResultCode.equals(gcResultCodeSuccess)){	//成功
+	obj.put("records", l1);
+	obj.put("Google_ID", userId);
+	obj.put("Google_User_Name", name);
+	obj.put("Google_User_Picture_URL", pictureUrl);
 }else if (sResultCode.equals(gcResultCodeNoDataFound)){	//沒資料，新增一筆資料
 	obj.put("resultCode", sResultCode);
-	obj.put("resultText", "無法取得您的註冊資料，可能是註冊使用的時間已經超過限制，請重新註冊!");
+	obj.put("resultText", "無法取得您的註冊資料，請重新註冊!");
 	out.print(obj);
 	out.flush();
 	return;

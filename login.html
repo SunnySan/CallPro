@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>Call Pro | Google帳號註冊</title>
+  <title>Call Pro | 用戶登入</title>
   <link rel="shortcut icon" href="images/favicon.ico">
   <!-- Tell the browser to be responsive to screen width -->
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
@@ -52,11 +52,11 @@
 <body class="hold-transition register-page">
 	<div class="register-box">
 		<div class="register-logo">
-			<a href="./index.html"><b>Call Pro</b></a>
+			<a href="./index.html"><b>Call Pro 用戶登入</b></a>
 		</div>
 		
-		<div id="register-box" class="register-box-body" style="display:none;">
-			<p class="login-box-msg">請點選下方按鈕並以您的Google帳號進行註冊</p>
+		<div id="register-box" class="register-box-body">
+			<p class="login-box-msg">請點選下方按鈕以您的Google帳號登入<br><span style="color:#FF0000;">注意：若您使用手機的LINE APP開啟本網頁，可能無法正常登入，請在LINE瀏覽器右上角選擇【以其他應用程式開啟】，使用您手機預設的瀏覽器開啟本網頁</span></p>
 			
 			<div class="social-auth-links text-center">
 				<input type="button" id="btnLogin" name="btnLogin" class="Google-Login-Button" value="" onclick="doLogin();">
@@ -97,14 +97,14 @@
 	var mailAddress		= "";
 
 	$(function () {
-		sequenceNumber	= getParameterByName("s");
-		mailAddress		= getParameterByName("m");
-
-		if (beEmpty(sequenceNumber) || beEmpty(mailAddress)){
-			msgBox("無法取得您的Email帳號資訊，請至Gmail信箱確認連結是否無誤，或重新執行註冊作業!");
-		}else{
-			$('#register-box').show();
-		}
+		setLocalValue("Account_Sequence", "");
+		setLocalValue("Account_Name", "");
+		setLocalValue("Account_Type", "");
+		setLocalValue("Bill_Type", "");
+		setLocalValue("Audit_Phone_Number", "");
+		setLocalValue("Google_ID", "");
+		setLocalValue("Google_User_Name", "");
+		setLocalValue("Google_User_Picture_URL", "");
 	});
 
 	function initGoogleAuth(){	//初始化Google Sign-In object
@@ -126,34 +126,54 @@
 			$('#btnLogin').prop("disabled",true);
 			//console.log("code=" + authResult['code']);
 			var sData = "";
+			var s = "";
+			var tmp = "";
+			
 			sData = "GoogleCode=" + authResult['code'];
-			sData += "&Account_Sequence=" + sequenceNumber;
-			sData += "&Google_Email=" + encodeURIComponent(mailAddress);
-			getDataFromServer("ajaxDoGoogleRegistration_GetAccessToken.jsp", sData, "json", function(data){
+			getDataFromServer("ajaxDoLogin_GetAccessToken.jsp", sData, "json", function(data){
 				if (!data.resultCode || !data.resultText){
 					msgBox("無法取得執行結果!");
 					$('#btnLogin').prop("disabled",false);
 					return;
 				}else{
 					if (data.resultCode=="00000"){
-						var GoogleUserId = data.GoogleUserId;
-						if (notEmpty(GoogleUserId)){
-							var GoogleUserDisplayName = data.GoogleUserDisplayName;
-							var GoogleUserPictureUrl = data.GoogleUserPictureUrl;
-							setLocalValue("GoogleUserId", GoogleUserId);
-							if (beEmpty(GoogleUserDisplayName)){
-								setLocalValue("GoogleUserName", "");
+						var recordCount = data.recordCount;
+						if (notEmpty(recordCount)){
+							if (recordCount=="1"){
+								$.each( data.records, function(i, r) {
+									setLocalValue("Account_Sequence", r.Account_Sequence);
+									setLocalValue("Account_Name", r.Account_Name);
+									setLocalValue("Account_Type", r.Account_Type);
+									setLocalValue("Bill_Type", r.Bill_Type);
+									setLocalValue("Audit_Phone_Number", r.Audit_Phone_Number);
+								});	//$.each( data.orders, function(i, r) {
+								setLocalValue("Google_ID", data.Google_ID);
+								setLocalValue("Google_User_Name", data.Google_User_Name);
+								setLocalValue("Google_User_Picture_URL", data.Google_User_Picture_URL);
+								location.href = "index_admin.html";
 							}else{
-								setLocalValue("GoogleUserName", GoogleUserDisplayName);
-							}
-							if (beEmpty(GoogleUserPictureUrl)){
-								setLocalValue("GoogleUserPictureUrl", "");
-							}else{
-								setLocalValue("GoogleUserPictureUrl", GoogleUserPictureUrl);
-							}
-							msgBox(data.GoogleUserDisplayName + "&nbsp;您好，歡迎您使用Call-Pro服務!", function(){location.href='index.html';});
+								s = "";
+								$.each( data.records, function(i, r) {
+									tmp = "";
+									/*
+									if (notEmpty(r.Amount_In)) tmp = " style='color:#2B49F5;'";
+									s = "<tr" + tmp + ">";
+									s += "<td>" + r.Transaction_Date + "</td>";
+									s += "<td>" + r.Transaction_Type + "</td>";
+									s += "<td>" + r.From_MSISDN + "</td>";
+									s += "<td class='myMoney'>" + toCurrency(r.Amount_Out) + "</td>";
+									s += "<td>" + r.To_Account + "</td>";
+									s += "<td class='myMoney'>" + toCurrency(r.Amount_In) + "</td>";
+									s += "<td class='myMoney'>" + toCurrency(r.Balance_After) + "</td>";
+									s += "<td>" + r.Comment + "</td>";
+									s += "</tr>";
+									$('#tblResult tbody').append(s);
+									*/
+								});	//$.each( data.orders, function(i, r) {
+								msgBox(data.GoogleUserDisplayName + "&nbsp;您好，歡迎您使用Call-Pro服務!", function(){location.href='index.html';});
+							}	//if (recordCount=="1"){
 						}else{
-							msgBox("無法取得Google的帳號資料");
+							msgBox("無法取得帳號資料");
 							$('#btnLogin').prop("disabled",false);
 						}
 
