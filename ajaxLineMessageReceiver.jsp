@@ -357,7 +357,7 @@ writeLog("debug", obj.toString());
 			}
 			
 			if (sAccountType.equals("O")){	//加盟商想新增非試用的電話主人帳號，檢查這個加盟商的Purchase_Quantity 減 Provision_Quantity 是否還夠用
-				if (isExceedPurchaseQuantity(Account_Sequence)){
+				if (isExceedPurchaseQuantity(s[0][0])){
 					return "您所購買的門號數已經用滿了，無法再開通新的用戶，請先購買新的門號!";
 				}
 			}
