@@ -24,9 +24,9 @@ out.clear();	//注意，一定要有out.clear();，要不然client端無法解�
 /*********************開始做事吧*********************/
 JSONObject obj=new JSONObject();
 
-String src		= nullToString(request.getParameter("src"), "");
+String lineChannel		= nullToString(request.getParameter("lineChannel"), "");
 
-if (beEmpty(src)){
+if (beEmpty(lineChannel)){
 	obj.put("resultCode", gcResultCodeParametersNotEnough);
 	obj.put("resultText", gcResultTextParametersNotEnough);
 	out.print(obj);
@@ -56,11 +56,13 @@ try {
 writeLog("debug", "\n***********************************************************************************************");
 writeLog("debug", "Receive Line message: " + contentStr);
 
+/*
 obj.put("resultCode", sResultCode);
 obj.put("resultText", sResultText);
 
 out.print(obj);
 out.flush();
+*/
 //out.close();
 
 //解析JSON參數
@@ -127,15 +129,16 @@ try {
 						}else if (sMessageText.indexOf("\"")>-1 || sMessageText.indexOf("'")>-1){
 							sReplyMessageText = "訊息中請勿使用單引號或雙引號!";
 						} else if (sMessageText.startsWith("A,") || sMessageText.startsWith("a,")){			//Admin傳來的指令
-							sReplyMessageText = processAdminCommand(sSourceUserId, src, sMessageText);
-						}else if (sMessageText.startsWith("1,") || sMessageText.startsWith("2,") || sMessageText.startsWith("3,")){	//經銷商傳來的指令
+							sReplyMessageText = processAdminCommand(sSourceUserId, lineChannel, sMessageText);
+						}else if (sMessageText.startsWith("1,") || sMessageText.startsWith("2,") || sMessageText.startsWith("3,")){	//加盟商傳來的指令
+							sReplyMessageText = processDealerCommand(sSourceUserId, lineChannel, sMessageText);
 						}else{	//其他指令，可能是傳來授權碼
-							sReplyMessageText = processOtherCommand(sSourceUserId, src, sMessageText);
+							sReplyMessageText = processOtherCommand(sSourceUserId, lineChannel, sMessageText);
 						}
 					}	//if (notEmpty(sMessageText)){	//用戶傳入文字訊息，判斷用戶資料並做對應的處理
 					/*
 					if (notEmpty(sMessageText)){	//用戶傳入文字訊息，判斷用戶資料並做對應的處理
-						ht = getAccountProfileByLineId(src, sSourceUserId, gcDataSourceName);
+						ht = getAccountProfileByLineId(lineChannel, sSourceUserId, gcDataSourceName);
 						sResultCode = ht.get("ResultCode").toString();
 						sResultText = ht.get("ResultText").toString();
 						if (!sResultCode.equals(gcResultCodeSuccess)){	//用戶資料找不到，或有問題
@@ -150,7 +153,7 @@ try {
 				}	//if (sMessageType.equals("sticker")){	//用戶傳送貼圖過來
 			}	//if (notEmpty(sMessageType)){
 		}	//if (notEmpty(sType) && sType.equals("message")){
-		writeLog("debug", "Line channel= " + src);
+		writeLog("debug", "Line channel= " + lineChannel);
 		writeLog("debug", "Event type= " + sType);
 		writeLog("debug", "Event replyToken= " + sReplyToken);
 		writeLog("debug", "Event source userId= " + sSourceUserId);
@@ -172,15 +175,22 @@ try {
 			{"events":[{"type":"follow","replyToken":"223f9cc52d6b42a487e1287fab800e56","source":{"userId":"Ue913331687d5757ccff454aab90f55cb","type":"user"},"timestamp":1508660591361}]}
 		*/
 		if (sType.equals("follow")){	//用戶加入好友，若DB已有此用戶(可能用戶之前封鎖現在解開)，把用戶狀態改為 follow
-			writeLog("info", "用戶加入官網服務");
+			writeLog("info", "用戶加入官網服務(或解除封鎖)");
+			if (updateUserStatus(sSourceUserId, lineChannel, sType)){
+				sReplyMessageText = "";	//不用回覆任何訊息，由LINE@MANAGER裡面設定的Greeting messages自動回覆
+			}else{
+				sReplyMessageText = "啟用您的帳號失敗，請稍後再試!";
+			}
 		}
-		if (sType.equals("unfollow")){	//用戶主動封鎖，把用戶狀態改為 unfollow
+		if (sType.equals("unfollow")){	//用戶主動封鎖，把用戶狀態改為 unfollow，從此不會發訊息給用戶，用戶也無法登入官網WEB
 			writeLog("info", "用戶封鎖官網服務");
+			updateUserStatus(sSourceUserId, lineChannel, sType);
+			sReplyMessageText = "";	//沒甚麼好說的了，這時候傳訊息的話LINE會回覆 400 error
 		}
 
 		//回傳 Line 訊息給客戶
 		if (notEmpty(sReplyMessageText)){
-			if (!sendReplyMessageToLine(src, sReplyMessageText)){
+			if (!sendReplyMessageToLine(lineChannel, sReplyMessageText)){
 				sResultCode = gcResultCodeUnknownError;
 				sResultText = gcResultTextUnknownError;
 			}
@@ -199,6 +209,7 @@ obj.put("resultCode", sResultCode);
 obj.put("resultText", sResultText);
 out.print(obj);
 out.flush();
+
 writeLog("debug", obj.toString());
 
 %>
@@ -245,7 +256,7 @@ writeLog("debug", obj.toString());
 			if (isDuplicateAuthorizationCode(sAuthorizationCode)){
 				return "目前系統中有相同的授權碼待用戶註冊帳號，請稍後使用此授權碼再試一次，或換一個授權碼!";
 			}
-			//開始建立經銷商的授權碼
+			//開始建立加盟商的授權碼
 			sSequence = getSequence(gcDataSourceName);	//取得新的Account_Sequence序號
 			sSQL = "INSERT INTO callpro_account (Create_User, Create_Date, Update_User, Update_Date, Account_Sequence, Account_Name, Account_Type, Line_User_ID, Line_Channel_Name, Parent_Account_Sequence, Audit_Phone_Number, Expiry_Date, Status) VALUES (";
 			sSQL += "'" + sUser + "',";
@@ -280,6 +291,115 @@ writeLog("debug", obj.toString());
 		}
 		//return sReplyMessageText;
 	}	//private String processAdminCommand (String sLineUserId, String sLineChannel, String sMessageText){
+
+	/*********************************************************************************************************************/
+	//處理由 加盟商 送來的指令，return需要Reply給LINE的訊息
+	private String processDealerCommand (String sLineUserId, String sLineChannel, String sMessageText){
+		Hashtable	ht					= new Hashtable();
+		String		sSQL				= "";
+		String		s[][]				= null;
+		String		sResultCode			= gcResultCodeSuccess;
+		String		sResultText			= gcResultTextSuccess;
+		String		sStatus				= "";
+		String		sReplyMessageText	= "";
+		List<String> sSQLList			= new ArrayList<String>();
+		String		sDate				= getDateTimeNow(gcDateFormatSlashYMDTime);
+		String		sUser				= "System";
+		String		sSequence			= "";
+		String		sAuthorizationCode	= "";
+		String		sAccountType		= "";
+		String		sBillType			= "";
+		
+		if (sMessageText.length()<3) return "訊息格式錯誤";
+		
+		sSQL = "SELECT A.Account_Sequence, DATE_FORMAT(A.Expiry_Date, '%Y-%m-%d %H:%i:%s'), A.Status";
+		sSQL += " FROM callpro_account A";
+		sSQL += " WHERE A.Line_User_ID='" + sLineUserId + "'";
+		sSQL += " AND A.Line_Channel_Name='" + sLineChannel + "'";
+		sSQL += " AND A.Account_Type='D'";
+		sSQL += " AND A.Status='Active'";
+	
+		ht = getDBData(sSQL, gcDataSourceName);
+		sResultCode = ht.get("ResultCode").toString();
+		sResultText = ht.get("ResultText").toString();
+		if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
+			s = (String[][])ht.get("Data");
+			if (isExpired(s[0][1])){
+				return "您的帳號已過期，無法進行此操作";
+			}
+			/*
+			sStatus = nullToString(s[0][2], "");
+			if (!sStatus.equals("Active")){
+				return "您的帳號狀態為非使用中，無法進行此操作";
+			}
+			*/
+			
+			sAuthorizationCode = sMessageText.substring(2);
+			if (isDuplicateAuthorizationCode(sAuthorizationCode)){
+				return "目前系統中有相同的授權碼(電話號碼)待用戶註冊帳號，請稍後使用此授權碼再試一次，或換一個授權碼!";
+			}
+			if (isDuplicateAuditPhoneNumber(sAuthorizationCode)){
+				return "目前系統中已有此電話號碼的主人資料，不需重複建立此電話主人帳號!";
+			}
+			//開始建立電話主人的授權碼
+			sSequence = getSequence(gcDataSourceName);	//取得新的Account_Sequence序號
+			if (sMessageText.startsWith("1,")){	//試用版
+				sAccountType = "T";
+				sBillType = "A";
+			}
+			if (sMessageText.startsWith("2,")){	//入門版
+				sAccountType = "O";
+				sBillType = "B";
+			}
+			if (sMessageText.startsWith("3,")){	//進階版
+				sAccountType = "O";
+				sBillType = "A";
+			}
+			
+			if (sAccountType.equals("O")){	//加盟商想新增非試用的電話主人帳號，檢查這個加盟商的Purchase_Quantity 減 Provision_Quantity 是否還夠用
+				if (isExceedPurchaseQuantity(Account_Sequence)){
+					return "您所購買的門號數已經用滿了，無法再開通新的用戶，請先購買新的門號!";
+				}
+			}
+
+			sSQL = "INSERT INTO callpro_account (Create_User, Create_Date, Update_User, Update_Date, Account_Sequence, Account_Name, Account_Type, Bill_Type, Line_User_ID, Line_Channel_Name, Parent_Account_Sequence, Audit_Phone_Number, Expiry_Date, Status) VALUES (";
+			sSQL += "'" + sUser + "',";
+			sSQL += "'" + sDate + "',";
+			sSQL += "'" + sUser + "',";
+			sSQL += "'" + sDate + "',";
+			sSQL += sSequence + ",";
+			sSQL += "'" + sAuthorizationCode + "',";
+			sSQL += "'" + sAccountType + "',";
+			sSQL += "'" + sBillType + "',";
+			sSQL += "'" + "" + "',";
+			sSQL += "'" + "" + "',";
+			sSQL += "'" + s[0][0] + "',";
+			sSQL += "'" + sAuthorizationCode + "',";
+			sSQL += "'" + "2099-12-31 23:59:59" + "',";
+			sSQL += "'" + "Init" + "'";
+			sSQL += ")";
+			sSQLList.add(sSQL);
+			ht = updateDBData(sSQLList, gcDataSourceName, false);
+			sResultCode = ht.get("ResultCode").toString();
+			sResultText = ht.get("ResultText").toString();
+			
+			if (sResultCode.equals(gcResultCodeSuccess)){	//成功
+				if (sMessageText.startsWith("2,")){	//試用版
+					return "執行成功，請電話主人於5分鐘內輸入以下授權碼：\n" + sAuthorizationCode;
+				}else{
+					return "執行成功，請電話主人於5分鐘內輸入授權碼" + sAuthorizationCode + "+逗點+Gmail帳號，例如以下內容：\n" + sAuthorizationCode + ",abc@gmail.com";
+				}
+			}else{
+				writeLog("error", "Failed to insert data, SQL= " + sSQL + ", sResultText=" + sResultText);
+				return "作業失敗，錯誤訊息：" + sResultText;
+			}	//if (sResultCode.equals(gcResultCodeSuccess)){	//成功
+		}else if (sResultCode.equals(gcResultCodeNoDataFound)){	//沒資料
+			return "系統中沒有您的加盟商帳號、或您的帳號未啟用，無法進行此操作";
+		}else{	//有誤
+			return "無法取得您的帳號資訊，無法進行此操作，錯誤訊息：" + sResultText;
+		}
+		//return sReplyMessageText;
+	}	//private String processDealerCommand (String sLineUserId, String sLineChannel, String sMessageText){
 
 	/*********************************************************************************************************************/
 	//處理其他指令，可能是用戶傳來授權碼，return需要Reply給LINE的訊息
@@ -328,9 +448,13 @@ writeLog("debug", obj.toString());
 			sAccountSequence = nullToString(s[0][1], "");
 			sAccountType = nullToString(s[0][3], "");
 			sBillType = nullToString(s[0][4], "");
-			
 			if (beEmpty(sAccountType)){
 				return "無法取得您的帳號類型，請您的門號管理者、商家重新申請授權碼!";
+			}
+
+			//檢查此用戶在相同的 Line Channel 底下是否已經有相同角色的帳號，不允許一個Line ID在同個Line Channel底下有相同類型的帳號
+			if (isDuplicateAccountTypeUnderSameLineChannel(sLineUserId, sLineChannel, sAccountType, nullToString(s[0][6], ""))){
+				return "您在此產品中已有相同功能的帳號，不需重複申請帳號";
 			}
 
 			if (sAccountType.equals("D") || ((sAccountType.equals("O")||sAccountType.equals("T"))&&!sBillType.equals("B"))){
@@ -356,7 +480,7 @@ writeLog("debug", obj.toString());
 			sSQL += " WHERE id=" + sRowId;
 			sSQLList.add(sSQL);
 			
-			if (!sAccountType.equals("M") && !sAccountType.equals("U")){	//經銷商及門號擁有者須興增一筆資料至callpro_account_detail
+			if (!sAccountType.equals("M") && !sAccountType.equals("U")){	//經銷商及門號擁有者須新增一筆資料至callpro_account_detail
 				//先將舊資料砍掉，應該不會有舊資料，這只是以防萬一
 				sSQL = "DELETE FROM callpro_account_detail";
 				sSQL += " WHERE Main_Account_Sequence=" + sAccountSequence;
@@ -390,7 +514,16 @@ writeLog("debug", obj.toString());
 				sSQL += "'" + sAccountSequence + "'";
 				sSQL += ")";
 				sSQLList.add(sSQL);
-			}
+				
+				if (sAccountType.equals("O")){	//這是電話主人帳號，將所屬加盟商的Provision_Quantity加1
+					sSQL = "UPDATE callpro_account_detail SET";
+					sSQL += " Update_User='" + sUser + "'";
+					sSQL += " ,Update_Date='" + sDate + "'";
+					sSQL += " ,Provision_Quantity=Provision_Quantity+1";
+					sSQL += " WHERE Main_Account_Sequence=" + s[0][5];
+					sSQLList.add(sSQL);
+				}
+			}	//if (!sAccountType.equals("M") && !sAccountType.equals("U")){	//經銷商及門號擁有者須新增一筆資料至callpro_account_detail
 
 			ht = updateDBData(sSQLList, gcDataSourceName, false);
 			sResultCode = ht.get("ResultCode").toString();
@@ -444,6 +577,105 @@ writeLog("debug", obj.toString());
 	}	//private java.lang.Boolean isDuplicateAuthorizationCode(String sAuthorizationCode){
 
 	/*********************************************************************************************************************/
+	//加盟商想新增非試用的電話主人帳號，檢查這個加盟商的Purchase_Quantity 減 Provision_Quantity 是否還夠用
+	private java.lang.Boolean isExceedPurchaseQuantity(String sAccountSequence){
+		Hashtable	ht					= new Hashtable();
+		String		sSQL				= "";
+		String		s[][]				= null;
+		String		sResultCode			= gcResultCodeSuccess;
+		String		sResultText			= gcResultTextSuccess;
+		int			i					= 0;
+		int			j					= 0;
+		
+		sSQL = "SELECT A.Purchase_Quantity, A.Provision_Quantity";
+		sSQL += " FROM callpro_account_detail A";
+		sSQL += " WHERE A.Main_Account_Sequence=" + sAccountSequence;
+
+		//writeLog("debug", "SQL= " + sSQL);
+		ht = getDBData(sSQL, gcDataSourceName);
+		sResultCode = ht.get("ResultCode").toString();
+		sResultText = ht.get("ResultText").toString();
+		if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
+			s = (String[][])ht.get("Data");
+			i = Integer.parseInt(s[0][0]);
+			j = Integer.parseInt(s[0][1]);
+			if ((i-j)<1) return true;
+			else return false;
+		}else if (sResultCode.equals(gcResultCodeNoDataFound)){	//沒資料，不對
+			return true;
+		}else{	//有誤
+			writeLog("error", "Failed to check Exceed Purchase Quantity, SQL= " + sSQL + ", sResultText=" + sResultText);
+			return true;
+		}
+	}	//private java.lang.Boolean isExceedPurchaseQuantity(String sAccountSequence){
+
+	/*********************************************************************************************************************/
+	//檢查目前系統中是否已有此電話號碼的主人資料
+	private java.lang.Boolean isDuplicateAuditPhoneNumber(String sAuthorizationCode){
+		Hashtable	ht					= new Hashtable();
+		String		sSQL				= "";
+		String		s[][]				= null;
+		String		sResultCode			= gcResultCodeSuccess;
+		String		sResultText			= gcResultTextSuccess;
+		String		sDate				= getDateTimeNow(gcDateFormatSlashYMDTime);
+		
+		sSQL = "SELECT A.Account_Sequence";
+		sSQL += " FROM callpro_account A";
+		sSQL += " WHERE A.Audit_Phone_Number='" + sAuthorizationCode + "'";
+		sSQL += " AND (A.Account_Type='O' OR A.Account_Type='T')";
+		sSQL += " AND A.Status<>'Init'";
+		//writeLog("debug", "SQL= " + sSQL);
+		ht = getDBData(sSQL, gcDataSourceName);
+		sResultCode = ht.get("ResultCode").toString();
+		sResultText = ht.get("ResultText").toString();
+		if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
+			return true;
+		}else if (sResultCode.equals(gcResultCodeNoDataFound)){	//沒資料，OK
+			return false;
+		}else{	//有誤
+			writeLog("error", "Failed to check duplicate Audit Phone Number, SQL= " + sSQL + ", sResultText=" + sResultText);
+			return true;
+		}
+	}	//private java.lang.Boolean isDuplicateAuditPhoneNumber(String sAuthorizationCode){
+
+	/*********************************************************************************************************************/
+	//檢查此用戶在相同的 Line Channel 底下是否已經有相同角色的帳號，不允許一個Line ID在同個Line Channel底下有相同類型的帳號
+	private java.lang.Boolean isDuplicateAccountTypeUnderSameLineChannel(String sLineUserId, String sLineChannel, String sAccountType, String sAuditPhoneNumber){
+		Hashtable	ht					= new Hashtable();
+		String		sSQL				= "";
+		String		s[][]				= null;
+		String		sResultCode			= gcResultCodeSuccess;
+		String		sResultText			= gcResultTextSuccess;
+		String		sDate				= getDateTimeNow(gcDateFormatSlashYMDTime);
+		
+		sSQL = "SELECT A.id";
+		sSQL += " FROM callpro_account A";
+		sSQL += " WHERE A.Line_User_ID='" + sLineUserId + "'";
+		sSQL += " AND A.Line_Channel_Name='" + sLineChannel + "'";
+		if (sAccountType.equals("O") || sAccountType.equals("T")){
+			sSQL += " AND (A.Account_Type='O' OR A.Account_Type='T')";
+			sSQL += " AND Audit_Phone_Number='" + sAuditPhoneNumber + "'";
+		}
+		if (sAccountType.equals("M") || sAccountType.equals("U")){
+			sSQL += " AND (A.Account_Type='M' OR A.Account_Type='U')";
+			sSQL += " AND Audit_Phone_Number='" + sAuditPhoneNumber + "'";
+		}
+		sSQL += " AND A.Status<>'Init'";
+		//writeLog("debug", "SQL= " + sSQL);
+		ht = getDBData(sSQL, gcDataSourceName);
+		sResultCode = ht.get("ResultCode").toString();
+		sResultText = ht.get("ResultText").toString();
+		if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
+			return true;
+		}else if (sResultCode.equals(gcResultCodeNoDataFound)){	//沒資料，可能還沒設授權碼或授權碼輸入錯誤
+			return false;
+		}else{	//有誤
+			writeLog("error", "Failed to check duplicate Account Type Under Same Line Channel, SQL= " + sSQL + ", sResultText=" + sResultText);
+			return true;
+		}
+	}	//private java.lang.Boolean isDuplicateAccountTypeUnderSameLineChannel(String sLineUserId, String sLineChannel, String sAccountType){
+
+	/*********************************************************************************************************************/
 	//發送Gmail帳號註冊信給用戶輸入的Gmail address
 	private java.lang.Boolean sendVerificationMailToGoogle(String gmailAddress, String sAccountSequence){
 		java.lang.Boolean bOK = false;
@@ -458,6 +690,41 @@ writeLog("debug", obj.toString());
 		return bOK;
 
 	}	//private java.lang.Boolean sendVerificationMailToGoogle(String gmailAddress, String sAccountSequence){
+
+	/*********************************************************************************************************************/
+	//用戶加入官方帳號、封鎖、解除封鎖時，變更DB中的用戶狀態
+	//sStatus可能是 follow 或 unfollow
+	private java.lang.Boolean updateUserStatus(String sLinrUserId, String sLineChannelName, String sStatus){
+		Hashtable	ht					= new Hashtable();
+		String		sSQL				= "";
+		String		s[][]				= null;
+		String		sResultCode			= gcResultCodeSuccess;
+		String		sResultText			= gcResultTextSuccess;
+		String		sDBStatus			= "unfollow";
+		List<String> sSQLList			= new ArrayList<String>();
+		String		sDate				= getDateTimeNow(gcDateFormatSlashYMDTime);
+		String		sUser				= "System";
+		sSQL = "UPDATE callpro_account SET Status ='";
+		if (sStatus.equals("unfollow")) sDBStatus = "Unfollow";
+		if (sStatus.equals("follow")) sDBStatus = "Active";
+		sSQL += sDBStatus + "'";
+		sSQL += " WHERE Line_User_ID='" + sLinrUserId + "'";
+		sSQL += " AND Line_Channel_Name='" + sLineChannelName + "'";
+		sSQL += " AND Status='";
+		if (sStatus.equals("unfollow")) sDBStatus = "Active";
+		if (sStatus.equals("follow")) sDBStatus = "Unfollow";
+		sSQL += sDBStatus + "'";
+		sSQLList.add(sSQL);
+		ht = updateDBData(sSQLList, gcDataSourceName, false);
+		sResultCode = ht.get("ResultCode").toString();
+		sResultText = ht.get("ResultText").toString();
+		
+		if (sResultCode.equals(gcResultCodeSuccess)){	//成功
+			return true;
+		}else{
+			return false;
+		}	//if (sResultCode.equals(gcResultCodeSuccess)){	//成功
+	}	//private java.lang.Boolean updateUserStatus(String sLinrUserId, String sLineChannelName, String sStatus){
 
 	/*********************************************************************************************************************/
 	private String generateMainMenu(String sReplyToken, String sSourceUserId, String sSourceRoomId, String sSourceGroupId, String sSourceType){	//產生主選單

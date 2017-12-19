@@ -29,6 +29,8 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
   
   <link type="text/css" rel="stylesheet" href="./css/jquery-ui.min.css">
+	<link rel="stylesheet" href="css/footable.core.min.css" type="text/css" /><!--處理table的RWD/sorting/filtering，參考網頁：https://github.com/bradvin/FooTable -->
+	<link rel="stylesheet" href="css/footable.standalone.min.css" type="text/css" /><!--處理table的RWD/sorting/filtering，參考網頁：https://github.com/bradvin/FooTable -->
 
 		<style type="text/css">
 			.Google-Login-Button {
@@ -50,7 +52,7 @@
 
 </head>
 <body class="hold-transition register-page">
-	<div class="register-box">
+	<div id="login-box" class="register-box">
 		<div class="register-logo">
 			<a href="./index.html"><b>Call Pro 用戶登入</b></a>
 		</div>
@@ -62,6 +64,36 @@
 				<input type="button" id="btnLogin" name="btnLogin" class="Google-Login-Button" value="" onclick="doLogin();">
 				<!--<a href="#" class="btn btn-block btn-social btn-google btn-flat"><i class="fa fa-google"></i> 使用Google帳號註冊</a>-->
 			</div>
+		</div><!-- /.register-box-body -->
+	</div><!-- /.register-box -->
+
+	<div id="select-account-box" class="register-box" style="display:none;">
+		<div class="register-logo">
+			<b>請選擇此次登入使用的帳號</b>
+		</div>
+		
+		<div id="register-box" class="register-box-body">
+			<table id="tblResult" class="with-border footable" data-page-size="50" data-limit-navigation="5" style="text-shadow:none;">
+				<thead>
+					<tr>
+						<th data-class="expand">帳號名稱</th>
+						<th>帳號類型</th>
+						<th>產品名稱</th>
+						<th>監控電話</th>
+						<th data-hide="phone">LINE官方帳號</th>
+						<th>登入帳號</th>
+					</tr>
+				</thead>
+				<tbody></tbody>
+				<tfoot>
+					<tr>
+						<td colspan="12" class="text-center">
+							<ul class="pagination pagination-centered">
+						</td>
+					</tr>
+				</tfoot>
+			</table>
+			
 		</div><!-- /.register-box-body -->
 	</div><!-- /.register-box -->
 
@@ -91,6 +123,7 @@
 <script type="text/javascript" src="js/util.js"></script>
 <script type="text/javascript" src="js/jquery.cookie.js"></script><!--處理cookie，參考網頁：https://github.com/carhartl/jquery-cookie -->
 <script src="https://apis.google.com/js/client:platform.js?onload=initGoogleAuth" async defer></script><!--Google Sign-In用的-->
+<script type="text/javascript" src="js/footable.all.min.js"></script><!--處理table的RWD/sorting/filtering，參考網頁：https://github.com/bradvin/FooTable -->
 
 <script>
 	var sequenceNumber	= "";
@@ -105,6 +138,7 @@
 		setLocalValue("Google_ID", "");
 		setLocalValue("Google_User_Name", "");
 		setLocalValue("Google_User_Picture_URL", "");
+		$('#tblResult').footable();
 	});
 
 	function initGoogleAuth(){	//初始化Google Sign-In object
@@ -121,6 +155,8 @@
 		auth2.grantOfflineAccess().then(signInCallback);
 	}
 
+	var sGoogleID = "";
+	var sRandomKey = "";
 	function signInCallback(authResult) {	//Google登入結果
 		if (authResult['code']) {
 			$('#btnLogin').prop("disabled",true);
@@ -155,22 +191,31 @@
 								s = "";
 								$.each( data.records, function(i, r) {
 									tmp = "";
-									/*
-									if (notEmpty(r.Amount_In)) tmp = " style='color:#2B49F5;'";
-									s = "<tr" + tmp + ">";
-									s += "<td>" + r.Transaction_Date + "</td>";
-									s += "<td>" + r.Transaction_Type + "</td>";
-									s += "<td>" + r.From_MSISDN + "</td>";
-									s += "<td class='myMoney'>" + toCurrency(r.Amount_Out) + "</td>";
-									s += "<td>" + r.To_Account + "</td>";
-									s += "<td class='myMoney'>" + toCurrency(r.Amount_In) + "</td>";
-									s += "<td class='myMoney'>" + toCurrency(r.Balance_After) + "</td>";
-									s += "<td>" + r.Comment + "</td>";
+									s = "<tr>";
+									s += "<td>" + r.Account_Name + "</td>";
+									tmp = r.Account_Type;
+									if (tmp=="A") tmp = "系統管理者";
+									if (tmp=="D") tmp = "加盟商";
+									if (tmp=="O") tmp = "電話主人";
+									if (tmp=="M") tmp = "電話子帳號";
+									if (tmp=="T") tmp = "測試版電話主人";
+									if (tmp=="U") tmp = "測試版電話子帳號";
+									s += "<td>" + tmp + "</td>";
+									tmp = r.Bill_Type;
+									if (tmp=="B") tmp = "入門版";
+									if (tmp=="A") tmp = "進階版";
+									s += "<td>" + tmp + "</td>";
+									s += "<td>" + r.Audit_Phone_Number + "</td>";
+									s += "<td>" + r.Channel_Desc + "</td>";
+									s += "<td><input type='button' value='登入此帳號' onclick='loginAccount(\"" + r.aid + "\", \"" + r.bid + "\");'></td>";
 									s += "</tr>";
 									$('#tblResult tbody').append(s);
-									*/
 								});	//$.each( data.orders, function(i, r) {
-								msgBox(data.GoogleUserDisplayName + "&nbsp;您好，歡迎您使用Call-Pro服務!", function(){location.href='index.html';});
+								$('#tblResult tbody').trigger('footable_redraw');
+								$('#login-box').hide();
+								$('#select-account-box').show();
+								sRandomKey = data.RandomKey;
+								sGoogleID = data.Google_ID;
 							}	//if (recordCount=="1"){
 						}else{
 							msgBox("無法取得帳號資料");
@@ -190,4 +235,39 @@
 		}
 	}	//function signInCallback(authResult) {	//Google登入結果
 
+	function loginAccount(aid, bid){
+		var sData = "";
+		
+		sData = "aid=" + aid;
+		sData += "&bid=" + bid;
+		sData += "&Google_ID=" + sGoogleID;
+		sData += "&RandomKey=" + sRandomKey;
+		getDataFromServer("ajaxDoLogin_LoginCertainAccount.jsp", sData, "json", function(data){
+			if (!data.resultCode || !data.resultText){
+				msgBox("無法取得執行結果!");
+				$('#btnLogin').prop("disabled",false);
+				$('#login-box').show();
+				$('#select-account-box').hide();
+				return;
+			}else{
+				if (data.resultCode=="00000"){
+					setLocalValue("Account_Sequence", data.Account_Sequence);
+					setLocalValue("Account_Name", data.Account_Name);
+					setLocalValue("Account_Type", data.Account_Type);
+					setLocalValue("Bill_Type", data.Bill_Type);
+					setLocalValue("Audit_Phone_Number", data.Audit_Phone_Number);
+					setLocalValue("Google_ID", data.Google_ID);
+					setLocalValue("Google_User_Name", data.Google_User_Name);
+					setLocalValue("Google_User_Picture_URL", data.Google_User_Picture_URL);
+					location.href = "index_admin.html";
+				}else{
+					msgBox("帳號檢查失敗:<br>" + data.resultText);
+					$('#btnLogin').prop("disabled",false);
+					$('#login-box').show();
+					$('#select-account-box').hide();
+				}
+			}
+
+		});	//getDataFromServer("xxx.jsp", sData, "json", function(data){
+	}
 </script>

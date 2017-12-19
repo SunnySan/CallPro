@@ -5,12 +5,11 @@
 public static final String	gcDataSourceName							= "jdbc/cmsiot";
 
 //Line Gateway URL
-public static final String	gcLineGatewayUrlSendTextReply				= "http://cms.gslssd.com/LineGateway/SendTextReply.jsp?src=";
-public static final String	gcLineGatewayUrlSendTextPush				= "http://cms.gslssd.com/LineGateway/SendTextPush.jsp?src=";
+public static final String	gcLineGatewayUrlSendTextReply				= "http://cms.gslssd.com/LineGateway/SendTextReply.jsp?lineChannel=";
+public static final String	gcLineGatewayUrlSendTextPush				= "http://cms.gslssd.com/LineGateway/SendTextPush.jsp?lineChannel=";
 
 //Google Sign-In API
 public static final String	gcGoogleClientSecretFilePath				= "/js/client_id.json";
-//public static final String	gcGoogleGmailSecretFilePathFull			= "/mnt/host/webapps/CallPro/js/gmail_id.p12";
 
 public static final String	gcGoogleUrlForGettingAccessToken			= "https://www.googleapis.com/oauth2/v4/token";
 public static final String	gcGoogleAccessTokenRedirectUri				= "https://cms.gslssd.com";

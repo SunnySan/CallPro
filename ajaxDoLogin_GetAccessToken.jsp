@@ -137,9 +137,6 @@ if (notEmpty(userId) && notEmpty(email) && notEmpty(accessToken)){	//Google正�
 	//將用戶資料寫到將回覆 client 端及紀錄到 session 的 JSON物件中
 	name = nullToString(name, "");
 	pictureUrl = nullToString(pictureUrl, "");
-	obj.put("GoogleUserId", userId);
-	obj.put("GoogleUserDisplayName", name);
-	obj.put("GoogleUserPictureUrl", pictureUrl);
 }else{
 	writeLog("error", "Google respond empty userId or email or accessToken");
 	sResultCode = gcResultCodeUnknownError;
@@ -161,14 +158,24 @@ String		sUser				= "System";
 int			i					= 0;
 int			j					= 0;
 
+/*
 sSQL = "SELECT A.id, B.id, A.Account_Sequence, A.Account_Name, A.Account_Type, A.Bill_Type, A.Audit_Phone_Number";
 sSQL += " FROM callpro_account_detail B LEFT JOIN callpro_account A";
 sSQL += " ON B.Main_Account_Sequence=A.Account_Sequence";
 sSQL += " WHERE B.Google_ID='" + userId + "'";
 sSQL += " AND A.Status='Active'";
 sSQL += " AND A.Expiry_Date>'" + sDate + "'";
+*/
 
-writeLog("debug", sSQL);
+sSQL = "SELECT A.id, B.id, A.Account_Sequence, A.Account_Name, A.Account_Type, A.Bill_Type, A.Audit_Phone_Number, C.Channel_Desc";
+sSQL += " FROM callpro_account_detail B, callpro_account A LEFT JOIN callpro_line_channel C";
+sSQL += " ON A.Line_Channel_Name=C.Line_Channel_Name";
+sSQL += " WHERE B.Google_ID='" + userId + "'";
+sSQL += " AND B.Main_Account_Sequence=A.Account_Sequence";
+sSQL += " AND A.Status='Active'";
+sSQL += " AND A.Expiry_Date>'" + sDate + "'";
+
+//writeLog("debug", sSQL);
 
 ht = getDBData(sSQL, gcDataSourceName);
 
@@ -194,19 +201,30 @@ if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
 		sResultText = ht.get("ResultText").toString();
 		if (sResultCode.equals(gcResultCodeSuccess)){	//成功
 			writeLog("info", "User login successfully, callpro_account.id=" + s[0][0] + ", name=" + s[0][3]);
-			session.setAttribute("Account_Sequence", s[0][2]);	//將登入用戶資料存入 session 中
-			session.setAttribute("Account_Type", s[0][4]);	//將登入用戶資料存入 session 中
-			session.setAttribute("Bill_Type", s[0][5]);	//將登入用戶資料存入 session 中
-			session.setAttribute("Audit_Phone_Number", s[0][6]);	//將登入用戶資料存入 session 中
+			session.setAttribute("Google_ID", userId);	//將登入用戶資料存入 session 中
+			session.setAttribute("Account_Sequence", nullToString(s[0][2], ""));	//將登入用戶資料存入 session 中
+			session.setAttribute("Account_Type", nullToString(s[0][4], ""));	//將登入用戶資料存入 session 中
+			session.setAttribute("Bill_Type", nullToString(s[0][5], ""));	//將登入用戶資料存入 session 中
+			session.setAttribute("Audit_Phone_Number", nullToString(s[0][6], ""));	//將登入用戶資料存入 session 中
+			writeLog("debug", "用戶登入, Google_ID=" + userId);
+			writeLog("debug", "用戶登入, Account_Sequence=" + nullToString(s[0][2], ""));
+			writeLog("debug", "用戶登入, Account_Type=" + nullToString(s[0][4], ""));
+			writeLog("debug", "用戶登入, Bill_Type=" + nullToString(s[0][5], ""));
+			writeLog("debug", "用戶登入, Audit_Phone_Number=" + nullToString(s[0][6], ""));
 		}else{
 			writeLog("error", "Fail to update callpro_account_detail data data (" + sResultCode + "): " + sResultText);
 			out.print(obj);
 			out.flush();
 			return;
 		}	//if (sResultCode.equals(gcResultCodeSuccess)){	//成功
+	}else{
+		String sRandom = generateTxId();	//產生一個隨機數回給browser，同時存入session，作為等一下用戶確認使用哪個帳號登入時使用
+		session.setAttribute("Google_ID", userId);	//將登入用戶資料存入 session 中
+		obj.put("RandomKey", sRandom);
+		session.setAttribute("RandomKey", sRandom);	//將隨機數存入 session 中
 	}	//if (s.length==1){	//只有一筆資料
 	obj.put("recordCount", String.valueOf(s.length));
-	String[] fields2 = {"aid", "bid", "Account_Sequence", "Account_Name", "Account_Type", "Bill_Type", "Audit_Phone_Number"};
+	String[] fields2 = {"aid", "bid", "Account_Sequence", "Account_Name", "Account_Type", "Bill_Type", "Audit_Phone_Number", "Channel_Desc"};
 	//若不只一筆資料，須讓用戶選要以哪個身分登入
 	List  l1 = new LinkedList();
 	Map m1 = null;
