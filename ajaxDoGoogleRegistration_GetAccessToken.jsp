@@ -226,6 +226,9 @@ if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
 	if (s[0][4].indexOf("Call")>-1){	//等 User 真正用他的電話打過來確認
 		sSQL += "Status='Call'";
 	}else{
+		if (at.equals("O") || at.equals("T")){	//電話主人
+			sSQL += "Billing_Start_Date='" + sDate + "',";	//電話主人完成所有註冊，從現在開始計費
+		}
 		sSQL += "Status='Active'";
 	}
 	sSQL += " WHERE id=" + s[0][0];

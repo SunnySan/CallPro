@@ -129,10 +129,12 @@ try {
 						}else if (sMessageText.indexOf("\"")>-1 || sMessageText.indexOf("'")>-1){
 							sReplyMessageText = "訊息中請勿使用單引號或雙引號!";
 						} else if (sMessageText.startsWith("A,") || sMessageText.startsWith("a,")){			//Admin傳來的指令
+							//系統管理者建立加盟商帳號
 							sReplyMessageText = processAdminCommand(sSourceUserId, lineChannel, sMessageText);
 						}else if (sMessageText.startsWith("1,") || sMessageText.startsWith("2,") || sMessageText.startsWith("3,")){	//加盟商傳來的指令
+							//加盟商建立電話主人帳號
 							sReplyMessageText = processDealerCommand(sSourceUserId, lineChannel, sMessageText);
-						}else{	//其他指令，可能是傳來授權碼
+						}else{	//其他指令，可能是傳來授權碼，或是電話主人建立子帳號
 							sReplyMessageText = processOtherCommand(sSourceUserId, lineChannel, sMessageText);
 						}
 					}	//if (notEmpty(sMessageText)){	//用戶傳入文字訊息，判斷用戶資料並做對應的處理
@@ -402,7 +404,7 @@ writeLog("debug", obj.toString());
 	}	//private String processDealerCommand (String sLineUserId, String sLineChannel, String sMessageText){
 
 	/*********************************************************************************************************************/
-	//處理其他指令，可能是用戶傳來授權碼，return需要Reply給LINE的訊息
+	//處理其他指令，可能是用戶傳來授權碼，或是電話主人建立子帳號，return需要Reply給LINE的訊息
 	private String processOtherCommand (String sLineUserId, String sLineChannel, String sMessageText){
 		Hashtable	ht					= new Hashtable();
 		String		sSQL				= "";
@@ -420,6 +422,7 @@ writeLog("debug", obj.toString());
 		String		sAccountType		= "";
 		String		sBillType			= "";
 		String		sAccountSequence	= "";
+		String		sSequence			= "";
 		
 		if (beEmpty(sMessageText)) return "請輸入訊息";
 		aMsg = sMessageText.split(",");
@@ -429,7 +432,7 @@ writeLog("debug", obj.toString());
 			if (sGoogleEmail.indexOf("@gmail.com")<1) return "GMail信箱格式錯誤";
 		}
 		
-		sSQL = "SELECT A.id, A.Account_Sequence, A.Account_Name, A.Account_Type, A.Bill_Type, A.Parent_Account_Sequence, A.Audit_Phone_Number, DATE_FORMAT(A.Expiry_Date, '%Y-%m-%d %H:%i:%s'), A.Status";
+		sSQL = "SELECT A.id, A.Account_Sequence, A.Account_Name, A.Account_Type, A.Bill_Type, A.Parent_Account_Sequence, A.Audit_Phone_Number, DATE_FORMAT(A.Expiry_Date, '%Y-%m-%d %H:%i:%s'), A.Status, A.Line_Channel_Name";
 		sSQL += " FROM callpro_account A";
 		sSQL += " WHERE A.Account_Name='" + sMessageText + "'";
 		sSQL += " AND A.Status='Init'";
@@ -452,6 +455,13 @@ writeLog("debug", obj.toString());
 				return "無法取得您的帳號類型，請您的門號管理者、商家重新申請授權碼!";
 			}
 
+			//如果申請的用戶類型是子帳號的話，檢查這個LINE ID是不是電話主人的，電話主人不需為自己另外申請子帳號
+			if (sAccountType.equals("M") || sAccountType.equals("U")){
+				if (isPhoneOwnerApplyChildAccountForHimself(sLineUserId, sLineChannel, nullToString(s[0][5], ""))){
+					return "您的電話主人帳號已具備接收LINE通知的功能，不需額外為自己申請子帳號";
+				}
+			}
+			
 			//檢查此用戶在相同的 Line Channel 底下是否已經有相同角色的帳號，不允許一個Line ID在同個Line Channel底下有相同類型的帳號
 			if (isDuplicateAccountTypeUnderSameLineChannel(sLineUserId, sLineChannel, sAccountType, nullToString(s[0][6], ""))){
 				return "您在此產品中已有相同功能的帳號，不需重複申請帳號";
@@ -461,8 +471,20 @@ writeLog("debug", obj.toString());
 				if (aMsg.length<2){
 					return "請輸入您的授權碼+逗點+Gmail帳號，例如以下內容：\n" + aMsg[0] + "," + "abc@gmail.com";
 				}
-				if (!sendVerificationMailToGoogle(aMsg[1], sAccountSequence)){	//加盟商、非基本版的門號擁有者下一步須進行Google帳號註冊
+				if (!sendVerificationMailToGoogle(aMsg[1], sAccountSequence)){	//加盟商、非入門版的門號擁有者下一步須進行Google帳號註冊
 					return "Gmail通知信發送失敗，請確認您的Gmail郵件地址是否正確，然後再試一次!";
+				}
+			}
+
+			if (sAccountType.equals("M") || sAccountType.equals("U")){
+				if (s[0][9]==null || !s[0][9].equals(sLineChannel)){
+					return "請使用和電話主人相同的Call-Pro官方帳號";
+				}else{
+					//修改一下電話主人的member數量
+					sSQL = "UPDATE callpro_account_detail";
+					sSQL += " SET Member_Quantity=Member_Quantity+1";
+					sSQL += " WHERE Main_Account_Sequence=" + s[0][5];
+					sSQLList.add(sSQL);
 				}
 			}
 			
@@ -473,8 +495,9 @@ writeLog("debug", obj.toString());
 			sSQL += " ,Line_Channel_Name='" + sLineChannel + "'";
 			sSQL += " ,Send_Notification='" + "Y" + "'";
 			if (sAccountType.equals("D") || ((sAccountType.equals("O")||sAccountType.equals("T"))&&!sBillType.equals("B"))){
-				sSQL += " ,Status='" + "Google" + "'";	//加盟商、非基本版的門號擁有者下一步須進行Google帳號註冊
+				sSQL += " ,Status='" + "Google" + "'";	//加盟商、非入門版的門號擁有者下一步須進行Google帳號註冊
 			}else{
+				sSQL += " ,Billing_Start_Date='" + sDate + "'";	//入門版電話主人，從現在開始計費
 				sSQL += " ,Status='" + "Active" + "'";
 			}
 			sSQL += " WHERE id=" + sRowId;
@@ -539,7 +562,55 @@ writeLog("debug", obj.toString());
 				writeLog("error", "Failed to insert data, SQL= " + sSQL + ", sResultText=" + sResultText);
 				return "作業失敗，錯誤訊息：" + sResultText;
 			}	//if (sResultCode.equals(gcResultCodeSuccess)){	//成功
-		}else if (sResultCode.equals(gcResultCodeNoDataFound)){	//沒資料，可能還沒設授權碼或授權碼輸入錯誤
+		}else if (sResultCode.equals(gcResultCodeNoDataFound)){	//沒資料，可能還沒設授權碼或授權碼輸入錯誤，或是電話主人要建立子帳號
+			//看看這個人是不是電話主人
+			sSQL = "SELECT Account_Sequence, Account_Type, Bill_Type, Audit_Phone_Number, DATE_FORMAT(Expiry_Date, '%Y-%m-%d %H:%i:%s')";
+			sSQL += " FROM callpro_account";
+			sSQL += " WHERE (Account_Type='O' OR Account_Type='T')";	//電話主人
+			sSQL += " AND Bill_Type<>'B'";	//入門版不用建立子帳號
+			sSQL += " AND Line_User_ID='" + sLineUserId + "'";
+			sSQL += " AND Line_Channel_Name='" + sLineChannel + "'";
+			sSQL += " AND Status='Active'";
+			writeLog("debug", sSQL);
+			ht = getDBData(sSQL, gcDataSourceName);
+			sResultCode = ht.get("ResultCode").toString();
+			sResultText = ht.get("ResultText").toString();
+			if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
+				s = (String[][])ht.get("Data");
+				if (isExpired(s[0][4])){
+					return "您的帳號已過期，無法進行此操作";
+				}
+				//電話主人要建立子帳號
+				sSequence = getSequence(gcDataSourceName);	//取得新的Account_Sequence序號
+				sSQL = "INSERT INTO callpro_account (Create_User, Create_Date, Update_User, Update_Date, Account_Sequence, Account_Name, Account_Type, Bill_Type, Line_User_ID, Line_Channel_Name, Parent_Account_Sequence, Audit_Phone_Number, Expiry_Date, Status) VALUES (";
+				sSQL += "'" + sUser + "',";
+				sSQL += "'" + sDate + "',";
+				sSQL += "'" + sUser + "',";
+				sSQL += "'" + sDate + "',";
+				sSQL += sSequence + ",";
+				sSQL += "'" + sMessageText + "',";
+				sSQL += "'" + (s[0][1].equals("O")?"M":"U") + "',";
+				sSQL += "'" + (s[0][2]==null?"":s[0][2]) + "',";
+				sSQL += "'" + "" + "',";
+				sSQL += "'" + sLineChannel + "',";	//子帳號的Line_Channel_Name應和電話主人相同
+				sSQL += "'" + s[0][0] + "',";
+				sSQL += "'" + (s[0][3]==null?"":s[0][3]) + "',";
+				sSQL += "'" + (s[0][4]==null?"":s[0][4]) + "',";
+				sSQL += "'" + "Init" + "'";
+				sSQL += ")";
+				sSQLList.add(sSQL);
+				ht = updateDBData(sSQLList, gcDataSourceName, false);
+				sResultCode = ht.get("ResultCode").toString();
+				sResultText = ht.get("ResultText").toString();
+				
+				if (sResultCode.equals(gcResultCodeSuccess)){	//成功
+					return "執行成功，請通知子帳號用戶於5分鐘內輸入以下授權碼：\n" + sMessageText;
+				}else{
+					writeLog("error", "Failed to insert data, SQL= " + sSQL + ", sResultText=" + sResultText);
+					return "作業失敗，錯誤訊息：" + sResultText;
+				}	//if (sResultCode.equals(gcResultCodeSuccess)){	//成功
+				
+			}	//if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
 			return "系統中沒有您輸入的授權碼資料(或授權碼已過期)，請確認授權碼是否正確，或請您的門號管理者、商家幫您以此授權碼申請帳號";
 		}else{	//有誤
 			return "無法取得您輸入的授權碼資訊，錯誤訊息：" + sResultText;
@@ -639,6 +710,38 @@ writeLog("debug", obj.toString());
 	}	//private java.lang.Boolean isDuplicateAuditPhoneNumber(String sAuthorizationCode){
 
 	/*********************************************************************************************************************/
+	//如果申請的用戶類型是子帳號的話，檢查這個LINE ID是不是電話主人的，電話主人不需為自己另外申請子帳號
+	private java.lang.Boolean isPhoneOwnerApplyChildAccountForHimself(String sLineUserId, String sLineChannel, String sParentAccountSequence){
+		Hashtable	ht					= new Hashtable();
+		String		sSQL				= "";
+		String		s[][]				= null;
+		String		sResultCode			= gcResultCodeSuccess;
+		String		sResultText			= gcResultTextSuccess;
+		String		sDate				= getDateTimeNow(gcDateFormatSlashYMDTime);
+		
+		sSQL = "SELECT A.Line_User_ID";
+		sSQL += " FROM callpro_account A";
+		sSQL += " WHERE A.Account_Sequence=" + sParentAccountSequence;
+		//writeLog("debug", "SQL= " + sSQL);
+		ht = getDBData(sSQL, gcDataSourceName);
+		sResultCode = ht.get("ResultCode").toString();
+		sResultText = ht.get("ResultText").toString();
+		if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
+			s = (String[][])ht.get("Data");
+			if (s[0][0]==null || s[0][0].equals(sLineUserId)){
+				return true;
+			}else{
+				return false;
+			}
+		}else if (sResultCode.equals(gcResultCodeNoDataFound)){	//沒資料，可能還沒設授權碼或授權碼輸入錯誤
+			return false;
+		}else{	//有誤
+			writeLog("error", "Failed to check duplicate Account Type Under Same Line Channel, SQL= " + sSQL + ", sResultText=" + sResultText);
+			return true;
+		}
+	}	//private java.lang.Boolean isDuplicateAccountTypeUnderSameLineChannel(String sLineUserId, String sLineChannel, String sAccountType){
+
+	/*********************************************************************************************************************/
 	//檢查此用戶在相同的 Line Channel 底下是否已經有相同角色的帳號，不允許一個Line ID在同個Line Channel底下有相同類型的帳號
 	private java.lang.Boolean isDuplicateAccountTypeUnderSameLineChannel(String sLineUserId, String sLineChannel, String sAccountType, String sAuditPhoneNumber){
 		Hashtable	ht					= new Hashtable();
@@ -652,6 +755,9 @@ writeLog("debug", obj.toString());
 		sSQL += " FROM callpro_account A";
 		sSQL += " WHERE A.Line_User_ID='" + sLineUserId + "'";
 		sSQL += " AND A.Line_Channel_Name='" + sLineChannel + "'";
+		if (sAccountType.equals("A") || sAccountType.equals("D")){
+			sSQL += " AND A.Account_Type='" + sAccountType + "'";
+		}
 		if (sAccountType.equals("O") || sAccountType.equals("T")){
 			sSQL += " AND (A.Account_Type='O' OR A.Account_Type='T')";
 			sSQL += " AND Audit_Phone_Number='" + sAuditPhoneNumber + "'";
@@ -783,6 +889,7 @@ writeLog("debug", obj.toString());
 		return objReplyMessage.toString();
 	}	//private String generateMainMenu(String sReplyToken, String sSourceUserId, String sSourceType){	//產生主選單
 
+	/*********************************************************************************************************************/
 	private String generateTextMessage(String sReplyToken, String sReplyMessageText){	//產生文字回覆訊息
 		/* 範例
 			{"replyToken":"e627c4070a944e808486c9230ec6cf17","messages":[{"template":{"thumbnailImageUrl":"https:\/\/cms.gslssd.com\/PhoneHousekeeper\/images\/call-center-2537390_1280.jpg","text":"歡迎您使用電話管家服務\n請點選下方的服務","type":"buttons","title":"親愛的用戶您好!","actions":[{"label":"申請啟用LINE通知功能","type":"uri","uri":"https:\/\/cms.gslssd.com\/PhoneHousekeeper\/ApplyLineNotifyEnable.html?lineUserId=Ue913331687d5757ccff454aab90f55cb&lineUserType=user"},{"label":"申請取消LINE通知功能","type":"uri","uri":"https:\/\/cms.gslssd.com\/PhoneHousekeeper\/ApplyLineNotifyDisable.html?lineUserId=Ue913331687d5757ccff454aab90f55cb&lineUserType=user"}]},"altText":"選擇服務功能","type":"template"}]}
@@ -801,6 +908,7 @@ writeLog("debug", obj.toString());
 		return objReplyMessage.toString();
 	}	//private String generateTextMessage(String sReplyToken, String sReplyMessageText){	//產生文字回覆訊息
 	
+	/*********************************************************************************************************************/
 	//回傳 Line 訊息給客戶
 	private java.lang.Boolean sendReplyMessageToLine(String lineChannel, String sReplyMessageText){
 		String		sLineGatewayUrlSendTextReply	= gcLineGatewayUrlSendTextReply;
