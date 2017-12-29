@@ -102,6 +102,16 @@ try{
 	refreshToken = nullToString(tokenResponse.getRefreshToken(), "");
 	writeLog("debug", "tokenResponse= " + tokenResponse);
 	writeLog("debug", "refresh token= " + refreshToken);
+	if (beEmpty(refreshToken)){
+		sResultCode = gcResultCodeUnknownError;
+		sResultText = "無法取得您的Google Refresh Token，請確認您在Google有加入Call Pro應用程式!";
+		obj.put("resultCode", sResultCode);
+		obj.put("resultText", sResultText);
+		out.print(obj);
+		out.flush();
+		return;
+	}
+
 	//以下是tokenResponse範例
 	//{"access_token":"ya29.GlvzBF8ZiYm7a3WT-A18g3OFnWF9aGP6nSTEy69QIMC8__XJVKF1o7lEbe8P6Y62uhiMo4AwTz1oZ0zV2GBfOspr0nfooNdJ5Jn4zFPV6Ek001R16bn3S9JQF4N8","expires_in":3599,"id_token":"eyJhbGciOiJSUzI1NiIsImtpZCI6ImY0MGYxYTVmNGQ0OWVmOGY3YTI3ZjQ5NThhOTZkYjgzNWRiY2M0MmMifQ.eyJhenAiOiI4MzU3ODA3NjUxNzEtaGRvMjZqcjZja2Z1bGJpMjljMzNmYzdlYjZqZWE5Ym8uYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJhdWQiOiI4MzU3ODA3NjUxNzEtaGRvMjZqcjZja2Z1bGJpMjljMzNmYzdlYjZqZWE5Ym8uYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJzdWIiOiIxMDM3OTQ3MjE1NzQ0ODg4MTMzODIiLCJlbWFpbCI6ImRpZWdvc3VuODg4QGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJhdF9oYXNoIjoiR0VfTzdpQU55Z0J0YWl2d0w2d1lVQSIsImlzcyI6Imh0dHBzOi8vYWNjb3VudHMuZ29vZ2xlLmNvbSIsImlhdCI6MTUwOTI4NjA2OCwiZXhwIjoxNTA5Mjg5NjY4LCJuYW1lIjoiU3VubnkgU3VuIiwicGljdHVyZSI6Imh0dHBzOi8vbGg2Lmdvb2dsZXVzZXJjb250ZW50LmNvbS8tS3Fwc2xxUFhpclkvQUFBQUFBQUFBQUkvQUFBQUFBQUFBQUEvQU5RMGtmNlhuYkNwRVF4ZWU2X3JUOENUVTI4VUZsOWFJQS9zOTYtYy9waG90by5qcGciLCJnaXZlbl9uYW1lIjoiU3VubnkiLCJmYW1pbHlfbmFtZSI6IlN1biJ9.dn8b2M-cIG8rxyWuZGn0Suxc_jpLRiyCuhIg0yl1YbfIDfQbqZGeC_HnkdcYN39aShf_Sv-CGE9BH8ku7SoThV1o-47qaJQCFS7BTpFgtQLny8VT6L16Pllk0ELexZUw_yS0V_9WCnsAcqedmJoKtyA1_rxgpo4RWDOqy9SgRZ5K_DWjGhqyFjznTyghkzd3e-jHWBWu4BEa9cas0Tmbk-VT4G_1Y9TPwSQKWsiHsVoL9lFI-xTq0cqahiqpu0SLYXIERKW-8_RzJWVnE28cBkj6lEl2x3gp6xtAEFNZcdbM6nZpznCqDMAuXpWD9Y-7Oau9uIY28NYZPJoq74mX1g","token_type":"Bearer"}
 	
@@ -240,6 +250,7 @@ if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
 	sSQL += "Google_ID='" + userId + "',";
 	sSQL += "Google_User_Name='" + name + "',";
 	sSQL += "Google_User_Picture_URL='" + pictureUrl + "',";
+	sSQL += "Google_Refresh_Token='" + refreshToken + "',";
 	sSQL += "Last_Login_Date='" + sDate + "'";
 	sSQL += " WHERE Main_Account_Sequence='" + Account_Sequence + "'";
 	sSQL += " AND Google_Email='" + Google_Email + "'";

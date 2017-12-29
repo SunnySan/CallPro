@@ -739,7 +739,7 @@ writeLog("debug", obj.toString());
 			writeLog("error", "Failed to check duplicate Account Type Under Same Line Channel, SQL= " + sSQL + ", sResultText=" + sResultText);
 			return true;
 		}
-	}	//private java.lang.Boolean isDuplicateAccountTypeUnderSameLineChannel(String sLineUserId, String sLineChannel, String sAccountType){
+	}	//private java.lang.Boolean isPhoneOwnerApplyChildAccountForHimself(String sLineUserId, String sLineChannel, String sParentAccountSequence){
 
 	/*********************************************************************************************************************/
 	//檢查此用戶在相同的 Line Channel 底下是否已經有相同角色的帳號，不允許一個Line ID在同個Line Channel底下有相同類型的帳號
@@ -766,7 +766,7 @@ writeLog("debug", obj.toString());
 			sSQL += " AND (A.Account_Type='M' OR A.Account_Type='U')";
 			sSQL += " AND Audit_Phone_Number='" + sAuditPhoneNumber + "'";
 		}
-		sSQL += " AND A.Status<>'Init'";
+		sSQL += " AND ((A.Status='Active' OR A.Status='Suspend') OR DATE_ADD( A.Create_Date , INTERVAL 5 MINUTE )>'" + sDate + "')";
 		//writeLog("debug", "SQL= " + sSQL);
 		ht = getDBData(sSQL, gcDataSourceName);
 		sResultCode = ht.get("ResultCode").toString();

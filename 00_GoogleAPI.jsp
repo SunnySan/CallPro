@@ -388,8 +388,8 @@ public String getShortenURL(HttpTransport httpTransport, JsonFactory jsonFactory
 
 /*********************************************************************************************************************/
 //新增Google Calendar Event
-public Hashtable addGoogleCalendarEvent(HttpTransport httpTransport, JsonFactory jsonFactory, GoogleCredential credential, String sDateTime, String sSummary, String sDescription ) {
-	String		APPLICATION_NAME	= "phonehousekeeper";
+public Hashtable addGoogleCalendarEvent(HttpTransport httpTransport, JsonFactory jsonFactory, GoogleCredential credential, int iDuration, String sSummary, String sDescription ) {
+	String		APPLICATION_NAME	= "Call-Pro";
 	Hashtable	htResponse			= new Hashtable();	//儲存回覆資料的 hash table
 	String		sResultCode			= gcResultCodeSuccess;
 	String		sResultText			= gcResultTextSuccess;
@@ -415,9 +415,10 @@ public Hashtable addGoogleCalendarEvent(HttpTransport httpTransport, JsonFactory
 		event.setDescription(sDescription);
 		//event.setEndTimeUnspecified(true);	//經測試一定要指定End Time才可以
 		EventDateTime startDateTime = new EventDateTime();
-		startDateTime.setDateTime(new DateTime(System.currentTimeMillis())).setTimeZone("Asia/Taipei");
+		//從目前的時間往前減少通話時間的秒數，作為日曆事件的起始時間
+		startDateTime.setDateTime(new DateTime(System.currentTimeMillis()-iDuration*1000)).setTimeZone("Asia/Taipei");
 		event.setStart(startDateTime);
-		DateTime endDateTime = new DateTime(System.currentTimeMillis()+3600000);
+		DateTime endDateTime = new DateTime(System.currentTimeMillis());
 		EventDateTime end = new EventDateTime().setDateTime(endDateTime).setTimeZone("Asia/Taipei");
         event.setEnd(end);
             

@@ -1,0 +1,153 @@
+﻿<!DOCTYPE HTML>
+<!--
+	Halcyonic by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>Call-Pro測試</title>
+		<link rel="shortcut icon" href="images/favicon.ico">
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<!--[if lte IE 8]><script src="assets/js/ie/html5shiv.js"></script><![endif]-->
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<!--[if lte IE 9]><link rel="stylesheet" href="assets/css/ie9.css" /><![endif]-->
+		<link rel="stylesheet" href="css/jquery-ui.min.css" type="text/css" />
+		<!--<link rel="stylesheet" href="css/bootstrap.css" type="text/css" />-->
+	</head>
+	<body class="subpage">
+		<div id="page-wrapper">
+
+			<!-- Header -->
+				<div id="header-wrapper">
+					<header id="header" class="container">
+						<div class="row">
+							<div class="12u">
+
+								<!-- Logo -->
+									<h1><a href="index.html" id="logo">Call-Pro&nbsp;-&nbsp;測試</a></h1>
+
+							</div>
+						</div>
+					</header>
+				</div>
+
+			<!-- Content -->
+				<div id="content-wrapper">
+					<div id="content">
+						<div class="container">
+							<div class="row">
+								<div class="6u 12u(mobile) important(mobile)">
+
+									<!-- Main Content -->
+										<section>
+											<header>
+												<h2>LINE即時訊息</h2>
+												<hr>
+											</header>
+											<form id="frm1" action="Event_SendInstantNotification.jsp" method="post" target="_blank">
+												<div class="form-group">
+													<label>(*)發話號碼</label>
+													<input type="text" id="from" name="from" class="form-control" value="" maxlength="20" placeholder="0986123101">
+												</div>
+												<div class="form-group">
+													<label>(*)受話號碼</label>
+													<input type="text" id="to" name="to" class="form-control" value="" maxlength="20" placeholder="0226941301">
+												</div>
+												<div class="form-group">
+													<label>聯絡人姓名</label>
+													<input type="text" id="contactName" name="contactName" class="form-control" value="" maxlength="20" placeholder="孫芳武">
+												</div>
+												<div class="form-group">
+													<label>(*)通話類型</label>
+													<select id="type" name="type" class="form-control">
+														<option value="in">來電</option>
+														<option value="out">撥出電話</option>
+													</select>
+												</div>
+												<div class="form-group">
+													<input class="button-big" type="submit" value="執行">
+												</div>
+											</form>
+										</section>
+
+								</div>
+
+
+
+								<div class="6u 12u(mobile) important(mobile)">
+
+									<!-- Main Content -->
+										<section>
+											<header>
+												<h2>錄音檔上傳Google Drive</h2>
+												<hr>
+											</header>
+											<form id="frm2" action="Event_GoogleDriveUpload.jsp" method="post" enctype="multipart/form-data" target="_blank">
+												<div class="form-group">
+													<label>(*)發話號碼</label>
+													<input type="text" id="from" name="from" class="form-control" value="" maxlength="20" placeholder="0986123101">
+												</div>
+												<div class="form-group">
+													<label>(*)受話號碼</label>
+													<input type="text" id="to" name="to" class="form-control" value="" maxlength="20" placeholder="0226941301">
+												</div>
+												<div class="form-group">
+													<label>聯絡人姓名</label>
+													<input type="text" id="contactName" name="contactName" class="form-control" value="" maxlength="20" placeholder="孫芳武">
+												</div>
+												<div class="form-group">
+													<label>(*)通話類型</label>
+													<select id="type" name="type" class="form-control">
+														<option value="in">來電</option>
+														<option value="out">撥出電話</option>
+													</select>
+												</div>
+												<div class="form-group">
+													<label>(*)通話秒數</label>
+													<input type="text" id="duration" name="duration" class="form-control" value="" maxlength="20" placeholder="20">
+												</div>
+												<div class="form-group">
+													<label>(*)錄音檔案</label>
+													<input type="file" id="DocFileName" name="DocFileName" maxlength="100" class="form-control" />
+												</div>
+												<div class="form-group">
+													<input class="button-big" type="submit" value="執行">
+												</div>
+											</form>
+										</section>
+
+								</div>
+							</div><!--<div class="row">-->
+
+						</div><!--<div class="container">-->
+					</div><!--<div id="content">-->
+				</div><!--<div id="content-wrapper">-->
+
+
+
+			<!-- Copyright -->
+				<div id="copyright">
+					&copy; Phone Housekeeper Co. Ltd. All rights reserved.
+				</div>
+
+		</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/skel.min.js"></script>
+			<script src="assets/js/skel-viewport.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>
+
+<script type="text/javascript" src="js/jquery-ui.min.js"></script>
+<!--<script type="text/javascript" src="js/bootstrap.min.js"></script>-->
+<script type="text/javascript" src="js/util.js"></script>
+<script type="text/javascript" src="js/jquery.cookie.js"></script><!--處理cookie，參考網頁：https://github.com/carhartl/jquery-cookie -->
+
+    
