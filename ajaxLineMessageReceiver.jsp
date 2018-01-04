@@ -255,6 +255,12 @@ writeLog("debug", obj.toString());
 			}
 			
 			sAuthorizationCode = sMessageText.substring(2);
+			if (beEmpty(sAuthorizationCode)){
+				return "請輸入【A,加盟商授權碼】";
+			}
+			if (sAuthorizationCode.length()>20){
+				return "授權碼長度過長，最多為20個字!";
+			}
 			if (isDuplicateAuthorizationCode(sAuthorizationCode)){
 				return "目前系統中有相同的授權碼待用戶註冊帳號，請稍後使用此授權碼再試一次，或換一個授權碼!";
 			}
@@ -337,6 +343,12 @@ writeLog("debug", obj.toString());
 			*/
 			
 			sAuthorizationCode = sMessageText.substring(2);
+			if (beEmpty(sAuthorizationCode)){
+				return "請輸入授權碼";
+			}
+			if (sAuthorizationCode.length()>20){
+				return "授權碼長度過長，最多為20個字!";
+			}
 			if (isDuplicateAuthorizationCode(sAuthorizationCode)){
 				return "目前系統中有相同的授權碼(電話號碼)待用戶註冊帳號，請稍後使用此授權碼再試一次，或換一個授權碼!";
 			}
@@ -431,6 +443,12 @@ writeLog("debug", obj.toString());
 			sGoogleEmail = aMsg[1].toLowerCase();
 			if (sGoogleEmail.indexOf("@gmail.com")<1) return "GMail信箱格式錯誤";
 		}
+		if (beEmpty(sMessageText)){
+			return "請輸入授權碼";
+		}
+		if (sMessageText.length()>20){
+			return "授權碼長度過長，最多為20個字!";
+		}
 		
 		sSQL = "SELECT A.id, A.Account_Sequence, A.Account_Name, A.Account_Type, A.Bill_Type, A.Parent_Account_Sequence, A.Audit_Phone_Number, DATE_FORMAT(A.Expiry_Date, '%Y-%m-%d %H:%i:%s'), A.Status, A.Line_Channel_Name";
 		sSQL += " FROM callpro_account A";
@@ -470,6 +488,12 @@ writeLog("debug", obj.toString());
 			if (sAccountType.equals("D") || ((sAccountType.equals("O")||sAccountType.equals("T"))&&!sBillType.equals("B"))){
 				if (aMsg.length<2){
 					return "請輸入您的授權碼+逗點+Gmail帳號，例如以下內容：\n" + aMsg[0] + "," + "abc@gmail.com";
+				}
+				if (beEmpty(aMsg[1])){
+					return "請輸入【授權碼,Google email 信箱】";
+				}
+				if (aMsg[1].length()>100){
+					return "Google email 信箱長度過長，最多為100個字!";
 				}
 				if (!sendVerificationMailToGoogle(aMsg[1], sAccountSequence)){	//加盟商、非入門版的門號擁有者下一步須進行Google帳號註冊
 					return "Gmail通知信發送失敗，請確認您的Gmail郵件地址是否正確，然後再試一次!";
