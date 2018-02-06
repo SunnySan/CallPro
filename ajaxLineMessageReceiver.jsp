@@ -231,6 +231,7 @@ writeLog("debug", obj.toString());
 		String		sDate				= getDateTimeNow(gcDateFormatSlashYMDTime);
 		String		sUser				= "System";
 		String		sSequence			= "";
+		String		sAccountName		= "";
 		String		sAuthorizationCode	= "";
 		
 		if (sMessageText.length()<3) return "訊息格式錯誤";
@@ -254,31 +255,34 @@ writeLog("debug", obj.toString());
 				return "您的帳號狀態為非使用中，無法進行此操作";
 			}
 			
-			sAuthorizationCode = sMessageText.substring(2);
-			if (beEmpty(sAuthorizationCode)){
-				return "請輸入【A,加盟商授權碼】";
+			sAccountName = sMessageText.substring(2);
+			
+			sAuthorizationCode = generateRandomNumber();
+			if (beEmpty(sAccountName)){
+				return "請輸入【A,加盟商名稱】";
 			}
-			if (sAuthorizationCode.length()>20){
-				return "授權碼長度過長，最多為20個字!";
+			if (sAccountName.length()>20){
+				return "加盟商名稱長度過長，最多為20個字!";
 			}
 			if (isDuplicateAuthorizationCode(sAuthorizationCode)){
-				return "目前系統中有相同的授權碼待用戶註冊帳號，請稍後使用此授權碼再試一次，或換一個授權碼!";
+				return "目前系統中有相同的授權碼待用戶註冊帳號，請稍後再試一次!";
 			}
 			//開始建立加盟商的授權碼
 			sSequence = getSequence(gcDataSourceName);	//取得新的Account_Sequence序號
-			sSQL = "INSERT INTO callpro_account (Create_User, Create_Date, Update_User, Update_Date, Account_Sequence, Account_Name, Account_Type, Line_User_ID, Line_Channel_Name, Parent_Account_Sequence, Audit_Phone_Number, Expiry_Date, Status) VALUES (";
+			sSQL = "INSERT INTO callpro_account (Create_User, Create_Date, Update_User, Update_Date, Account_Sequence, Account_Name, Account_Type, Line_User_ID, Line_Channel_Name, Parent_Account_Sequence, Audit_Phone_Number, Expiry_Date, Authorization_Code, Status) VALUES (";
 			sSQL += "'" + sUser + "',";
 			sSQL += "'" + sDate + "',";
 			sSQL += "'" + sUser + "',";
 			sSQL += "'" + sDate + "',";
 			sSQL += sSequence + ",";
-			sSQL += "'" + sAuthorizationCode + "',";
+			sSQL += "'" + sAccountName + "',";
 			sSQL += "'" + "D" + "',";
 			sSQL += "'" + "" + "',";
 			sSQL += "'" + "" + "',";
 			sSQL += "'" + s[0][0] + "',";
 			sSQL += "'" + "" + "',";
 			sSQL += "'" + "2099-12-31 23:59:59" + "',";
+			sSQL += "'" + sAuthorizationCode + "',";
 			sSQL += "'" + "Init" + "'";
 			sSQL += ")";
 			sSQLList.add(sSQL);
@@ -314,6 +318,7 @@ writeLog("debug", obj.toString());
 		String		sDate				= getDateTimeNow(gcDateFormatSlashYMDTime);
 		String		sUser				= "System";
 		String		sSequence			= "";
+		String		sAccountName		= "";
 		String		sAuthorizationCode	= "";
 		String		sAccountType		= "";
 		String		sBillType			= "";
@@ -342,17 +347,19 @@ writeLog("debug", obj.toString());
 			}
 			*/
 			
-			sAuthorizationCode = sMessageText.substring(2);
-			if (beEmpty(sAuthorizationCode)){
-				return "請輸入授權碼";
+			sAccountName = sMessageText.substring(2);
+			
+			sAuthorizationCode = generateRandomNumber();
+			if (beEmpty(sAccountName)){
+				return "請輸入用戶電話號碼";
 			}
-			if (sAuthorizationCode.length()>20){
-				return "授權碼長度過長，最多為20個字!";
+			if (sAccountName.length()>20){
+				return "用戶電話號碼長度過長，最多為20個字!";
 			}
 			if (isDuplicateAuthorizationCode(sAuthorizationCode)){
-				return "目前系統中有相同的授權碼(電話號碼)待用戶註冊帳號，請稍後使用此授權碼再試一次，或換一個授權碼!";
+				return "目前系統中有相同的授權碼待用戶註冊帳號，請稍後再試一次!";
 			}
-			if (isDuplicateAuditPhoneNumber(sAuthorizationCode)){
+			if (isDuplicateAuditPhoneNumber(sAccountName)){
 				return "目前系統中已有此電話號碼的主人資料，不需重複建立此電話主人帳號!";
 			}
 			//開始建立電話主人的授權碼
@@ -376,20 +383,21 @@ writeLog("debug", obj.toString());
 				}
 			}
 
-			sSQL = "INSERT INTO callpro_account (Create_User, Create_Date, Update_User, Update_Date, Account_Sequence, Account_Name, Account_Type, Bill_Type, Line_User_ID, Line_Channel_Name, Parent_Account_Sequence, Audit_Phone_Number, Expiry_Date, Status) VALUES (";
+			sSQL = "INSERT INTO callpro_account (Create_User, Create_Date, Update_User, Update_Date, Account_Sequence, Account_Name, Account_Type, Bill_Type, Line_User_ID, Line_Channel_Name, Parent_Account_Sequence, Audit_Phone_Number, Expiry_Date, Authorization_Code, Status) VALUES (";
 			sSQL += "'" + sUser + "',";
 			sSQL += "'" + sDate + "',";
 			sSQL += "'" + sUser + "',";
 			sSQL += "'" + sDate + "',";
 			sSQL += sSequence + ",";
-			sSQL += "'" + sAuthorizationCode + "',";
+			sSQL += "'" + sAccountName + "',";
 			sSQL += "'" + sAccountType + "',";
 			sSQL += "'" + sBillType + "',";
 			sSQL += "'" + "" + "',";
 			sSQL += "'" + "" + "',";
 			sSQL += "'" + s[0][0] + "',";
-			sSQL += "'" + sAuthorizationCode + "',";
+			sSQL += "'" + sAccountName + "',";
 			sSQL += "'" + "2099-12-31 23:59:59" + "',";
+			sSQL += "'" + sAuthorizationCode + "',";
 			sSQL += "'" + "Init" + "'";
 			sSQL += ")";
 			sSQLList.add(sSQL);
@@ -435,6 +443,7 @@ writeLog("debug", obj.toString());
 		String		sBillType			= "";
 		String		sAccountSequence	= "";
 		String		sSequence			= "";
+		String		sAuthorizationCode	= "";
 		
 		if (beEmpty(sMessageText)) return "請輸入訊息";
 		aMsg = sMessageText.split(",");
@@ -444,15 +453,15 @@ writeLog("debug", obj.toString());
 			if (sGoogleEmail.indexOf("@gmail.com")<1) return "GMail信箱格式錯誤";
 		}
 		if (beEmpty(sMessageText)){
-			return "請輸入授權碼";
+			return "請輸入授權碼或用戶名稱";
 		}
 		if (sMessageText.length()>20){
-			return "授權碼長度過長，最多為20個字!";
+			return "授權碼或用戶名稱長度過長，最多為20個字!";
 		}
 		
 		sSQL = "SELECT A.id, A.Account_Sequence, A.Account_Name, A.Account_Type, A.Bill_Type, A.Parent_Account_Sequence, A.Audit_Phone_Number, DATE_FORMAT(A.Expiry_Date, '%Y-%m-%d %H:%i:%s'), A.Status, A.Line_Channel_Name";
 		sSQL += " FROM callpro_account A";
-		sSQL += " WHERE A.Account_Name='" + sMessageText + "'";
+		sSQL += " WHERE A.Authorization_Code='" + sMessageText + "'";
 		sSQL += " AND A.Status='Init'";
 		sSQL += " AND DATE_ADD( A.Create_Date , INTERVAL 5 MINUTE )>'" + sDate + "'";
 	
@@ -578,7 +587,11 @@ writeLog("debug", obj.toString());
 			
 			if (sResultCode.equals(gcResultCodeSuccess)){	//成功
 				if (sAccountType.equals("D") || ((sAccountType.equals("O")||sAccountType.equals("T"))&&!sBillType.equals("B"))){
-					return "您的帳號已確認，請至Gmail信箱收取通知信，點選通知信中的網頁連結以註冊您的Google帳號!";
+					if (sAccountType.equals("O")||sAccountType.equals("T")){
+						return "您的帳號已確認，請至Gmail信箱收取通知信，點選通知信中的網頁連結以註冊您的Google帳號。並請開啟您電腦中的Call-Pro應用程式，輸入您的電話號碼及授權碼進行註冊!";
+					}else{
+						return "您的帳號已確認，請至Gmail信箱收取通知信，點選通知信中的網頁連結以註冊您的Google帳號!";
+					}
 				}else{
 					return "太棒了，您的帳號已經註冊完成!";
 				}
@@ -606,7 +619,11 @@ writeLog("debug", obj.toString());
 				}
 				//電話主人要建立子帳號
 				sSequence = getSequence(gcDataSourceName);	//取得新的Account_Sequence序號
-				sSQL = "INSERT INTO callpro_account (Create_User, Create_Date, Update_User, Update_Date, Account_Sequence, Account_Name, Account_Type, Bill_Type, Line_User_ID, Line_Channel_Name, Parent_Account_Sequence, Audit_Phone_Number, Expiry_Date, Status) VALUES (";
+				sAuthorizationCode = generateRandomNumber();
+				if (isDuplicateAuthorizationCode(sAuthorizationCode)){
+					return "目前系統中有相同的授權碼待用戶註冊帳號，請稍後再試一次!";
+				}
+				sSQL = "INSERT INTO callpro_account (Create_User, Create_Date, Update_User, Update_Date, Account_Sequence, Account_Name, Account_Type, Bill_Type, Line_User_ID, Line_Channel_Name, Parent_Account_Sequence, Audit_Phone_Number, Expiry_Date, Authorization_Code, Status) VALUES (";
 				sSQL += "'" + sUser + "',";
 				sSQL += "'" + sDate + "',";
 				sSQL += "'" + sUser + "',";
@@ -620,6 +637,7 @@ writeLog("debug", obj.toString());
 				sSQL += "'" + s[0][0] + "',";
 				sSQL += "'" + (s[0][3]==null?"":s[0][3]) + "',";
 				sSQL += "'" + (s[0][4]==null?"":s[0][4]) + "',";
+				sSQL += "'" + sAuthorizationCode + "',";
 				sSQL += "'" + "Init" + "'";
 				sSQL += ")";
 				sSQLList.add(sSQL);
@@ -628,7 +646,7 @@ writeLog("debug", obj.toString());
 				sResultText = ht.get("ResultText").toString();
 				
 				if (sResultCode.equals(gcResultCodeSuccess)){	//成功
-					return "執行成功，請通知子帳號用戶於5分鐘內輸入以下授權碼：\n" + sMessageText;
+					return "執行成功，請通知子帳號用戶於5分鐘內輸入以下授權碼：\n" + sAuthorizationCode;
 				}else{
 					writeLog("error", "Failed to insert data, SQL= " + sSQL + ", sResultText=" + sResultText);
 					return "作業失敗，錯誤訊息：" + sResultText;
@@ -654,7 +672,7 @@ writeLog("debug", obj.toString());
 		
 		sSQL = "SELECT A.Account_Sequence";
 		sSQL += " FROM callpro_account A";
-		sSQL += " WHERE A.Account_Name='" + sAuthorizationCode + "'";
+		sSQL += " WHERE A.Authorization_Code='" + sAuthorizationCode + "'";
 		sSQL += " AND A.Status='Init'";
 		sSQL += " AND DATE_ADD( Create_Date , INTERVAL 5 MINUTE )>'" + sDate + "'";
 		//writeLog("debug", "SQL= " + sSQL);
@@ -706,7 +724,7 @@ writeLog("debug", obj.toString());
 
 	/*********************************************************************************************************************/
 	//檢查目前系統中是否已有此電話號碼的主人資料
-	private java.lang.Boolean isDuplicateAuditPhoneNumber(String sAuthorizationCode){
+	private java.lang.Boolean isDuplicateAuditPhoneNumber(String sAccountName){
 		Hashtable	ht					= new Hashtable();
 		String		sSQL				= "";
 		String		s[][]				= null;
@@ -716,7 +734,7 @@ writeLog("debug", obj.toString());
 		
 		sSQL = "SELECT A.Account_Sequence";
 		sSQL += " FROM callpro_account A";
-		sSQL += " WHERE A.Audit_Phone_Number='" + sAuthorizationCode + "'";
+		sSQL += " WHERE A.Audit_Phone_Number='" + sAccountName + "'";
 		sSQL += " AND (A.Account_Type='O' OR A.Account_Type='T')";
 		sSQL += " AND A.Status<>'Init'";
 		//writeLog("debug", "SQL= " + sSQL);

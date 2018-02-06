@@ -95,6 +95,16 @@ public String generateTxId(){
 }
 
 /*********************************************************************************************************************/
+
+//產生6碼的隨機數字
+public String generateRandomNumber(){
+	String txtRandom = String.valueOf(Math.round(Math.random()*1000000));
+	txtRandom = MakesUpZero(txtRandom, 6);	//不足4碼的話，將前面補0
+
+	return txtRandom;
+}
+
+/*********************************************************************************************************************/
 //建立資料庫連線
 public Connection DBConnection(String dbName){
 	try{
