@@ -653,7 +653,7 @@ writeLog("debug", obj.toString());
 				}	//if (sResultCode.equals(gcResultCodeSuccess)){	//成功
 				
 			}	//if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
-			return "系統中沒有您輸入的授權碼資料(或授權碼已過期)，請確認授權碼是否正確，或請您的門號管理者、商家幫您以此授權碼申請帳號";
+			return "系統中沒有您輸入的授權碼資料(或授權碼已過期)，請確認授權碼是否正確";
 		}else{	//有誤
 			return "無法取得您輸入的授權碼資訊，錯誤訊息：" + sResultText;
 		}

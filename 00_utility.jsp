@@ -305,6 +305,19 @@ public java.lang.Boolean DeleteFile(String sFileName){
 }	//public java.lang.Boolean DeleteFile(String sPath, String sFileName){
 
 /*********************************************************************************************************************/
+//某個檔案是否存在
+public java.lang.Boolean isFileExist(String sFileName){
+	java.lang.Boolean bOK = false;
+	if (sFileName==null || sFileName.length()<1)	return false;
+	
+	java.io.File f = new java.io.File(sFileName);
+	if(f.exists()){//檔案存在
+		bOK = true;
+	} 
+	return bOK;
+}	//public java.lang.Boolean DeleteFile(String sPath, String sFileName){
+
+/*********************************************************************************************************************/
 //依照輸入的SQL statement取得ResultSet，並將ResultSet轉換成String Array回覆給呼叫端
 public Hashtable getDBData(String sSQL, String dbName){
 	//sSQL是SQL statement
@@ -857,6 +870,40 @@ public Hashtable getAccountProfileByLineId(String sLineChannel, String sLineUser
 	htResponse.put("ResultText", sResultText);
 	return htResponse;
 }	//public Hashtable getAccountProfileByLineId(String sLineChannel, String sLineUserId, String dbName){
+
+/*********************************************************************************************************************/
+//檢查PC送來的電話主人資料是否正常、正確
+public java.lang.Boolean isValidPhoneOwner(String sAreaCode, String sPhoneNumber, String sAuthorizationCode) {
+	java.lang.Boolean bOK = false;
+	Hashtable	ht					= new Hashtable();
+	String		sResultCode			= gcResultCodeSuccess;
+	String		sResultText			= gcResultTextSuccess;
+	
+	String		s[][]				= null;
+	String		sSQL				= "";
+
+	//找電話主人的資料
+	sSQL = "SELECT Account_Type, Bill_Type, Audit_Phone_Number, DATE_FORMAT(Expiry_Date, '%Y-%m-%d %H:%i:%s'), Authorization_Code, Status";
+	sSQL += " FROM callpro_account";
+	sSQL += " WHERE (Account_Type='O' OR Account_Type='T')";	//電話主人
+	sSQL += " AND Audit_Phone_Number='" + sAreaCode + sPhoneNumber + "'";
+	
+	ht = getDBData(sSQL, gcDataSourceName);
+	sResultCode = ht.get("ResultCode").toString();
+	sResultText = ht.get("ResultText").toString();
+	if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
+		s = (String[][])ht.get("Data");
+		if (!isExpired(s[0][3]) && notEmpty(s[0][5]) && !s[0][5].equals("Suspend") && !s[0][5].equals("Init")){
+			bOK = true;
+		}
+		
+		if (beEmpty(s[0][4]) || !sAuthorizationCode.equals(s[0][4])){
+			bOK = false;
+		}
+	}	//if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
+
+	return bOK;
+}	//public java.lang.Boolean beEmpty(String s) {
 
 /*********************************************************************************************************************/
 //讓單引號等字元可以寫入MySQL DB中，用法為escape(String)

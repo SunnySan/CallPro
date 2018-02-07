@@ -65,7 +65,7 @@ sResultCode = ht.get("ResultCode").toString();
 sResultText = ht.get("ResultText").toString();
 if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
 	s = (String[][])ht.get("Data");
-	if (isExpired(s[0][3]) || (beEmpty(s[0][5]) || s[0][5].equals("Suspend"))){
+	if (isExpired(s[0][3]) || (beEmpty(s[0][5]) || s[0][5].equals("Suspend") || s[0][5].equals("Init"))){
 		sStatus = "0";	//帳號狀態－0停用；1入門功能正常；2進階功能正常
 	}else{
 		if (notEmpty(s[0][1]) && s[0][1].equals("A")){

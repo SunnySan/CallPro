@@ -25,17 +25,32 @@ out.clear();	//注意，一定要有out.clear();，要不然client端無法解�
 /*********************開始做事吧*********************/
 JSONObject obj=new JSONObject();
 
+/************************************呼叫範例*******************************
+https://cms.gslssd.com/CallPro/Event_PCClientSendInstantNotification.jsp?areacode=02&phonenumber1=26585888&accesscode=123456&callerphone=0988123456&callername=hellokitty&callerdetail=great
+************************************呼叫範例*******************************/
+
 String sLineGatewayUrlSendTextPush = gcLineGatewayUrlSendTextPush;
 
-String sAParty = nullToString(request.getParameter("from"), "");
-String sBParty = nullToString(request.getParameter("to"), "");
-String sType = nullToString(request.getParameter("type"), "");	//in 或 out
-String sContactName = nullToString(request.getParameter("contactName"), (sType.equals("in")?sAParty:sBParty));
+String sAreaCode			= nullToString(request.getParameter("areacode"), "");		//監控電話的室話區碼
+String sPhoneNumber			= nullToString(request.getParameter("phonenumber1"), "");	//監控電話的電話號碼
+String sAuthorizationCode	= nullToString(request.getParameter("accesscode"), "");		//授權碼
+String sAPartyNumber = nullToString(request.getParameter("callerphone"), "");
+String sAPartyName = nullToString(request.getParameter("callername"), "");
+String sAPartyDetail = nullToString(request.getParameter("callerdetail"), "");	//in 或 out
 
-
-if (beEmpty(sAParty) || beEmpty(sBParty) || beEmpty(sType)){
+if (beEmpty(sAreaCode) || beEmpty(sPhoneNumber) || beEmpty(sAuthorizationCode) || beEmpty(sAPartyNumber)){
+	writeLog("info", "Parameters not enough, areacode= " + sAreaCode + ", phonenumber1= " + sPhoneNumber + ", accesscode= " + sAuthorizationCode + ", callerphone= " + sAPartyNumber);
 	obj.put("resultCode", gcResultCodeParametersNotEnough);
 	obj.put("resultText", gcResultTextParametersNotEnough);
+	out.print(obj);
+	out.flush();
+	return;
+}
+
+if (!isValidPhoneOwner(sAreaCode, sPhoneNumber, sAuthorizationCode)){
+	writeLog("error", "Authorization failed, areacode= " + sAreaCode + ", phonenumber1= " + sPhoneNumber + ", accesscode= " + sAuthorizationCode + ", callerphone= " + sAPartyNumber);
+	obj.put("resultCode", gcResultCodeParametersValidationError);
+	obj.put("resultText", gcResultTextParametersValidationError);
 	out.print(obj);
 	out.flush();
 	return;
@@ -56,9 +71,9 @@ String		sLineChannelName	= "";
 
 //確認門號主人狀態正常
 sSQL = "SELECT Line_Channel_Name FROM callpro_account";
-sSQL += " WHERE Audit_Phone_Number='" + (sType.equals("in")?sBParty:sAParty) + "'";
+sSQL += " WHERE Audit_Phone_Number='" + sAreaCode + sPhoneNumber + "'";
 sSQL += " AND (Account_Type='O' OR Account_Type='T')";
-sSQL += " AND Status='Active'";
+//sSQL += " AND Status='Active'";	//先不要這一行，也就是說若尚未註冊Google帳號也能收到通知
 
 ht = getDBData(sSQL, gcDataSourceName);
 
@@ -80,9 +95,10 @@ String		sRecepientType		= "";
 
 //找出通知對象
 sSQL = "SELECT Line_User_ID FROM callpro_account";
-sSQL += " WHERE Audit_Phone_Number='" + (sType.equals("in")?sBParty:sAParty) + "'";
+sSQL += " WHERE Audit_Phone_Number='" + sAreaCode + sPhoneNumber + "'";
 sSQL += " AND Send_Notification='Y'";
-sSQL += " AND Status='Active'";
+//sSQL += " AND Status='Active'";	//先不要這一行，也就是說若尚未註冊Google帳號也能收到通知
+sSQL += " AND (Status='Active' OR Status='Google')";
 
 ht = getDBData(sSQL, gcDataSourceName);
 
@@ -113,13 +129,7 @@ if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
 String sMessageBody = "";
 String sPushMessage = "";
 
-sMessageBody = (sType.equals("in")?sBParty:sAParty) + (sType.equals("in")?"來電":"撥出電話到") + (sType.equals("in")?sAParty:sBParty);
-
-if (beEmpty(sContactName)){
-	sMessageBody += "，對方資料未建檔";
-}else{
-	sMessageBody += "，對方姓名為【" + sContactName + "】";
-}
+sMessageBody = sAreaCode + sPhoneNumber + "來電" + sAPartyNumber + "，對方為" + sAPartyName + "，個人資料如下：\n" + sAPartyDetail;
 
 sPushMessage = generateTextMessage(sRecepientType, s, sMessageBody);
 
