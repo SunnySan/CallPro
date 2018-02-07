@@ -25,6 +25,10 @@ out.clear();	//注意，一定要有out.clear();，要不然client端無法解�
 /*********************開始做事吧*********************/
 JSONObject obj=new JSONObject();
 
+/************************************呼叫範例*******************************
+https://cms.gslssd.com/CallPro/Event_PCClientNewCDR.jsp?areacode=02&phonenumber1=26585888&accesscode=123456&callerphone=0988123456&recordtime=30&recordtimestart=2018-01-23 10:42&call_direction=0&recordfile=ringtone_04.wav&ring_time=10&talked_time=20&callername=John&calleraddr=台北市內湖區成功路四段&callercompany=Call-Pro&calleremail=hello@gmail.com
+************************************呼叫範例*******************************/
+
 String CLIENT_SECRET_FILE	= application.getRealPath(gcGoogleClientSecretFilePath);
 /** Application name. */
 String APPLICATION_NAME = "Call-Pro";
@@ -32,80 +36,47 @@ String APPLICATION_NAME = "Call-Pro";
 String sLineGatewayUrlSendTextPush = gcLineGatewayUrlSendTextPush;
 
 String saveDirectory = application.getRealPath("/upload");
+if (!saveDirectory.endsWith("/")) saveDirectory = saveDirectory + "/";
 
-String sAParty = "";
-String sBParty = "";
-String sContactName = "";
-String sType = "";	//in 或 out
-String sSavedFileName = "";
-String sGoogleCalendarId = "";
-String sDuration = "";
-String sOwnerEmail = "";
-String sGoogleDriveFileId = "";
-/***********************處理上傳檔案**********************************/
-// Check that we have a file upload request
-boolean isMultipart = ServletFileUpload.isMultipartContent(request);
-//out.println("isMultipart="+isMultipart+"<br>");
+String sAreaCode			= nullToString(request.getParameter("areacode"), "");			//監控電話的室話區碼
+String sPhoneNumber			= nullToString(request.getParameter("phonenumber1"), "");		//監控電話的電話號碼
+String sAuthorizationCode	= nullToString(request.getParameter("accesscode"), "");			//授權碼
+String sCallerNumber 		= nullToString(request.getParameter("callerphone"), "");		//來電號碼，0966777117  (無來電顯示為0)
+String sRecordTime 			= nullToString(request.getParameter("recordtime"), "");			//錄音總長秒數，recordtime = ring_time + talked_time
+String sRecordTimeStart 	= nullToString(request.getParameter("recordtimestart"), "");	//錄音開始時間，2018-01-23 10:42
+String sType 				= nullToString(request.getParameter("call_direction"), "");		//來電或是撥出，0來電；1撥出
+String sSavedFileName 		= nullToString(request.getParameter("recordfile"), "");			//錄音檔名，"2016-03-03_19-34-46_000_0922599500.mp3， (wav或mp3,無錄音檔為0,無錄音檔不會先呼叫錄音檔上傳程式)"
+String sRingTime 			= nullToString(request.getParameter("ring_time"), "");			//鈴響秒數
+String sTalkedTime 			= nullToString(request.getParameter("talked_time"), "");		//開始通話秒數，0  (如為來電且talked_time=0，則為未接)
+String sCallerName 			= nullToString(request.getParameter("callername"), "");			//來電者姓名
+String sCallerAddr 			= nullToString(request.getParameter("calleraddr"), "");			//來電者地址
+String sCallerCompany 		= nullToString(request.getParameter("callercompany"), "");		//來電者公司
+String sCallerEmail 		= nullToString(request.getParameter("calleremail"), "");		//來電者email
 
-// Create a factory for disk-based file items
-FileItemFactory factory = new DiskFileItemFactory();
-
-// Create a new file upload handler
-ServletFileUpload upload = new ServletFileUpload(factory);
-
-// Parse the request
-List /* FileItem */ items = upload.parseRequest(request);
-
-// Process the uploaded items
-Iterator iter = items.iterator(); 
-while (iter.hasNext()) {
-	FileItem item = (FileItem) iter.next();
-	
-	if (item.isFormField()) {
-		// Process a regular form field
-		//processFormField(item);
-		String name = item.getFieldName();
-		String value = item.getString("UTF-8");
-		//value = new String(value.getBytes("UTF-8"), "ISO8859-1");
-		obj.put(name, value);
-		//out.println(name + "=" + value+"<br>");
-		
-		if (name.equals("from"))		sAParty = value;
-		if (name.equals("to"))			sBParty = value;
-		if (name.equals("contactName"))	sContactName = value;
-		if (name.equals("type"))		sType = value;
-		if (name.equals("duration"))	sDuration = value;
-	} else {	//if (item.isFormField()) {
-		// Process a file upload
-		//processUploadedFile(item);
-		String fieldName = item.getFieldName();
-		String fileName = item.getName();
-		String contentType = item.getContentType();
-		boolean isInMemory = item.isInMemory();
-		long sizeInBytes = item.getSize();
-		
-		obj.put("originalFileName", fileName);
-		if (notEmpty(fileName) && sizeInBytes>0) {
-			fileName= FilenameUtils.getName(fileName);
-			String fileExt = fileName.substring(fileName.lastIndexOf("."));	//取得副檔名，含句點
-			sGoogleCalendarId = getDateTimeNow(gcDateFormatDateDashTime) + "-" + getSequence(gcDataSourceName);
-			sSavedFileName = sGoogleCalendarId + fileExt;
-			//out.println("fileName saved="+fileName+"<br>");
-			obj.put("savedFileName", sSavedFileName);
-			File uploadedFile = new File(saveDirectory, sSavedFileName);
-			item.write(uploadedFile);
-		}	//if (fileName != null && !"".equals(fileName)) {
-	}	//if (item.isFormField()) {
-}	//while (iter.hasNext()) {
-
-/****************以上是取得上傳資料，以下開始處理資料*********************/
-
-if (beEmpty(sAParty) || beEmpty(sBParty) || beEmpty(sType) || beEmpty(sSavedFileName)){
+if (beEmpty(sAreaCode) || beEmpty(sPhoneNumber) || beEmpty(sAuthorizationCode) || beEmpty(sCallerNumber)){
+	writeLog("info", "Parameters not enough, areacode= " + sAreaCode + ", phonenumber1= " + sPhoneNumber + ", accesscode= " + sAuthorizationCode + ", callerphone= " + sCallerNumber);
 	obj.put("resultCode", gcResultCodeParametersNotEnough);
 	obj.put("resultText", gcResultTextParametersNotEnough);
-	out.print(obj);
-	out.flush();
+	//out.print(obj);
+	//out.flush();
 	return;
+}
+
+if (!isValidPhoneOwner(sAreaCode, sPhoneNumber, sAuthorizationCode)){
+	writeLog("error", "Authorization failed, areacode= " + sAreaCode + ", phonenumber1= " + sPhoneNumber + ", accesscode= " + sAuthorizationCode + ", callerphone= " + sCallerNumber);
+	obj.put("resultCode", gcResultCodeParametersValidationError);
+	obj.put("resultText", gcResultTextParametersValidationError);
+	//out.print(obj);
+	//out.flush();
+	return;
+}
+
+String sGoogleCalendarId = "";
+String sGoogleDriveFileId = "";
+java.lang.Boolean bHasFile = false;
+sGoogleCalendarId = getDateTimeNow(gcDateFormatDateDashTime) + "-" + getSequence(gcDataSourceName);
+if (notEmpty(sSavedFileName) && sSavedFileName.length()>4 && isFileExist(saveDirectory + sSavedFileName)){
+	bHasFile = true;
 }
 
 Hashtable	ht					= new Hashtable();
@@ -118,14 +89,15 @@ List<String> sSQLList			= new ArrayList<String>();
 
 int			i					= 0;
 int			j					= 0;
+int			k					= 0;
 
 String		sLineChannelName	= "";
 String		sRefreshToken		= "";
 
-//確認門號主人狀態正常
+//確認門號主人狀態正常且已取得Google帳號
 sSQL = "SELECT A.Line_User_ID, A.Line_Channel_Name, B.Google_Refresh_Token";
 sSQL += " FROM callpro_account A, callpro_account_detail B";
-sSQL += " WHERE A.Audit_Phone_Number='" + (sType.equals("in")?sBParty:sAParty) + "'";
+sSQL += " WHERE A.Audit_Phone_Number='" + sAreaCode + sPhoneNumber + "'";
 sSQL += " AND (A.Account_Type='O' OR A.Account_Type='T')";
 sSQL += " AND A.Send_Notification='Y'";
 sSQL += " AND A.Status='Active'";
@@ -141,8 +113,8 @@ if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
 	if (beEmpty(s[0][0]) || beEmpty(s[0][1]) || beEmpty(s[0][2])){
 		obj.put("resultCode", gcResultCodeNoDataFound);
 		obj.put("resultText", "無法取得該門號主人Google帳號的Line Channel或Refresh Token，請門號主人至Google移除Call Pro服務後重新註冊");
-		out.print(obj);
-		out.flush();
+		//out.print(obj);
+		//out.flush();
 		return;
 	}
 	sLineChannelName = s[0][1];
@@ -150,8 +122,8 @@ if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
 }else{
 	obj.put("resultCode", sResultCode);
 	obj.put("resultText", sResultText);
-	out.print(obj);
-	out.flush();
+	//out.print(obj);
+	//out.flush();
 	return;
 }	//if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
 
@@ -178,42 +150,44 @@ try{
 		out.flush();
 		return;
 	}
-
-	Drive service = new Drive.Builder(
-            HTTP_TRANSPORT, JSON_FACTORY, credential)
-            .setApplicationName(APPLICATION_NAME)
-            .build();
-
-	com.google.api.services.drive.model.File file1 = getExistsFolder(service, gcGoogleDriveFolderName, "");
-
-	if (file1==null){
-		writeLog("debug", "目錄不存在，建立目錄...");
-		com.google.api.services.drive.model.File fileMetadata = new com.google.api.services.drive.model.File();
-		fileMetadata.setName(gcGoogleDriveFolderName);
-		fileMetadata.setMimeType("application/vnd.google-apps.folder");
-		
-		file1 = service.files().create(fileMetadata)
-		    .setFields("id")
-		    .execute();
-	}
-	String	myFolderId = file1.getId();
-	writeLog("debug", "Folder ID: " + myFolderId);
-
-
-	com.google.api.services.drive.model.File newFile = insertFile(service, sSavedFileName, "PhoneHousekeeper Upload", myFolderId, "audio/mpeg", (saveDirectory.endsWith("/")?saveDirectory+sSavedFileName:saveDirectory+"/"+sSavedFileName));
 	
-	if (newFile!=null && notEmpty(newFile.getId())){
-		sGoogleDriveFileId = newFile.getId();
-		writeLog("info", "New file ID= " + sGoogleDriveFileId);
-		//writeLog("info", "getPermissions()= " + newFile.getPermissions());
-	}else{
-		writeLog("error", "檔案上傳至Google Drive失敗");
-		obj.put("resultCode", gcResultCodeUnknownError);
-		obj.put("resultText", "檔案上傳至Google Drive失敗");
-		out.print(obj);
-		out.flush();
-		return;
-	}
+	if (bHasFile){	//有檔案才上傳
+		Drive service = new Drive.Builder(
+	            HTTP_TRANSPORT, JSON_FACTORY, credential)
+	            .setApplicationName(APPLICATION_NAME)
+	            .build();
+	
+		com.google.api.services.drive.model.File file1 = getExistsFolder(service, gcGoogleDriveFolderName, "");
+	
+		if (file1==null){
+			writeLog("debug", "目錄不存在，建立目錄...");
+			com.google.api.services.drive.model.File fileMetadata = new com.google.api.services.drive.model.File();
+			fileMetadata.setName(gcGoogleDriveFolderName);
+			fileMetadata.setMimeType("application/vnd.google-apps.folder");
+			
+			file1 = service.files().create(fileMetadata)
+			    .setFields("id")
+			    .execute();
+		}
+		String	myFolderId = file1.getId();
+		writeLog("debug", "Folder ID: " + myFolderId);
+	
+	
+		com.google.api.services.drive.model.File newFile = insertFile(service, sSavedFileName, "Call-Pro Upload", myFolderId, (sSavedFileName.endsWith("wav")?"audio/wav":"audio/mpeg"), (saveDirectory.endsWith("/")?saveDirectory+sSavedFileName:saveDirectory+"/"+sSavedFileName));
+		
+		if (newFile!=null && notEmpty(newFile.getId())){
+			sGoogleDriveFileId = newFile.getId();
+			writeLog("info", "New file ID= " + sGoogleDriveFileId);
+			//writeLog("info", "getPermissions()= " + newFile.getPermissions());
+		}else{
+			writeLog("error", "檔案上傳至Google Drive失敗");
+			obj.put("resultCode", gcResultCodeUnknownError);
+			obj.put("resultText", "檔案上傳至Google Drive失敗");
+			//out.print(obj);
+			//out.flush();
+			return;
+		}
+	}	//if (bHasFile){	//有檔案才上傳
 
 	//取得接收LINE通知的人的資料
 
@@ -225,11 +199,11 @@ try{
 	String sMessageBody = "";
 	String sPushMessage = "";
 	
-	sMessageBody = (sType.equals("in")?sBParty:sAParty) + (sType.equals("in")?"來電":"撥出電話到") + (sType.equals("in")?sAParty:sBParty);
-	if (beEmpty(sContactName)){
-		sMessageBody += "，對方資料未建檔";
+	sMessageBody = sAreaCode + sPhoneNumber + (sType.equals("0")?"來電自":"撥出電話到") + sCallerNumber;
+	if (beEmpty(sCallerName)){
+		sMessageBody += "，對方為未建檔";
 	}else{
-		sMessageBody += "，對方姓名為【" + sContactName + "】";
+		sMessageBody += "，對方為【" + sCallerName + "】";
 	}
 	
 	//取得Google短網址
@@ -237,11 +211,11 @@ try{
 	String sShortURL = getShortenURL(HTTP_TRANSPORT, JSON_FACTORY, credential, sFileURL);
 
 	//sMessageBody += "，通話時間" + sDuration + "秒，聽取通話內容: " + sShortURL;
-	sMessageBody += "，通話時間" + sDuration + "秒，聽取通話內容: \n" + (beEmpty(sShortURL)?sFileURL:sShortURL);
+	sMessageBody += "，通話時間為" + sTalkedTime + "秒，聽取錄音檔: \n" + (beEmpty(sShortURL)?sFileURL:sShortURL);
 	sPushMessage = generateTextMessage(sRecepientType, s, sMessageBody);
 	
 	//新增 Google 行事曆
-	ht = addGoogleCalendarEvent(HTTP_TRANSPORT, JSON_FACTORY, credential, Integer.parseInt(sDuration), (sType.equals("in")?sBParty:sAParty) + (sType.equals("in")?"來電":"撥出電話到") + (sType.equals("in")?sAParty:sBParty), sMessageBody );
+	ht = addGoogleCalendarEvent(HTTP_TRANSPORT, JSON_FACTORY, credential, Integer.parseInt(sTalkedTime), sAreaCode + sPhoneNumber + (sType.equals("0")?"來電自":"撥出電話到") + sCallerNumber, sMessageBody );
 	
 	//Push Line 訊息給客戶
 	String	sResponse	= "";
@@ -318,15 +292,20 @@ try{
 	sResultText = "無法取得Google Token，請稍後再試!<br>" + e.toString();
 	obj.put("resultCode", sResultCode);
 	obj.put("resultText", sResultText);
-	out.print(obj);
-	out.flush();
+	//out.print(obj);
+	//out.flush();
 	return;
 }finally{
 }
 
 obj.put("resultCode", sResultCode);
 obj.put("resultText", sResultText);
-out.print(obj);
+//out.print(obj);
+if (bHasFile){
+	out.print(sSavedFileName);
+}else{
+	out.print("ok");
+}
 out.flush();
 
 %>
