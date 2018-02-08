@@ -129,7 +129,7 @@ if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
 String sMessageBody = "";
 String sPushMessage = "";
 
-sMessageBody = sAreaCode + sPhoneNumber + "來電" + sAPartyNumber + "，對方為" + sAPartyName + "，個人資料如下：\n" + sAPartyDetail;
+sMessageBody = sAreaCode + sPhoneNumber + "來電自" + sAPartyNumber + "，對方為" + sAPartyName + "，個人資料如下：\n" + sAPartyDetail;
 
 sPushMessage = generateTextMessage(sRecepientType, s, sMessageBody);
 
