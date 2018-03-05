@@ -206,12 +206,16 @@ try{
 		sMessageBody += "，對方為【" + sCallerName + "】";
 	}
 	
-	//取得Google短網址
+	//取得Google短網址(錄音檔)
 	String sFileURL = "https://drive.google.com/file/d/" + sGoogleDriveFileId + "/view";
 	String sShortURL = getShortenURL(HTTP_TRANSPORT, JSON_FACTORY, credential, sFileURL);
+	
+	//取得Google短網址(Call Log 查詢)
+	String sCallLogURL = gcSystemUri + "SimpleCallLog.html?auditphone=" + sAreaCode + sPhoneNumber + "&callerphone=" + sCallerNumber;
+	String sCallLogShortURL = getShortenURL(HTTP_TRANSPORT, JSON_FACTORY, credential, sCallLogURL);
 
 	//sMessageBody += "，通話時間" + sDuration + "秒，聽取通話內容: " + sShortURL;
-	sMessageBody += "，通話時間為" + sTalkedTime + "秒，聽取錄音檔: \n" + (beEmpty(sShortURL)?sFileURL:sShortURL);
+	sMessageBody += "，通話時間為" + sTalkedTime + "秒，聽取錄音檔: \n" + (beEmpty(sShortURL)?sFileURL:sShortURL) + "\n，查詢歷史記錄：\n" + (beEmpty(sCallLogShortURL)?sCallLogURL:sCallLogShortURL);
 	sPushMessage = generateTextMessage(sRecepientType, s, sMessageBody);
 	
 	//新增 Google 行事曆
@@ -286,6 +290,9 @@ try{
         }
     }
     */
+    
+    //新增Call Log記錄至database
+    insertIntoCallLog(sAreaCode + sPhoneNumber, sCallerNumber, sType, sRecordTime, sTalkedTime, sRecordTimeStart, (beEmpty(sShortURL)?sFileURL:sShortURL), sCallerName, sCallerAddr, sCallerCompany, sCallerEmail);
 }catch (Exception e){
 	writeLog("error", "Google Drive Error" + e.toString());
 	sResultCode = gcResultCodeUnknownError;
@@ -423,5 +430,47 @@ body.setPermissionIds(list);
 		objPushMessage.put("messages", lMessage);	//一次最多可以傳 5 個訊息，這個 function 只傳 1 個訊息
 		return objPushMessage.toString();
 	}	//private String generateTextMessage(String sRecepientType, String s[][], String sMessage){	//產生單一文字訊息
+	
+	
+	
+	//新增Call Log記錄至database
+	private void insertIntoCallLog(String sAuditPhoneNumber, String sCallerPhoneNumber, String sCallType, String sRecordLength, String sRecordTalkedTime, String sRecordTimeStart, String sRecordFileURL, String sCallerName, String sCallerAddress, String sCallerCompany, String sCallerEmail){
+		Hashtable	ht					= new Hashtable();
+		String		sSQL				= "";
+		String		sResultCode			= gcResultCodeSuccess;
+		String		sResultText			= gcResultTextSuccess;
+		List<String> sSQLList			= new ArrayList<String>();
+		String		sDate				= getDateTimeNow(gcDateFormatSlashYMDTime);
+		String		sUser				= "System";
+
+		sSQL = "INSERT INTO callpro_call_log (Create_User, Create_Date, Update_User, Update_Date, Audit_Phone_Number, Caller_Phone_Number, Call_Type, Record_Length, Record_Talked_Time, Record_Time_Start, Record_File_URL, Caller_Name, Caller_Address, Caller_Company, Caller_Email) VALUES (";
+		sSQL += "'" + sUser + "',";
+		sSQL += "'" + sDate + "',";
+		sSQL += "'" + sUser + "',";
+		sSQL += "'" + sDate + "',";
+		sSQL += "'" + sAuditPhoneNumber + "',";
+		sSQL += "'" + sCallerPhoneNumber + "',";
+		sSQL += "'" + sCallType + "',";
+		sSQL += sRecordLength + ",";
+		sSQL += sRecordTalkedTime + ",";
+		sSQL += "'" + sRecordTimeStart + "',";
+		sSQL += "'" + sRecordFileURL + "',";
+		sSQL += "'" + sCallerName + "',";
+		sSQL += "'" + sCallerAddress + "',";
+		sSQL += "'" + sCallerCompany + "',";
+		sSQL += "'" + sCallerEmail + "'";
+		sSQL += ")";
+		sSQLList.add(sSQL);
+		ht = updateDBData(sSQLList, gcDataSourceName, false);
+		sResultCode = ht.get("ResultCode").toString();
+		sResultText = ht.get("ResultText").toString();
+		
+		if (sResultCode.equals(gcResultCodeSuccess)){	//成功
+			writeLog("info", "成功寫入Call_Log");
+		}else{
+			writeLog("error", "寫入Call_Log失敗：" + sResultText);
+		}	//if (sResultCode.equals(gcResultCodeSuccess)){	//成功
+
+	}	//private void insertIntoCallLog(String sAuditPhoneNumber, String sCallerPhoneNumber, String sCallType, String sRecordLength, String sRecordTalkedTime, String sRecordTimeStart, String sRecordFileURL, String sCallerName, String sCallerAddress, String sCallerCompany, String sCallerEmail){
 
 %>

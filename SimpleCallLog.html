@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Call Pro | 通話記錄速查</title>
+  <link rel="shortcut icon" href="images/favicon.ico">
+  <!-- Tell the browser to be responsive to screen width -->
+  <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+  <!-- Bootstrap 3.3.7 -->
+  <link rel="stylesheet" href="./bower_components/bootstrap/dist/css/bootstrap.min.css">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="./bower_components/font-awesome/css/font-awesome.min.css">
+  <!-- Ionicons -->
+  <link rel="stylesheet" href="./bower_components/Ionicons/css/ionicons.min.css">
+  <!-- Theme style -->
+  <link rel="stylesheet" href="./dist/css/AdminLTE.min.css">
+  <!-- iCheck -->
+  <link rel="stylesheet" href="./plugins/iCheck/square/blue.css">
+
+  <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+  <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+  <!--[if lt IE 9]>
+  <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+  <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+  <![endif]-->
+
+  <!-- Google Font -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
+  
+  <link type="text/css" rel="stylesheet" href="./css/jquery-ui.min.css">
+	<link rel="stylesheet" href="css/footable.core.min.css" type="text/css" /><!--處理table的RWD/sorting/filtering，參考網頁：https://github.com/bradvin/FooTable -->
+	<link rel="stylesheet" href="css/footable.standalone.min.css" type="text/css" /><!--處理table的RWD/sorting/filtering，參考網頁：https://github.com/bradvin/FooTable -->
+</head>
+<body class="hold-transition register-page">
+	<!--<div id="select-account-box" class="register-box">-->
+	<div id="select-account-box">
+		<div class="register-logo">
+			<b>通話記錄速查</b>
+		</div>
+		
+		<div id="register-box" class="register-box-body">
+			<table id="tblResult" class="with-border footable" data-page-size="50" data-limit-navigation="5" style="text-shadow:none;">
+				<thead>
+					<tr>
+						<th data-class="expand">類型</th>
+						<th data-hide="phone">主人電話</th>
+						<th data-hide="phone">對方電話</th>
+						<th>起始時間</th>
+						<th>通話秒數</th>
+						<th>錄音檔案</th>
+						<th>對方姓名</th>
+						<th data-hide="phone">對方地址</th>
+						<th data-hide="phone">對方公司名稱</th>
+						<th data-hide="phone">對方Email</th>
+					</tr>
+				</thead>
+				<tbody></tbody>
+				<tfoot>
+					<tr>
+						<td colspan="12" class="text-center">
+							<ul class="pagination pagination-centered">
+						</td>
+					</tr>
+				</tfoot>
+			</table>
+			
+		</div><!-- /.register-box-body -->
+	</div><!-- /.register-box -->
+
+</body>
+</html>
+
+<!-- jQuery 3 -->
+<script src="./bower_components/jquery/dist/jquery.min.js"></script>
+<script src="./js/jquery-migrate-3.0.0.min.js"></script>
+<script src="./js/jquery-ui.min.js"></script>
+
+<!-- Bootstrap 3.3.7 -->
+<script src="./bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+
+<script type="text/javascript" src="js/jquery.blockUI.js"></script>
+<script type="text/javascript" src="js/util.js"></script>
+<script type="text/javascript" src="js/jquery.cookie.js"></script><!--處理cookie，參考網頁：https://github.com/carhartl/jquery-cookie -->
+<script type="text/javascript" src="js/footable.all.min.js"></script><!--處理table的RWD/sorting/filtering，參考網頁：https://github.com/bradvin/FooTable -->
+
+<script>
+	$(function () {
+		$('#tblResult').footable();
+		getCallLog();
+	});
+
+	function getCallLog(){
+		var sAuditPhoneNumber = getParameterByName("auditphone");
+		var sCallerPhoneNumber = getParameterByName("callerphone");
+		
+		if (beEmpty(sAuditPhoneNumber) || beEmpty(sCallerPhoneNumber)){
+			msgBox("無法取得電話號碼，請確認您連結的網址!");
+			return;
+		}
+
+		var sData = "";
+		var s = "";
+		var tmp = "";
+		
+		sData = "AuditPhoneNumber=" + sAuditPhoneNumber;
+		sData += "&CallerPhoneNumber=" + sCallerPhoneNumber;
+		getDataFromServer("ajaxGetCallLog.jsp", sData, "json", function(data){
+			if (!data.resultCode || !data.resultText){
+				msgBox("無法取得通話記錄!");
+				return;
+			}else{
+				if (data.resultCode=="00000"){
+					s = "";
+					$.each( data.records, function(i, r) {
+						tmp = "";
+						s = "<tr>";
+						s += "<td>" + (r.Call_Type=="0"?"撥入":"撥出") + "</td>";
+						s += "<td>" + r.Audit_Phone_Number + "</td>";
+						s += "<td>" + r.Caller_Phone_Number + "</td>";
+						s += "<td>" + r.Record_Time_Start + "</td>";
+						s += "<td>" + r.Record_Talked_Time + "</td>";
+						s += "<td><a href='" + r.Record_File_URL + "' target='_blank'>聽取</a></td>";
+						s += "<td>" + r.Caller_Name + "</td>";
+						s += "<td>" + r.Caller_Address + "</td>";
+						s += "<td>" + r.Caller_Company + "</td>";
+						s += "<td>" + r.Caller_Email + "</td>";
+						s += "</tr>";
+						$('#tblResult tbody').append(s);
+					});	//$.each( data.orders, function(i, r) {
+					$('#tblResult tbody').trigger('footable_redraw');
+				}else{
+					msgBox("取得通話記錄失敗:<br>" + data.resultText);
+				}
+			}
+
+		});	//getDataFromServer("xxx.jsp", sData, "json", function(data){
+	}
+</script>
