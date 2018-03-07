@@ -94,6 +94,22 @@ sSQL = "";
 if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
 	//檢查 Status
 	s = (String[][])ht.get("Data");
+
+	//更新 callpro_account_detail 中的資料
+	sSQL = "UPDATE callpro_account_detail SET ";
+	sSQL += "Last_Login_Date='" + sDate + "'";
+	sSQL += " WHERE id=" + bid;
+	sSQLList.add(sSQL);
+	ht = updateDBData(sSQLList, gcDataSourceName, false);	//更新 callpro_account_detail 中的 Google_Refresh_Token
+	sResultCode = ht.get("ResultCode").toString();
+	sResultText = ht.get("ResultText").toString();
+	if (!sResultCode.equals(gcResultCodeSuccess)){	//失敗
+		writeLog("error", "更新 callpro_account_detail 失敗 (" + sResultCode + "): " + sResultText);
+		out.print(obj);
+		out.flush();
+		return;
+	}
+
 	session.setAttribute("Google_ID", Google_ID);	//將登入用戶資料存入 session 中
 	session.setAttribute("Account_Sequence", nullToString(s[0][0], ""));	//將登入用戶資料存入 session 中
 	session.setAttribute("Account_Type", nullToString(s[0][2], ""));	//將登入用戶資料存入 session 中

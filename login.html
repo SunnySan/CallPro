@@ -130,14 +130,7 @@
 	var mailAddress		= "";
 
 	$(function () {
-		setLocalValue("Account_Sequence", "");
-		setLocalValue("Account_Name", "");
-		setLocalValue("Account_Type", "");
-		setLocalValue("Bill_Type", "");
-		setLocalValue("Audit_Phone_Number", "");
-		setLocalValue("Google_ID", "");
-		setLocalValue("Google_User_Name", "");
-		setLocalValue("Google_User_Picture_URL", "");
+		clearCookie();
 		$('#tblResult').footable();
 	});
 
@@ -152,6 +145,7 @@
 	}	//function initGoogleAuth(){	//初始化Google Sign-In object
 	
 	function doLogin(){
+		//以下採用 grantOfflineAccess 的方式，若要簡單的登入，請參考： https://developers.google.com/identity/sign-in/web/
 		auth2.grantOfflineAccess().then(signInCallback);
 	}
 
@@ -186,7 +180,7 @@
 								setLocalValue("Google_ID", data.Google_ID);
 								setLocalValue("Google_User_Name", data.Google_User_Name);
 								setLocalValue("Google_User_Picture_URL", data.Google_User_Picture_URL);
-								location.href = "index_admin.html";
+								gotoAdmHomePage(r.Account_Type);
 							}else{
 								s = "";
 								$.each( data.records, function(i, r) {
@@ -259,7 +253,7 @@
 					setLocalValue("Google_ID", data.Google_ID);
 					setLocalValue("Google_User_Name", data.Google_User_Name);
 					setLocalValue("Google_User_Picture_URL", data.Google_User_Picture_URL);
-					location.href = "index_admin.html";
+					gotoAdmHomePage(data.Account_Type);
 				}else{
 					msgBox("帳號檢查失敗:<br>" + data.resultText);
 					$('#btnLogin').prop("disabled",false);
@@ -269,5 +263,25 @@
 			}
 
 		});	//getDataFromServer("xxx.jsp", sData, "json", function(data){
+	}
+	
+	function gotoAdmHomePage(myAccountType){
+		var s = "";
+		if (myAccountType=="A"){	//系統管理者
+			s = "index_admin.html";
+		}
+		if (myAccountType=="D"){	//加盟商
+			s = "index_admin.html";
+		}
+		if (myAccountType=="O" || myAccountType=="T"){	//電話主人
+			s = "AdmOwnerCallLog.html";
+		}
+		
+		if (beEmpty(s)){
+			alert("無法取得您的身分，請重新登入!");
+			s = "index.html";
+		}
+		
+		location.href = s;
 	}
 </script>

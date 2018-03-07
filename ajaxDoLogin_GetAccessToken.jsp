@@ -187,36 +187,42 @@ if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
 	//檢查 Status
 	s = (String[][])ht.get("Data");
 
+	//更新 callpro_account_detail 中的資料
+	sSQL = "UPDATE callpro_account_detail SET ";
+	sSQL += "Google_Refresh_Token='" + refreshToken + "',";
+	sSQL += "Update_User='" + sUser + "',";
+	sSQL += "Update_Date='" + sDate + "',";
+	sSQL += "Google_User_Name='" + name + "',";
+	sSQL += "Google_User_Picture_URL='" + pictureUrl + "'";
 	if (s.length==1){	//只有一筆資料
-		sSQL = "UPDATE callpro_account_detail SET ";
-		sSQL += "Update_User='" + sUser + "',";
-		sSQL += "Update_Date='" + sDate + "',";
-		sSQL += "Google_User_Name='" + name + "',";
-		sSQL += "Google_User_Picture_URL='" + pictureUrl + "',";
-		sSQL += "Last_Login_Date='" + sDate + "'";
+		sSQL += ",Last_Login_Date='" + sDate + "'";
 		sSQL += " WHERE id=" + s[0][1];
-		sSQLList.add(sSQL);
-		ht = updateDBData(sSQLList, gcDataSourceName, false);
-		sResultCode = ht.get("ResultCode").toString();
-		sResultText = ht.get("ResultText").toString();
-		if (sResultCode.equals(gcResultCodeSuccess)){	//成功
-			writeLog("info", "User login successfully, callpro_account.id=" + s[0][0] + ", name=" + s[0][3]);
-			session.setAttribute("Google_ID", userId);	//將登入用戶資料存入 session 中
-			session.setAttribute("Account_Sequence", nullToString(s[0][2], ""));	//將登入用戶資料存入 session 中
-			session.setAttribute("Account_Type", nullToString(s[0][4], ""));	//將登入用戶資料存入 session 中
-			session.setAttribute("Bill_Type", nullToString(s[0][5], ""));	//將登入用戶資料存入 session 中
-			session.setAttribute("Audit_Phone_Number", nullToString(s[0][6], ""));	//將登入用戶資料存入 session 中
-			writeLog("debug", "用戶登入, Google_ID=" + userId);
-			writeLog("debug", "用戶登入, Account_Sequence=" + nullToString(s[0][2], ""));
-			writeLog("debug", "用戶登入, Account_Type=" + nullToString(s[0][4], ""));
-			writeLog("debug", "用戶登入, Bill_Type=" + nullToString(s[0][5], ""));
-			writeLog("debug", "用戶登入, Audit_Phone_Number=" + nullToString(s[0][6], ""));
-		}else{
-			writeLog("error", "Fail to update callpro_account_detail data data (" + sResultCode + "): " + sResultText);
-			out.print(obj);
-			out.flush();
-			return;
-		}	//if (sResultCode.equals(gcResultCodeSuccess)){	//成功
+	}else{
+		sSQL += " WHERE Google_ID='" + userId + "'";
+	}
+	sSQLList.add(sSQL);
+	ht = updateDBData(sSQLList, gcDataSourceName, false);	//更新 callpro_account_detail 中的 Google_Refresh_Token
+	sResultCode = ht.get("ResultCode").toString();
+	sResultText = ht.get("ResultText").toString();
+	if (!sResultCode.equals(gcResultCodeSuccess)){	//失敗
+		writeLog("error", "更新 callpro_account_detail 失敗 (" + sResultCode + "): " + sResultText);
+		out.print(obj);
+		out.flush();
+		return;
+	}
+
+	if (s.length==1){	//只有一筆資料
+		writeLog("info", "User login successfully, callpro_account.id=" + s[0][0] + ", name=" + s[0][3]);
+		session.setAttribute("Google_ID", userId);	//將登入用戶資料存入 session 中
+		session.setAttribute("Account_Sequence", nullToString(s[0][2], ""));	//將登入用戶資料存入 session 中
+		session.setAttribute("Account_Type", nullToString(s[0][4], ""));	//將登入用戶資料存入 session 中
+		session.setAttribute("Bill_Type", nullToString(s[0][5], ""));	//將登入用戶資料存入 session 中
+		session.setAttribute("Audit_Phone_Number", nullToString(s[0][6], ""));	//將登入用戶資料存入 session 中
+		writeLog("debug", "用戶登入, Google_ID=" + userId);
+		writeLog("debug", "用戶登入, Account_Sequence=" + nullToString(s[0][2], ""));
+		writeLog("debug", "用戶登入, Account_Type=" + nullToString(s[0][4], ""));
+		writeLog("debug", "用戶登入, Bill_Type=" + nullToString(s[0][5], ""));
+		writeLog("debug", "用戶登入, Audit_Phone_Number=" + nullToString(s[0][6], ""));
 	}else{
 		String sRandom = generateTxId();	//產生一個隨機數回給browser，同時存入session，作為等一下用戶確認使用哪個帳號登入時使用
 		session.setAttribute("Google_ID", userId);	//將登入用戶資料存入 session 中
@@ -239,7 +245,7 @@ if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
 	obj.put("Google_ID", userId);
 	obj.put("Google_User_Name", name);
 	obj.put("Google_User_Picture_URL", pictureUrl);
-}else if (sResultCode.equals(gcResultCodeNoDataFound)){	//沒資料，新增一筆資料
+}else if (sResultCode.equals(gcResultCodeNoDataFound)){	//沒資料
 	obj.put("resultCode", sResultCode);
 	obj.put("resultText", "無法取得您的註冊資料，請重新註冊!");
 	out.print(obj);

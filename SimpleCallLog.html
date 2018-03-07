@@ -107,8 +107,8 @@
 		var s = "";
 		var tmp = "";
 		
-		sData = "AuditPhoneNumber=" + sAuditPhoneNumber;
-		sData += "&CallerPhoneNumber=" + sCallerPhoneNumber;
+		sData = "auditPhoneNumber=" + sAuditPhoneNumber;
+		sData += "&callerPhoneNumber=" + sCallerPhoneNumber;
 		getDataFromServer("ajaxGetCallLog.jsp", sData, "json", function(data){
 			if (!data.resultCode || !data.resultText){
 				msgBox("無法取得通話記錄!");

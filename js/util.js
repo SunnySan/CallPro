@@ -210,35 +210,82 @@ function getDataFromServer(sProgram, sData, sResponseType, SuccessCallback, bBlo
 }	//function sServerBaseURL(sProgram, sData, sResponseType, SuccessCallback){
 
 function clearCookie(){	//清除 cookie 中的登入資料
-	/*
-	$.removeCookie('LineUserID');
-	$.removeCookie('LineUserName');
-	$.removeCookie('LineUserPictureURL');
-	*/
-	setLocalValue('LineUserID','');
-	setLocalValue('LineUserName','');
-	setLocalValue('LineUserPictureURL','');
-	setLocalValue("nextAction", '');
-	setLocalValue("nextActionLineUserId", '');
-	setLocalValue("nextActionLineRoomId", '');
-	setLocalValue("nextActionLineGroupId", '');
-	setLocalValue("nextActionLineUserType", '');
-	setLocalValue('GoogleUserId','');
-	setLocalValue('GoogleUserName','');
-	setLocalValue('GoogleUserPictureUrl','');
+	setLocalValue("Account_Sequence", "");
+	setLocalValue("Account_Name", "");
+	setLocalValue("Account_Type", "");
+	setLocalValue("Bill_Type", "");
+	setLocalValue("Audit_Phone_Number", "");
+	setLocalValue("Google_ID", "");
+	setLocalValue("Google_User_Name", "");
+	setLocalValue("Google_User_Picture_URL", "");
 	return true;
 }
 
-//檢查Line登入狀態
-function doCheckLoginStatus(){
-	var User_ID = getLocalValue("LineUserID");
-	if (beEmpty(User_ID)){
-		$('#menuLogin').show();
-	}else{
-		var LineUserName = getLocalValue("LineUserName");
-		$('#menuLogout').show();
-		if (notEmpty(LineUserName)){
-			$('#sysUserName').text("(" + LineUserName + ")");
-		}
+//用戶登出
+function doLogout(){
+	clearCookie();
+	location.href = "/index.html";
+}
+
+//在頁面填入一些預設值
+function pageInit(){
+	var myGoogleId = getLocalValue("Google_ID");
+	var myAccountType = getLocalValue("Account_Type");
+	var myAccountName = getLocalValue("Account_Name");
+	var myGoogleName = getLocalValue("Google_User_Name");
+	var myGooglePicture = getLocalValue("Google_User_Picture_URL");
+	if (beEmpty(myGoogleId) || beEmpty(myAccountType)){
+		alert("無法取得您的登入資訊，請重新登入!");
+		location.href = "/index.html";
 	}
-}	//function doCheckLoginStatus(){
+	
+	if (beEmpty(myAccountName)) myAccountName = "無法取得註冊名稱";
+	if (beEmpty(myGoogleName)) myGoogleName = "請問您貴姓大名？";
+	if (beEmpty(myGooglePicture)) myGooglePicture = "images/JohnDoe.jpg";
+	
+	$('.sys-user-image').attr('src', myGooglePicture);
+	$('.sys-user-name').text(myGoogleName);
+	$('.sys-user-account-name').text(myAccountName);
+	
+	generateMainMenu();
+}
+
+//產生主選單
+function generateMainMenu() {
+	var myAccountType = getLocalValue("Account_Type");
+	var s = "";
+	var s1 = "";
+	var me = window.location.pathname;
+	var i = me.lastIndexOf("/");
+	me = me.substring(i+1);	//目前的網頁名稱
+
+	var pageName = "";
+	var bFound = false;
+	s += "<li class='header'>請選擇您要執行的功能</li>";
+	
+	if (myAccountType=="O" || myAccountType=="T"){	//電話主人
+		pageName = "AdmOwnerCallLog.html";
+		s += "<li" + (pageName==me?" class='active'":"") + "><a href='" + pageName + "'><i class='fa fa-table'></i> <span>通話記錄查詢</span></a></li>";
+
+		s1 = "";
+		pageName = "AdmOwnerReport_DailyCount.html";
+		if (pageName==me) bFound = true;
+		s1 += "		<li" + (pageName==me?" class='active'":"") + "><a href='" + pageName + "'><i class='fa fa-circle-o'></i> 每日通話次數統計</a></li>";
+		pageName = "AdmOwnerReport_DailyTalkTime.html";
+		if (pageName==me) bFound = true;
+		s1 += "		<li" + (pageName==me?" class='active'":"") + "><a href='" + pageName + "'><i class='fa fa-circle-o'></i> 每日通話時間統計</a></li>";
+		s += "<li class='treeview" + (bFound?" active":"") + "'>";
+		s += "	<a href='#'>";
+		s += "		<i class='fa fa-pie-chart'></i> <span>我的報表</span>";
+		s += "		<span class='pull-right-container'>";
+		s += "			<i class='fa fa-angle-left pull-right'></i>";
+		s += "		</span>";
+		s += "	</a>";
+		s += "	<ul class='treeview-menu'>";
+		s += s1;
+		s += "	</ul>";
+		s += "</li>";
+	}	//if (myAccountType=="O" || myAccountType=="T"){	//電話主人
+	
+	if (notEmpty(s)) $('#sys-main-menu').append(s);
+}	//function generateMainMenu() {

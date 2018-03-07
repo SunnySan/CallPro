@@ -24,16 +24,31 @@ out.clear();	//注意，一定要有out.clear();，要不然client端無法解�
 /*********************開始做事吧*********************/
 JSONObject obj=new JSONObject();
 
-String sAuditPhoneNumber	= nullToString(request.getParameter("AuditPhoneNumber"), "");
-String sCallerPhoneNumber	= nullToString(request.getParameter("CallerPhoneNumber"), "");
+String sAuditPhoneNumber	= nullToString(request.getParameter("auditPhoneNumber"), "");
+String sCallerPhoneNumber	= nullToString(request.getParameter("callerPhoneNumber"), "");
+String sDateStart			= nullToString(request.getParameter("dateStart"), "");
+String sDateEnd				= nullToString(request.getParameter("dateEnd"), "");
 
-if (beEmpty(sAuditPhoneNumber)){
+//登入用戶的資訊
+String sLoginUserAccountSequence	= (String)session.getAttribute("Account_Sequence");
+String sLoginUserAccountType		= (String)session.getAttribute("Account_Type");
+String sLoginUserAuditPhoneNumber	= (String)session.getAttribute("Audit_Phone_Number");
+
+if (notEmpty(sLoginUserAuditPhoneNumber)){
+	sAuditPhoneNumber = sLoginUserAuditPhoneNumber;	//如果登入的是電話主人，只能查自己的紀錄
+}
+
+//由於用戶從LINE browser無法登入Google，所以允許用戶為登入就查詢某個 sAuditPhoneNumber + sCallerPhoneNumber 的記錄
+if ((beEmpty(sLoginUserAccountSequence) && beEmpty(sAuditPhoneNumber)) || ((beEmpty(sDateStart) || beEmpty(sDateEnd)) && beEmpty(sCallerPhoneNumber))){
 	obj.put("resultCode", gcResultCodeParametersNotEnough);
 	obj.put("resultText", gcResultTextParametersNotEnough);
 	out.print(obj);
 	out.flush();
 	return;
 }
+
+if (notEmpty(sDateStart))	sDateStart	+= " 00:00:00";	//從開始日期的0點起算
+if (notEmpty(sDateEnd))		sDateEnd	+= " 23:59:59";	//算到結束日期的23:59:59
 
 Hashtable	ht					= new Hashtable();
 String		sResultCode			= gcResultCodeSuccess;
@@ -45,13 +60,18 @@ List<String> sSQLList			= new ArrayList<String>();
 int			i					= 0;
 int			j					= 0;
 
-sSQL = "SELECT Audit_Phone_Number, Caller_Phone_Number, Call_Type, Record_Length, Record_Talked_Time, Record_Time_Start, Record_File_URL, Caller_Name, Caller_Address, Caller_Company, Caller_Email";
+String		sWhere				= "";
+
+if (notEmpty(sAuditPhoneNumber)) sWhere += " AND Audit_Phone_Number='" + sAuditPhoneNumber + "'";
+if (notEmpty(sCallerPhoneNumber)) sWhere += " AND Caller_Phone_Number='" + sCallerPhoneNumber + "'";
+if (notEmpty(sDateStart)) sWhere += " AND Record_Time_Start>='" + sDateStart + "'";
+if (notEmpty(sDateEnd)) sWhere += " AND Record_Time_Start<='" + sDateEnd + "'";
+
+sSQL = "SELECT id, Audit_Phone_Number, Caller_Phone_Number, Call_Type, Record_Length, Record_Talked_Time, DATE_FORMAT(Record_Time_Start,'%Y-%m-%d %H:%i:%s'), Record_File_URL, Caller_Name, Caller_Address, Caller_Company, Caller_Email";
 sSQL += " FROM callpro_call_log";
-sSQL += " WHERE Audit_Phone_Number='" + sAuditPhoneNumber + "'";
-if (notEmpty(sCallerPhoneNumber)){
-	sSQL += " AND Caller_Phone_Number='" + sCallerPhoneNumber + "'";
-}
+if (notEmpty(sWhere)) sSQL += " WHERE " + sWhere.substring(5);
 sSQL += " ORDER BY id DESC";
+sSQL += " LIMIT 200";
 
 //writeLog("debug", sSQL);
 
@@ -65,7 +85,7 @@ if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
 	s = (String[][])ht.get("Data");
 
 	obj.put("recordCount", String.valueOf(s.length));
-	String[] fields2 = {"Audit_Phone_Number", "Caller_Phone_Number", "Call_Type", "Record_Length", "Record_Talked_Time", "Record_Time_Start", "Record_File_URL", "Caller_Name", "Caller_Address", "Caller_Company", "Caller_Email"};
+	String[] fields2 = {"id", "Audit_Phone_Number", "Caller_Phone_Number", "Call_Type", "Record_Length", "Record_Talked_Time", "Record_Time_Start", "Record_File_URL", "Caller_Name", "Caller_Address", "Caller_Company", "Caller_Email"};
 	List  l1 = new LinkedList();
 	Map m1 = null;
 	for (i=0;i<s.length;i++){
