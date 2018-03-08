@@ -190,6 +190,7 @@ function getDataFromServer(sProgram, sData, sResponseType, SuccessCallback, bBlo
 	bBlockUI		是否顯示BlockUI，若未輸入此參數則預設為顯示BlockUI
 	*****************************************************************/
 	if (beEmpty(bBlockUI)) bBlockUI = true;
+	bBlockUI = false;	//這個專案不用BlockUI，用AdminLTE的 Loading States <div class="overlay"> 代替
 	if (beEmpty(sData)) sData = "ResponseType=" + sResponseType; else sData += "&ResponseType=" + sResponseType;
 	$.ajax({
 		url: sServerBaseURL + sProgram,
@@ -268,12 +269,12 @@ function generateMainMenu() {
 		s += "<li" + (pageName==me?" class='active'":"") + "><a href='" + pageName + "'><i class='fa fa-table'></i> <span>通話記錄查詢</span></a></li>";
 
 		s1 = "";
-		pageName = "AdmOwnerReport_DailyCount.html";
+		pageName = "AdmOwnerReport_DailyCallStatistics.html";
 		if (pageName==me) bFound = true;
-		s1 += "		<li" + (pageName==me?" class='active'":"") + "><a href='" + pageName + "'><i class='fa fa-circle-o'></i> 每日通話次數統計</a></li>";
-		pageName = "AdmOwnerReport_DailyTalkTime.html";
+		s1 += "		<li" + (pageName==me?" class='active'":"") + "><a href='" + pageName + "'><i class='fa fa-circle-o'></i> 每日通話統計</a></li>";
+		pageName = "AdmOwnerReport_MonthlyCallStatistics.html";
 		if (pageName==me) bFound = true;
-		s1 += "		<li" + (pageName==me?" class='active'":"") + "><a href='" + pageName + "'><i class='fa fa-circle-o'></i> 每日通話時間統計</a></li>";
+		s1 += "		<li" + (pageName==me?" class='active'":"") + "><a href='" + pageName + "'><i class='fa fa-circle-o'></i> 每月通話統計</a></li>";
 		s += "<li class='treeview" + (bFound?" active":"") + "'>";
 		s += "	<a href='#'>";
 		s += "		<i class='fa fa-pie-chart'></i> <span>我的報表</span>";

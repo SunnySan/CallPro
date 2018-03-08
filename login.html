@@ -67,7 +67,7 @@
 		</div><!-- /.register-box-body -->
 	</div><!-- /.register-box -->
 
-	<div id="select-account-box" class="register-box" style="display:none;">
+	<div id="select-account-box" style="display:none;">
 		<div class="register-logo">
 			<b>請選擇此次登入使用的帳號</b>
 		</div>
@@ -78,7 +78,7 @@
 					<tr>
 						<th data-class="expand">帳號名稱</th>
 						<th>帳號類型</th>
-						<th>產品名稱</th>
+						<th data-hide="phone">產品名稱</th>
 						<th>監控電話</th>
 						<th data-hide="phone">LINE官方帳號</th>
 						<th>登入帳號</th>
@@ -205,9 +205,12 @@
 									s += "</tr>";
 									$('#tblResult tbody').append(s);
 								});	//$.each( data.orders, function(i, r) {
-								$('#tblResult tbody').trigger('footable_redraw');
 								$('#login-box').hide();
 								$('#select-account-box').show();
+								$('#tblResult tbody').trigger('footable_redraw');
+								$('html, body').animate({
+									scrollTop: $("#tblResult").offset().top
+								}, 1000);
 								sRandomKey = data.RandomKey;
 								sGoogleID = data.Google_ID;
 							}	//if (recordCount=="1"){

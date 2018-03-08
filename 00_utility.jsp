@@ -191,8 +191,43 @@ public String getWeekAgo(String sDateFormat){
 	*************************************/
 	TimeZone.setDefault(TimeZone.getTimeZone("Asia/Taipei"));	//將 Timezone 設為 GMT+8
 	java.util.Calendar cal = java.util.Calendar.getInstance();//使用預設時區和語言環境獲得一個日曆。  
-	cal.add(java.util.Calendar.DAY_OF_MONTH, -7);//取當前日期的前一天.  
+	cal.add(java.util.Calendar.DAY_OF_MONTH, -7);//取當前日期的前7天.  
 	//cal.add(java.util.Calendar.DAY_OF_MONTH, +1);//取當前日期的後一天.  
+	
+	//通過格式化輸出日期  
+	java.text.SimpleDateFormat format = new java.text.SimpleDateFormat(sDateFormat);
+ 
+	return format.format(cal.getTime());
+
+}	//public String getDateTimeNow(String sDateFormat){
+
+/*********************************************************************************************************************/
+//取得30天前日期
+public String getThirtyDaysAgo(String sDateFormat){
+	/************************************
+	sDateFormat:	指定的格式，例如"yyyyMMdd-HHmmss"或"yyyyMMdd"
+	*************************************/
+	TimeZone.setDefault(TimeZone.getTimeZone("Asia/Taipei"));	//將 Timezone 設為 GMT+8
+	java.util.Calendar cal = java.util.Calendar.getInstance();//使用預設時區和語言環境獲得一個日曆。  
+	cal.add(java.util.Calendar.DAY_OF_MONTH, -30);//取當前日期的前30天.  
+	//cal.add(java.util.Calendar.DAY_OF_MONTH, +1);//取當前日期的後一天.  
+	
+	//通過格式化輸出日期  
+	java.text.SimpleDateFormat format = new java.text.SimpleDateFormat(sDateFormat);
+ 
+	return format.format(cal.getTime());
+
+}	//public String getDateTimeNow(String sDateFormat){
+
+/*********************************************************************************************************************/
+//取得12個月前日期
+public String getTwelveMonthsAgo(String sDateFormat){
+	/************************************
+	sDateFormat:	指定的格式，例如"yyyyMMdd-HHmmss"或"yyyyMMdd"
+	*************************************/
+	TimeZone.setDefault(TimeZone.getTimeZone("Asia/Taipei"));	//將 Timezone 設為 GMT+8
+	java.util.Calendar cal = java.util.Calendar.getInstance();//使用預設時區和語言環境獲得一個日曆。  
+	cal.add(java.util.Calendar.MONTH, -12);//取當前日期的前12個月.  
 	
 	//通過格式化輸出日期  
 	java.text.SimpleDateFormat format = new java.text.SimpleDateFormat(sDateFormat);

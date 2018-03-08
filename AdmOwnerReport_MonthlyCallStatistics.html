@@ -151,8 +151,8 @@
 		<!-- Content Header (Page header) -->
 		<section class="content-header">
 			<h1>
-				通話記錄查詢
-				<small>查詢全部或某人的歷史通話記錄</small>
+				每月通話統計
+				<small>統計過去12個月，每月的通話次數及通話分鐘數</small>
 			</h1>
 		</section>
 		
@@ -160,111 +160,64 @@
 		<section class="content">
 			<!-- 主要功能的內容在這裡 -->
 
-			<div class="alert alert-info alert-dismissible">
-				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-				<h4><i class="icon fa fa-info"></i> 使用說明</h4>
-				<ul>
-					<li>
-						請先輸入撥入或撥出的電話號碼(未輸入表示查詢所有電話)，然後再選擇查詢的日期區間，按下【確認】進行查詢
-					</li>
-					<li>
-						一次最多可查<span style="color:#FF0000;">200</span>筆記錄
-					</li>
-				</ul>
-			</div>
-
-			<div class="box box-primary box-solid">
-				<div class="box-header with-border">
-					<h3 class="box-title">資料查詢條件</h3>
-				</div><!-- /.box-header -->
-
-				<!-- form start -->
-				<form role="form">
-					<div class="box-body">
-						<div class="form-group">
-							<label for="callerPhoneNumber">電話號碼</label>
-							<input type="text" class="form-control" id="callerPhoneNumber" placeholder="0988520178" maxlength="20">
-						</div>
-						
-						<div class="form-group">
-							<label>日期區間</label>
-							
-							<div class="input-group">
-								<div class="input-group-addon">
-									<i class="fa fa-calendar"></i>
-								</div>
-								<input type="text" class="form-control" id="dateRange">
-								<input type="hidden" id="dateStart" value="">
-								<input type="hidden" id="dateEnd" value="">
+			<div class="row">
+				<div class="col-md-6">
+					<div class="box box-success box-solid">
+						<div class="box-header with-border">
+							<h3 class="box-title">每月通話次數統計</h3>
+							<div class="box-tools pull-right">
+								<button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+								<button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
 							</div>
-						</div><!-- /.input group -->
+						</div><!-- /.box-header -->
 						
-					</div><!-- /.box-body -->
-					
-					<div class="box-footer">
-						<button type="button" class="btn btn-primary" onclick="doQuery();">確認</button>
-					</div><!-- /.box-footer -->
-				</form>
-				<!-- Loading (remove the following to stop the loading)-->
-				<div class="overlay" style="display:none;">
-					<i class="fa fa-refresh fa-spin"></i>
-				</div>
-			</div><!-- /.box -->
+						<div class="box-body chart-responsive">
+							<div class="chart" id="monthCountChart" style="height: 300px;"></div>
+							
+						</div><!-- /.box-body -->
 
-			<div class="box box-success box-solid">
-				<div class="box-header with-border">
-					<h3 class="box-title">資料查詢結果</h3>
-				</div><!-- /.box-header -->
+						<div class="box-footer">
+							<!--<button type="button" class="btn btn-success" onclick="doQuery();">確認</button>-->
+						</div><!-- /.box-footer -->
+						
+						<!-- Loading (remove the following to stop the loading)-->
+						<div class="overlay" style="display:none;">
+							<i class="fa fa-refresh fa-spin"></i>
+						</div>
+					</div><!-- /.box -->
+				</div><!-- /.col -->
 
-				<div class="box-body">
+				<div class="col-md-6">
+					<div class="box box-success box-solid">
+						<div class="box-header with-border">
+							<h3 class="box-title">每月通話分鐘數統計</h3>
+							<div class="box-tools pull-right">
+								<button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+								<button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+							</div>
+						</div><!-- /.box-header -->
+						
+						<div class="box-body chart-responsive">
+							<div class="chart" id="monthMinuteChart" style="height: 300px;"></div>
+							
+						</div><!-- /.box-body -->
 
-					<table id="tblResult" class="table table-bordered table-striped">
-						<thead>
-							<tr>
-								<th>類型</th>
-								<th>主人電話</th>
-								<th>對方電話</th>
-								<th>起始時間</th>
-								<th>通話秒數</th>
-								<th>錄音檔案</th>
-								<th>對方姓名</th>
-								<th>對方地址</th>
-								<th>對方公司名稱</th>
-								<th>對方Email</th>
-							</tr>
-						</thead>
-						<tbody>
-						</tbody>
-						<tfoot>
-							<tr>
-								<th>類型</th>
-								<th>主人電話</th>
-								<th>對方電話</th>
-								<th>起始時間</th>
-								<th>通話秒數</th>
-								<th>錄音檔案</th>
-								<th>對方姓名</th>
-								<th>對方地址</th>
-								<th>對方公司名稱</th>
-								<th>對方Email</th>
-							</tr>
-						</tfoot>
-					</table>
-					
-				</div><!-- /.box-body -->
-				
-				<div class="box-footer">
-				</div><!-- /.box-footer -->
-				<!-- Loading (remove the following to stop the loading)-->
-				<div class="overlay" style="display:none;">
-					<i class="fa fa-refresh fa-spin"></i>
-				</div>
-			</div><!-- /.box -->
+						<div class="box-footer">
+							<!--<button type="button" class="btn btn-success" onclick="doQuery();">確認</button>-->
+						</div><!-- /.box-footer -->
+						
+						<!-- Loading (remove the following to stop the loading)-->
+						<div class="overlay" style="display:none;">
+							<i class="fa fa-refresh fa-spin"></i>
+						</div>
+					</div><!-- /.box -->
+				</div><!-- /.col -->
+			</div><!-- /.row -->
+			
+
 		
-		</section>
-		<!-- /.content -->
-	</div>
-	<!-- /.content-wrapper -->
+		</section><!-- /.content -->
+	</div><!-- /.content-wrapper -->
 
 
 
@@ -325,136 +278,52 @@
 <script>
 	$(function () {
 		pageInit();
-		//Date range picker
-    	$('#dateRange').daterangepicker({
-			ranges   : {
-				'今天'       : [moment(), moment()],
-				'昨天'   : [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
-				'過去7天' : [moment().subtract(6, 'days'), moment()],
-				'過去30天': [moment().subtract(29, 'days'), moment()],
-				'這個月'  : [moment().startOf('month'), moment().endOf('month')],
-				'上個月'  : [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
-			},
-    		locale : {
-				applyLabel : "確定",
-				cancelLabel : "取消",
-				fromLabel : "開始日期",
-				toLabel : "結束日期",
-				customRangeLabel : "自訂日期區間",
-				daysOfWeek : [ "日", "一", "二", "三", "四", "五", "六" ],
-				monthNames : [ "1月", "2月", "3月", "4月", "5月", "6月",
-				"7月", "8月", "9月", "10月", "11月", "12月" ],
-				firstDay : 1,
-				format: "YYYY/MM/DD"
-			}
-    	});
-
-		$('#dateStart').val(moment().format('YYYY/MM/DD'));
-		$('#dateEnd').val(moment().format('YYYY/MM/DD'));
-    	
-		$('#dateRange').on("apply.daterangepicker", function(ev, picker) {
-			$('#dateStart').val(picker.startDate.format('YYYY/MM/DD'));
-			$('#dateEnd').val(picker.endDate.format('YYYY/MM/DD'));
-		});
-
-		//initDataTable();
+		getData();
 	});
 </script>
 
 <script>
-	var table = null;
-	
-	function initDataTable(){
-		table = $('#tblResult').DataTable({
-			language: {
-				url: 'bower_components/datatables.net/js/Chinese.json'
-			}
-		});
 
-	}
-
-	function doQuery(){
-		var callerPhoneNumber = $('#callerPhoneNumber').val();
-		var dateStart = $('#dateStart').val();
-		var dateEnd = $('#dateEnd').val();
-		
-		if (callerPhoneNumber.length>20){
-			msgBox("電話號碼長度不可超過20個字，請重新輸入!");
-			return;
-		}
-		if (beEmpty(dateStart) || beEmpty(dateEnd) || dateStart.length>10 || dateEnd.length>10){
-			msgBox("請選擇日期區間!");
-			return;
-		}
-
-		if ($.fn.dataTable.isDataTable(table) ) table.clear().draw();
+	function getData(){
 		$('.overlay').show();
 		
 		var sData = "";
 		
-		sData = "callerPhoneNumber=" + callerPhoneNumber;
-		sData += "&dateStart=" + dateStart;
-		sData += "&dateEnd=" + dateEnd;
-		getDataFromServer("ajaxGetCallLog.jsp", sData, "json", function(data){
+		sData = "dateType=month";
+		getDataFromServer("ajaxReport_CallStatistics.jsp", sData, "json", function(data){
 			if (!data.resultCode || !data.resultText){
 				$('.overlay').hide();
-				msgBox("無法取得通話記錄!");
+				msgBox("無法取得報表資料!");
 				return;
 			}else{
 				if (data.resultCode=="00000"){
-					s = "";
-					$.each( data.records, function(i, r) {
-						/*
-						tmp = "";
-						s = "<tr>";
-						s += "<td>" + (r.Call_Type=="0"?"撥入":"撥出") + "</td>";
-						s += "<td>" + r.Audit_Phone_Number + "</td>";
-						s += "<td>" + r.Caller_Phone_Number + "</td>";
-						s += "<td>" + r.Record_Time_Start + "</td>";
-						s += "<td>" + r.Record_Talked_Time + "</td>";
-						s += "<td><a href='" + r.Record_File_URL + "' target='_blank'>聽取</a></td>";
-						s += "<td>" + r.Caller_Name + "</td>";
-						s += "<td>" + r.Caller_Address + "</td>";
-						s += "<td>" + r.Caller_Company + "</td>";
-						s += "<td>" + r.Caller_Email + "</td>";
-						s += "</tr>";
-						*/
-						r.Call_Type = (r.Call_Type=="0"?"撥入":"撥出");
-						r.Record_File_URL = "<a href='" + r.Record_File_URL + "' target='_blank'>聽取</a>";
+					// AREA CHART
+					var area1 = new Morris.Area({
+						element: 'monthCountChart',
+						resize: true,
+						data: data.countData,
+						xkey: 'date',
+						ykeys: ['allCount', 'inCount', 'outCount'],
+						labels: ['全部', '撥入', '撥出'],
+						lineColors: ['#DF0101', '#01DF3A', '#DBA901'],
+						hideHover: 'auto',
+						behaveLikeLine: true
+					});
 
-					});	//$.each( data.orders, function(i, r) {
-					if ($.fn.dataTable.isDataTable(table) ){
-						table.destroy();
-					}
-					table = $('#tblResult').DataTable( {
-						responsive: true,
-						columnDefs: [
-						{ responsivePriority: 1, targets: 2 },
-						{ responsivePriority: 1, targets: 3 },
-						{ responsivePriority: 1, targets: 5 },
-						{ responsivePriority: 1, targets: 0 }
-						],
-						language: {
-							url: 'bower_components/datatables.net/js/Chinese.json'
-						},
-						data: data.records,
-						columns: [
-							{ data: 'Call_Type' },
-							{ data: 'Audit_Phone_Number' },
-							{ data: 'Caller_Phone_Number' },
-							{ data: 'Record_Time_Start' },
-							{ data: 'Record_Talked_Time' },
-							{ data: 'Record_File_URL' },
-							{ data: 'Caller_Name' },
-							{ data: 'Caller_Address' },
-							{ data: 'Caller_Company' },
-							{ data: 'Caller_Email' }
-						],
-						order: [[ 3, 'desc' ], [ 0, 'asc' ]]
-					} );
-					
+					// AREA CHART
+					var area2 = new Morris.Area({
+						element: 'monthMinuteChart',
+						resize: true,
+						data: data.countData,
+						xkey: 'date',
+						ykeys: ['allMinute', 'inMinute', 'outMinute'],
+						labels: ['全部', '撥入', '撥出'],
+						lineColors: ['#DF0101', '#01DF3A', '#DBA901'],
+						hideHover: 'auto',
+						behaveLikeLine: true
+					});
 				}else{
-					msgBox("取得通話記錄失敗:<br>" + data.resultText);
+					msgBox("取得報表資料失敗:<br>" + data.resultText);
 				}
 				$('.overlay').hide();
 			}

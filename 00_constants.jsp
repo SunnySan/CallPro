@@ -69,5 +69,6 @@ public static final String	gcDateFormatDashYMDTime					= "yyyy-MM-dd HH:mm:ss";
 public static final String	gcDateFormatYMD							= "yyyyMMdd";
 public static final String	gcDateFormatSlashYMD					= "yyyy/MM/dd";
 public static final String	gcDateFormatdashYMD						= "yyyy-MM-dd";
+public static final String	gcDateFormatSlashYM						= "yyyy/MM";
 
 %>
