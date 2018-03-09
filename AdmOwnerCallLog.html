@@ -211,7 +211,7 @@
 				</div>
 			</div><!-- /.box -->
 
-			<div class="box box-success box-solid">
+			<div class="box box-success box-solid" id="boxResult">
 				<div class="box-header with-border">
 					<h3 class="box-title">資料查詢結果</h3>
 				</div><!-- /.box-header -->
@@ -452,6 +452,10 @@
 						],
 						order: [[ 3, 'desc' ], [ 0, 'asc' ]]
 					} );
+
+					$('html, body').animate({
+						scrollTop: $("#boxResult").offset().top
+					}, 1000);
 					
 				}else{
 					msgBox("取得通話記錄失敗:<br>" + data.resultText);

@@ -286,6 +286,9 @@ function generateMainMenu() {
 		s += s1;
 		s += "	</ul>";
 		s += "</li>";
+	}else if (myAccountType=="D"){	//加盟商
+		pageName = "AdmDealerCRM.html";
+		s += "<li" + (pageName==me?" class='active'":"") + "><a href='" + pageName + "'><i class='fa fa-table'></i> <span>客戶資料管理</span></a></li>";
 	}	//if (myAccountType=="O" || myAccountType=="T"){	//電話主人
 	
 	if (notEmpty(s)) $('#sys-main-menu').append(s);
