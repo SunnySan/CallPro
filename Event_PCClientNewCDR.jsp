@@ -207,8 +207,12 @@ try{
 	}
 	
 	//取得Google短網址(錄音檔)
-	String sFileURL = "https://drive.google.com/file/d/" + sGoogleDriveFileId + "/view";
-	String sShortURL = getShortenURL(HTTP_TRANSPORT, JSON_FACTORY, credential, sFileURL);
+	String sFileURL = "";
+	String sShortURL = "";
+	if (bHasFile){
+		sFileURL = "https://drive.google.com/file/d/" + sGoogleDriveFileId + "/view";
+		sShortURL = getShortenURL(HTTP_TRANSPORT, JSON_FACTORY, credential, sFileURL);
+	}
 	
 	//取得Google短網址(Call Log 查詢)
 	//String sCallLogURL = gcSystemUri + "SimpleCallLog.html?auditphone=" + sAreaCode + sPhoneNumber + "&callerphone=" + sCallerNumber;
@@ -216,7 +220,11 @@ try{
 	String sCallLogShortURL = getShortenURL(HTTP_TRANSPORT, JSON_FACTORY, credential, sCallLogURL);
 
 	//sMessageBody += "，通話時間" + sDuration + "秒，聽取通話內容: " + sShortURL;
-	sMessageBody += "，通話時間為" + sTalkedTime + "秒，聽取錄音檔: \n" + (beEmpty(sShortURL)?sFileURL:sShortURL) + "\n，查詢歷史記錄：\n" + (beEmpty(sCallLogShortURL)?sCallLogURL:sCallLogShortURL);
+	if (bHasFile){
+		sMessageBody += "，通話時間為" + sTalkedTime + "秒，聽取錄音檔: \n" + (beEmpty(sShortURL)?sFileURL:sShortURL) + "\n，查詢歷史記錄：\n" + (beEmpty(sCallLogShortURL)?sCallLogURL:sCallLogShortURL);
+	}else{
+		sMessageBody += "，通話時間為" + sTalkedTime + "秒，此通話無錄音檔，查詢歷史記錄：\n" + (beEmpty(sCallLogShortURL)?sCallLogURL:sCallLogShortURL);
+	}
 	sPushMessage = generateTextMessage(sRecepientType, s, sMessageBody);
 	
 	//新增 Google 行事曆
