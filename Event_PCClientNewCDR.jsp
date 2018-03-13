@@ -211,7 +211,8 @@ try{
 	String sShortURL = getShortenURL(HTTP_TRANSPORT, JSON_FACTORY, credential, sFileURL);
 	
 	//取得Google短網址(Call Log 查詢)
-	String sCallLogURL = gcSystemUri + "SimpleCallLog.html?auditphone=" + sAreaCode + sPhoneNumber + "&callerphone=" + sCallerNumber;
+	//String sCallLogURL = gcSystemUri + "SimpleCallLog.html?auditphone=" + sAreaCode + sPhoneNumber + "&callerphone=" + sCallerNumber;
+	String sCallLogURL = gcSystemUri + "AdmOwnerCallLog.html?callerPhoneNumber=" + sCallerNumber;
 	String sCallLogShortURL = getShortenURL(HTTP_TRANSPORT, JSON_FACTORY, credential, sCallLogURL);
 
 	//sMessageBody += "，通話時間" + sDuration + "秒，聽取通話內容: " + sShortURL;

@@ -151,8 +151,8 @@
 		<!-- Content Header (Page header) -->
 		<section class="content-header">
 			<h1>
-				通話記錄查詢
-				<small>查詢全部或某人的歷史通話記錄</small>
+				子帳號管理
+				<small>您可以將子帳號刪除或暫停發送訊息給該子帳號</small>
 			</h1>
 		</section>
 		
@@ -165,55 +165,23 @@
 				<h4><i class="icon fa fa-info"></i> 使用說明</h4>
 				<ul>
 					<li>
-						請先輸入撥入或撥出的電話號碼(未輸入表示查詢所有電話)，然後再選擇查詢的日期區間，按下【確認】進行查詢
+						進入本頁後系統將於下方表格顯示您目前已開通的子帳號，以及該帳號目前的狀態
 					</li>
 					<li>
-						一次最多可查<span style="color:#FF0000;">200</span>筆記錄
+						若您點選【停用】，則系統會暫停將來電訊息發送給該帳號
+					</li>
+					<li>
+						若您點選【復用】，則系統會開始將來電訊息發送給該帳號
+					</li>
+					<li>
+						若您點選【刪除】，則此帳號將被永久刪除
 					</li>
 				</ul>
 			</div>
 
-			<div class="box box-primary box-solid">
-				<div class="box-header with-border">
-					<h3 class="box-title">資料查詢條件</h3>
-				</div><!-- /.box-header -->
-
-				<!-- form start -->
-				<form role="form">
-					<div class="box-body">
-						<div class="form-group">
-							<label for="callerPhoneNumber">電話號碼</label>
-							<input type="text" class="form-control" id="callerPhoneNumber" placeholder="0988520178" maxlength="20">
-						</div>
-						
-						<div class="form-group">
-							<label>日期區間</label>
-							
-							<div class="input-group">
-								<div class="input-group-addon">
-									<i class="fa fa-calendar"></i>
-								</div>
-								<input type="text" class="form-control" id="dateRange">
-								<input type="hidden" id="dateStart" value="">
-								<input type="hidden" id="dateEnd" value="">
-							</div>
-						</div><!-- /.input group -->
-						
-					</div><!-- /.box-body -->
-					
-					<div class="box-footer">
-						<button type="button" class="btn btn-primary" onclick="doQuery();">確認</button>
-					</div><!-- /.box-footer -->
-				</form>
-				<!-- Loading (remove the following to stop the loading)-->
-				<div class="overlay" style="display:none;">
-					<i class="fa fa-refresh fa-spin"></i>
-				</div>
-			</div><!-- /.box -->
-
 			<div class="box box-success box-solid" id="boxResult">
 				<div class="box-header with-border">
-					<h3 class="box-title">資料查詢結果</h3>
+					<h3 class="box-title">已開通的子帳號</h3>
 				</div><!-- /.box-header -->
 
 				<div class="box-body">
@@ -221,32 +189,22 @@
 					<table id="tblResult" class="table table-bordered table-striped">
 						<thead>
 							<tr>
-								<th>類型</th>
-								<th>主人電話</th>
-								<th>對方電話</th>
-								<th>起始時間</th>
-								<th>通話秒數</th>
-								<th>錄音檔案</th>
-								<th>對方姓名</th>
-								<th>對方地址</th>
-								<th>對方公司名稱</th>
-								<th>對方Email</th>
+								<th>開通日期</th>
+								<th>帳號姓名</th>
+								<th>狀態</th>
+								<th>停用</th>
+								<th>刪除</th>
 							</tr>
 						</thead>
 						<tbody>
 						</tbody>
 						<tfoot>
 							<tr>
-								<th>類型</th>
-								<th>主人電話</th>
-								<th>對方電話</th>
-								<th>起始時間</th>
-								<th>通話秒數</th>
-								<th>錄音檔案</th>
-								<th>對方姓名</th>
-								<th>對方地址</th>
-								<th>對方公司名稱</th>
-								<th>對方Email</th>
+								<th>開通日期</th>
+								<th>帳號姓名</th>
+								<th>狀態</th>
+								<th>停用</th>
+								<th>刪除</th>
 							</tr>
 						</tfoot>
 					</table>
@@ -260,7 +218,26 @@
 					<i class="fa fa-refresh fa-spin"></i>
 				</div>
 			</div><!-- /.box -->
-		
+
+			<!-- 刪除資料的確認視窗 -->
+			<div class="modal modal-danger fade" id="modal-danger">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span></button>
+							<h4 class="modal-title">資料刪除確認</h4>
+						</div>
+						<div class="modal-body">
+							<p>此作業將會刪除子帳號【<span id="modalAccountName"></span>】的資料</p>
+							</div>
+							<div class="modal-footer">
+							<button type="button" class="btn btn-outline pull-left" data-dismiss="modal">取消</button>
+							<button type="button" class="btn btn-outline" onclick="confirmDelete();">確認刪除</button>
+						</div>
+					</div><!-- /.modal-content -->
+				</div><!-- /.modal-dialog -->
+			</div><!-- /.modal -->		
 		</section>
 		<!-- /.content -->
 	</div>
@@ -324,50 +301,9 @@
 
 <script>
 	$(function () {
-		var callerPhoneNumber = getParameterByName("callerPhoneNumber");
-		setLocalValue("callerPhoneNumber", callerPhoneNumber);
 		pageInit();
-		//Date range picker
-    	$('#dateRange').daterangepicker({
-			ranges   : {
-				'今天'       : [moment(), moment()],
-				'昨天'   : [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
-				'過去7天' : [moment().subtract(6, 'days'), moment()],
-				'過去30天': [moment().subtract(29, 'days'), moment()],
-				'這個月'  : [moment().startOf('month'), moment().endOf('month')],
-				'上個月'  : [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
-			},
-    		locale : {
-				applyLabel : "確定",
-				cancelLabel : "取消",
-				fromLabel : "開始日期",
-				toLabel : "結束日期",
-				customRangeLabel : "自訂日期區間",
-				daysOfWeek : [ "日", "一", "二", "三", "四", "五", "六" ],
-				monthNames : [ "1月", "2月", "3月", "4月", "5月", "6月",
-				"7月", "8月", "9月", "10月", "11月", "12月" ],
-				firstDay : 1,
-				format: "YYYY/MM/DD"
-			}
-    	});
-
-		$('#dateStart').val(moment().format('YYYY/MM/DD'));
-		$('#dateEnd').val(moment().format('YYYY/MM/DD'));
-    	
-		$('#dateRange').on("apply.daterangepicker", function(ev, picker) {
-			$('#dateStart').val(picker.startDate.format('YYYY/MM/DD'));
-			$('#dateEnd').val(picker.endDate.format('YYYY/MM/DD'));
-		});
-
-		//如果用戶是從LINE通知裡面連過來的，就直接查詢資料
-		if (notEmpty(callerPhoneNumber)){
-			$('#callerPhoneNumber').val(callerPhoneNumber);
-			$('#dateRange').val("");
-			$('#dateStart').val("");
-			$('#dateEnd').val("");
-			doQuery();
-		}
 		//initDataTable();
+		doQuery();
 	});
 </script>
 
@@ -384,58 +320,23 @@
 	}
 
 	function doQuery(){
-		var callerPhoneNumber = $('#callerPhoneNumber').val();
-		var dateStart = $('#dateStart').val();
-		var dateEnd = $('#dateEnd').val();
-		
-		if (callerPhoneNumber.length>20){
-			msgBox("電話號碼長度不可超過20個字，請重新輸入!");
-			return;
-		}
-		if (beEmpty(callerPhoneNumber) && (beEmpty(dateStart) || beEmpty(dateEnd))){
-			msgBox("請選擇日期區間!");
-			return;
-		}
-		if (dateStart.length>10 || dateEnd.length>10){
-			msgBox("請選擇日期區間!");
-			return;
-		}
-
 		if ($.fn.dataTable.isDataTable(table) ) table.clear().draw();
 		$('.overlay').show();
 		
 		var sData = "";
 		
-		sData = "callerPhoneNumber=" + callerPhoneNumber;
-		sData += "&dateStart=" + dateStart;
-		sData += "&dateEnd=" + dateEnd;
-		getDataFromServer("ajaxGetCallLog.jsp", sData, "json", function(data){
+		getDataFromServer("ajaxGetPhoneMemberList.jsp", sData, "json", function(data){
 			if (!data.resultCode || !data.resultText){
 				$('.overlay').hide();
-				msgBox("無法取得通話記錄!");
-				setLocalValue("callerPhoneNumber", "");
+				msgBox("無法取得子帳號資料!");
 				return;
 			}else{
 				if (data.resultCode=="00000"){
 					s = "";
 					$.each( data.records, function(i, r) {
-						/*
-						tmp = "";
-						s = "<tr>";
-						s += "<td>" + (r.Call_Type=="0"?"撥入":"撥出") + "</td>";
-						s += "<td>" + r.Audit_Phone_Number + "</td>";
-						s += "<td>" + r.Caller_Phone_Number + "</td>";
-						s += "<td>" + r.Record_Time_Start + "</td>";
-						s += "<td>" + r.Record_Talked_Time + "</td>";
-						s += "<td><a href='" + r.Record_File_URL + "' target='_blank'>聽取</a></td>";
-						s += "<td>" + r.Caller_Name + "</td>";
-						s += "<td>" + r.Caller_Address + "</td>";
-						s += "<td>" + r.Caller_Company + "</td>";
-						s += "<td>" + r.Caller_Email + "</td>";
-						s += "</tr>";
-						*/
-						r.Call_Type = (r.Call_Type=="0"?"撥入":"撥出");
-						r.Record_File_URL = "<a href='" + r.Record_File_URL + "' target='_blank'>聽取</a>";
+						r.Suspend = (r.Send_Notification=="Y"?"<input type='button' value='停用' onclick=\"doEdit('suspend', '" + r.id + "');\">":"<input type='button' value='復用' onclick=\"doEdit('revert', '" + r.id + "');\">");
+						r.Send_Notification = (r.Send_Notification=="Y"?"正常":"<span style='color:#FF0000;'>停用</span>");
+						r.Delete = "<input type='button' value='刪除' onclick=\"doDelete('" + r.id + "', '" + r.Account_Name + "');\">";
 
 					});	//$.each( data.orders, function(i, r) {
 					if ($.fn.dataTable.isDataTable(table) ){
@@ -444,28 +345,23 @@
 					table = $('#tblResult').DataTable( {
 						responsive: true,
 						columnDefs: [
+						{ responsivePriority: 1, targets: 1 },
 						{ responsivePriority: 1, targets: 2 },
 						{ responsivePriority: 1, targets: 3 },
-						{ responsivePriority: 1, targets: 5 },
-						{ responsivePriority: 1, targets: 0 }
+						{ responsivePriority: 1, targets: 4 }
 						],
 						language: {
 							url: 'bower_components/datatables.net/js/Chinese.json'
 						},
 						data: data.records,
 						columns: [
-							{ data: 'Call_Type' },
-							{ data: 'Audit_Phone_Number' },
-							{ data: 'Caller_Phone_Number' },
-							{ data: 'Record_Time_Start' },
-							{ data: 'Record_Talked_Time' },
-							{ data: 'Record_File_URL' },
-							{ data: 'Caller_Name' },
-							{ data: 'Caller_Address' },
-							{ data: 'Caller_Company' },
-							{ data: 'Caller_Email' }
+							{ data: 'Create_Date' },
+							{ data: 'Account_Name' },
+							{ data: 'Send_Notification' },
+							{ data: 'Suspend' },
+							{ data: 'Delete' },
 						],
-						order: [[ 3, 'desc' ], [ 0, 'asc' ]]
+						order: [[ 0, 'desc' ]]
 					} );
 
 					$('html, body').animate({
@@ -473,10 +369,47 @@
 					}, 1000);
 					
 				}else{
-					msgBox("取得通話記錄失敗:<br>" + data.resultText);
+					msgBox("取得子帳號資料失敗:<br>" + data.resultText);
 				}
 				$('.overlay').hide();
-				setLocalValue("callerPhoneNumber", "");
+			}
+
+		});	//getDataFromServer("xxx.jsp", sData, "json", function(data){
+	}
+
+	var rowIdToBeDeleted;
+	
+	function doDelete(rowId, accountName){
+		rowIdToBeDeleted = rowId;
+		$('#modalAccountName').text(accountName);
+		//$('#modal-danger').modal({backdrop:false});	//若設為 false，則用戶按背景時將不會關閉 modal window
+		$('#modal-danger').modal('show');
+	}
+	
+	function confirmDelete(){
+		$('#modal-danger').modal('hide');
+		doEdit('delete', rowIdToBeDeleted);
+	}
+
+	function doEdit(myAction, rowId){
+		$('.overlay').show();
+		
+		var sData = "";
+		sData = "action=" + myAction;
+		sData += "&rowId=" + rowId;
+		
+		getDataFromServer("ajaxDoPhoneMemberSuspendAndDelete.jsp", sData, "json", function(data){
+			if (!data.resultCode || !data.resultText){
+				$('.overlay').hide();
+				msgBox("無法取得作業結果!");
+				return;
+			}else{
+				if (data.resultCode=="00000"){
+					msgBox("作業成功!", doQuery);
+				}else{
+					msgBox("作業失敗:<br>" + data.resultText);
+				}
+				$('.overlay').hide();
 			}
 
 		});	//getDataFromServer("xxx.jsp", sData, "json", function(data){

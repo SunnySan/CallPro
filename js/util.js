@@ -267,6 +267,8 @@ function generateMainMenu() {
 	if (myAccountType=="O" || myAccountType=="T"){	//電話主人
 		pageName = "AdmOwnerCallLog.html";
 		s += "<li" + (pageName==me?" class='active'":"") + "><a href='" + pageName + "'><i class='fa fa-table'></i> <span>通話記錄查詢</span></a></li>";
+		pageName = "AdmOwnerMemberManagement.html";
+		s += "<li" + (pageName==me?" class='active'":"") + "><a href='" + pageName + "'><i class='fa fa-user'></i> <span>子帳號管理</span></a></li>";
 
 		s1 = "";
 		pageName = "AdmOwnerReport_DailyCallStatistics.html";
@@ -275,21 +277,41 @@ function generateMainMenu() {
 		pageName = "AdmOwnerReport_MonthlyCallStatistics.html";
 		if (pageName==me) bFound = true;
 		s1 += "		<li" + (pageName==me?" class='active'":"") + "><a href='" + pageName + "'><i class='fa fa-circle-o'></i> 每月通話統計</a></li>";
-		s += "<li class='treeview" + (bFound?" active":"") + "'>";
-		s += "	<a href='#'>";
-		s += "		<i class='fa fa-pie-chart'></i> <span>我的報表</span>";
-		s += "		<span class='pull-right-container'>";
-		s += "			<i class='fa fa-angle-left pull-right'></i>";
-		s += "		</span>";
-		s += "	</a>";
-		s += "	<ul class='treeview-menu'>";
-		s += s1;
-		s += "	</ul>";
-		s += "</li>";
+		s += generateSeconeLevelMenu("fa-line-chart", bFound, "我的報表", s1);
 	}else if (myAccountType=="D"){	//加盟商
 		pageName = "AdmDealerCRM.html";
 		s += "<li" + (pageName==me?" class='active'":"") + "><a href='" + pageName + "'><i class='fa fa-table'></i> <span>客戶資料管理</span></a></li>";
+
+		s1 = "";
+		pageName = "AdmDealerReport_CustomerAccountStatistics.html";
+		if (pageName==me) bFound = true;
+		s1 += "		<li" + (pageName==me?" class='active'":"") + "><a href='" + pageName + "'><i class='fa fa-circle-o'></i> 客戶資料統計</a></li>";
+		s += generateSeconeLevelMenu("fa-line-chart", bFound, "我的報表", s1);
+	}else if (myAccountType=="A"){	//系統管理者
+		/*
+		pageName = "AdmDealerCRM.html";
+		s += "<li" + (pageName==me?" class='active'":"") + "><a href='" + pageName + "'><i class='fa fa-table'></i> <span>客戶資料管理</span></a></li>";
+		*/
 	}	//if (myAccountType=="O" || myAccountType=="T"){	//電話主人
 	
 	if (notEmpty(s)) $('#sys-main-menu').append(s);
 }	//function generateMainMenu() {
+
+//產生有第二層選單的HTML
+function generateSeconeLevelMenu(levelOneIcon, bFound, firstLevelName, secondLevelHtml){
+	var s = "";
+	s += "<li class='treeview" + (bFound?" active":"") + "'>";
+	s += "	<a href='#'>";
+	s += "		<i class='fa " + levelOneIcon + "'></i> <span>" + firstLevelName + "</span>";
+	s += "		<span class='pull-right-container'>";
+	s += "			<i class='fa fa-angle-left pull-right'></i>";
+	s += "		</span>";
+	s += "	</a>";
+	s += "	<ul class='treeview-menu'>";
+	s += secondLevelHtml;
+	s += "	</ul>";
+	s += "</li>";
+	
+	return s;
+}
+
