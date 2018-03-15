@@ -277,6 +277,8 @@ if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
 			String sPushMessage = "";
 			
 			sMessageBody = "您的Google帳號" + email + "已經與電話號碼【" + sAuditPhoneNumber + "】完成綁定，請記得在您電腦上的Call-Pro應用程式以授權碼" + sAuthorizationCode + "進行登錄!";
+			if (at.equals("T")) sMessageBody += "\n溫馨提醒：您的帳號是試用版帳號，有效期為30天，祝您使用愉快。";
+			
 			String aRecipient[][] = {{sLineUserID}};
 			sPushMessage = generateLineTextMessage("push", aRecipient, sMessageBody);
 			

@@ -377,6 +377,10 @@ writeLog("debug", obj.toString());
 				sBillType = "A";
 			}
 			
+			if (beEmpty(sAccountType)){
+				return "您輸入的訊息格式錯誤，需輸入半形1、2或3，後面加上半形逗點及用戶電話號碼含區碼，請輸入正確的格式!";
+			}
+			
 			if (sAccountType.equals("O")){	//加盟商想新增非試用的電話主人帳號，檢查這個加盟商的Purchase_Quantity 減 Provision_Quantity 是否還夠用
 				if (isExceedPurchaseQuantity(s[0][0])){
 					return "您所購買的門號數已經用滿了，無法再開通新的用戶，請先購買新的門號!";
@@ -396,7 +400,11 @@ writeLog("debug", obj.toString());
 			sSQL += "'" + "" + "',";
 			sSQL += "'" + s[0][0] + "',";
 			sSQL += "'" + sAccountName + "',";
-			sSQL += "'" + "2099-12-31 23:59:59" + "',";
+			if (sAccountType.equals("T")){	//試用帳號，30天有效
+				sSQL += "'" + sDate + "' + INTERVAL 30 DAY,";
+			}else{	//正式帳號，預設到2099年底
+				sSQL += "'" + "2099-12-31 23:59:59" + "',";
+			}
 			sSQL += "'" + sAuthorizationCode + "',";
 			sSQL += "'" + "Init" + "'";
 			sSQL += ")";
