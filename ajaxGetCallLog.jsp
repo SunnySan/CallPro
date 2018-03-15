@@ -41,7 +41,7 @@ if (notEmpty(sLoginUserAuditPhoneNumber)){
 //由於用戶從LINE browser無法登入Google，所以允許用戶未登入就查詢某個 sAuditPhoneNumber + sCallerPhoneNumber 的記錄
 if ((beEmpty(sLoginUserAccountSequence) && beEmpty(sAuditPhoneNumber)) || ((beEmpty(sDateStart) || beEmpty(sDateEnd)) && beEmpty(sCallerPhoneNumber))){
 	obj.put("resultCode", gcResultCodeParametersNotEnough);
-	obj.put("resultText", gcResultTextParametersNotEnough + "，請確認您登入的帳號是否正確!");
+	obj.put("resultText", gcResultTextParametersNotEnough + "，或閒置過久遭系統自動登出，請確認資料正確並重新登入!");
 	out.print(obj);
 	out.flush();
 	return;

@@ -24,6 +24,7 @@
 
 <%@include file="00_constants.jsp"%>
 <%@include file="00_utility.jsp"%>
+<%@include file="00_LineAPI.jsp"%>
 
 <%
 request.setCharacterEncoding("utf-8");
@@ -36,6 +37,8 @@ out.clear();	//注意，一定要有out.clear();，要不然client端無法解�
 
 /*********************開始做事吧*********************/
 JSONObject obj=new JSONObject();
+
+String sLineGatewayUrlSendTextPush = gcLineGatewayUrlSendTextPush;
 
 String authorizationCode	= nullToString(request.getParameter("GoogleCode"), "");
 String Account_Sequence		= nullToString(request.getParameter("Account_Sequence"), "");
@@ -104,7 +107,7 @@ try{
 	writeLog("debug", "refresh token= " + refreshToken);
 	if (beEmpty(refreshToken)){
 		sResultCode = gcResultCodeUnknownError;
-		sResultText = "無法取得您的Google Refresh Token，請確認您在Google有加入Call Pro應用程式!";
+		sResultText = "無法取得您的Google Refresh Token，請確認您在Google有加入Call-Pro應用程式!";
 		obj.put("resultCode", sResultCode);
 		obj.put("resultText", sResultText);
 		out.print(obj);
@@ -138,14 +141,14 @@ try{
 	out.flush();
 	return;
 }
-writeLog("debug", "accessToken= " + accessToken);
-writeLog("debug", "userId= " + userId);
-writeLog("debug", "email= " + email);
-writeLog("debug", "emailVerified= " + emailVerified);
-writeLog("debug", "pictureUrl= " + pictureUrl);
-writeLog("debug", "Name= " + name);
-writeLog("debug", "familyName= " + familyName);
-writeLog("debug", "givenName= " + givenName);
+writeLog("info", "accessToken= " + accessToken);
+writeLog("info", "userId= " + userId);
+writeLog("info", "email= " + email);
+writeLog("info", "emailVerified= " + emailVerified);
+writeLog("info", "pictureUrl= " + pictureUrl);
+writeLog("info", "Name= " + name);
+writeLog("info", "familyName= " + familyName);
+writeLog("info", "givenName= " + givenName);
 
 if (notEmpty(userId) && notEmpty(email) && notEmpty(accessToken)){	//Google正常回覆資料
 	//將用戶資料寫到將回覆 client 端及紀錄到 session 的 JSON物件中
@@ -172,8 +175,12 @@ String		sSQL				= "";
 List<String> sSQLList			= new ArrayList<String>();
 String		sDate				= getDateTimeNow(gcDateFormatSlashYMDTime);
 String		sUser				= "System";
+String		sAuthorizationCode	= "";
+String		sAuditPhoneNumber	= "";
+String		sLineChannelName	= "";
+String		sLineUserID			= "";
 
-sSQL = "SELECT A.id, A.Account_Type, A.Bill_Type, DATE_FORMAT(A.Expiry_Date, '%Y-%m-%d %H:%i:%s'), A.Status";
+sSQL = "SELECT A.id, A.Account_Type, A.Bill_Type, DATE_FORMAT(A.Expiry_Date, '%Y-%m-%d %H:%i:%s'), A.Status, A.Authorization_Code, A.Audit_Phone_Number, A.Line_Channel_Name, A.Line_User_ID";
 sSQL += " FROM callpro_account A LEFT JOIN callpro_account_detail B";
 sSQL += " ON A.Account_Sequence=B.Main_Account_Sequence";
 sSQL += " WHERE A.Account_Sequence='" + Account_Sequence + "'";
@@ -191,6 +198,10 @@ if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
 	s = (String[][])ht.get("Data");
 	String at = nullToString(s[0][1], "");	//Account_Type
 	String bt = nullToString(s[0][2], "");	//Bill_Type
+	sAuthorizationCode = nullToString(s[0][5], "");
+	sAuditPhoneNumber = nullToString(s[0][6], "");
+	sLineChannelName = nullToString(s[0][7], "");
+	sLineUserID = nullToString(s[0][8], "");
 
 	//at規則: A=Admin, D=Dealer, O=Phone owner, M=Phone member, T=Phone owner for trial, U=Phone member for trial
 	//bt規則: 當Account_Type=O或T時有值，B為入門版、A為進階版
@@ -260,13 +271,25 @@ if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
 	sResultText = ht.get("ResultText").toString();
 	if (sResultCode.equals(gcResultCodeSuccess)){	//成功
 		writeLog("info", "Updated callpro_account and callpro_account_detail data, callpro_account id= " + s[0][0]);
+		//如果是電話主人，同時發個line給客戶，強調授權碼用來登錄電腦版ap
+		if (at.equals("O")||at.equals("T")){
+			String sMessageBody = "";
+			String sPushMessage = "";
+			
+			sMessageBody = "您的Google帳號" + email + "已經與電話號碼【" + sAuditPhoneNumber + "】完成綁定，請記得在您電腦上的Call-Pro應用程式以授權碼" + sAuthorizationCode + "進行登錄!";
+			String aRecipient[][] = {{sLineUserID}};
+			sPushMessage = generateLineTextMessage("push", aRecipient, sMessageBody);
+			
+			//Push Line 訊息給客戶
+			sendPushMessageToLine(sLineGatewayUrlSendTextPush + sLineChannelName + "&type=push", sPushMessage);
+		}
 	}else{
 		writeLog("error", "Fail to update callpro_account and callpro_account_detail data data (" + sResultCode + "): " + sResultText);
 		out.print(obj);
 		out.flush();
 		return;
 	}	//if (sResultCode.equals(gcResultCodeSuccess)){	//成功
-}else if (sResultCode.equals(gcResultCodeNoDataFound)){	//沒資料，新增一筆資料
+}else if (sResultCode.equals(gcResultCodeNoDataFound)){	//沒資料
 	obj.put("resultCode", sResultCode);
 	obj.put("resultText", "無法取得您的註冊資料，可能是註冊使用的時間已經超過限制，請重新註冊!");
 	out.print(obj);

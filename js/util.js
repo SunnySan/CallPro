@@ -132,6 +132,16 @@ function getCurrentDate(){
 	return txtCurrDate;
 }
 
+/**********取得今天時間，格式為：13:50:50**********/
+function getCurrentTime(){
+	var currDate = new Date();	//目前時間
+	
+	var tHours = currDate.getHours() > 9 ? currDate.getHours() : '0'+currDate.getHours();
+	var tMinutes = currDate.getMinutes() > 9 ? currDate.getMinutes() : '0'+currDate.getMinutes();
+	var tSeconds = currDate.getSeconds() > 9 ? currDate.getSeconds() : '0'+currDate.getSeconds();
+	return currDate= tHours +':'+ tMinutes +':'+ tSeconds;
+}
+
 /**********取得儲存在client端的變數值(從PC cookie或手機storage取得)**********/
 function getLocalValue(key){
 	var value = "";
@@ -225,7 +235,10 @@ function clearCookie(){	//清除 cookie 中的登入資料
 //用戶登出
 function doLogout(){
 	clearCookie();
-	location.href = "/index.html";
+	var sData = "";
+	getDataFromServer("ajaxDoLogout.jsp", sData, "json", function(data){
+		location.href = "/index.html";
+	});	//getDataFromServer("xxx.jsp", sData, "json", function(data){
 }
 
 //在頁面填入一些預設值
@@ -236,8 +249,16 @@ function pageInit(){
 	var myGoogleName = getLocalValue("Google_User_Name");
 	var myGooglePicture = getLocalValue("Google_User_Picture_URL");
 	if (beEmpty(myGoogleId) || beEmpty(myAccountType)){
+		var me = window.location.pathname;
+		var i = me.lastIndexOf("/");
+		me = me.substring(i+1);	//目前的網頁名稱
+		var s = "";
+		if (me=="AdmOwnerCallLog.html"){
+			var callerPhoneNumber = getParameterByName("callerPhoneNumber");
+			if (notEmpty(callerPhoneNumber)) s = "?callerPhoneNumber=" + callerPhoneNumber;
+		}
 		alert("無法取得您的登入資訊，請重新登入!");
-		location.href = "/index.html";
+		location.href = "login_simple.html" + s;
 	}
 	
 	if (beEmpty(myAccountName)) myAccountName = "無法取得註冊名稱";
@@ -247,6 +268,11 @@ function pageInit(){
 	$('.sys-user-image').attr('src', myGooglePicture);
 	$('.sys-user-name').text(myGoogleName);
 	$('.sys-user-account-name').text(myAccountName);
+	var myType = "歡迎您";
+	if (myAccountType=="A") myType = "系統管理者";
+	if (myAccountType=="D") myType = "加盟商您好!";
+	if (myAccountType=="O" || myAccountType=="T") myType = "電話主人您好!";
+	$('#sys-account-type').text(" " + myType);
 	
 	generateMainMenu();
 }
@@ -288,10 +314,8 @@ function generateMainMenu() {
 		s1 += "		<li" + (pageName==me?" class='active'":"") + "><a href='" + pageName + "'><i class='fa fa-circle-o'></i> 客戶資料統計</a></li>";
 		s += generateSeconeLevelMenu("fa-line-chart", bFound, "我的報表", s1);
 	}else if (myAccountType=="A"){	//系統管理者
-		/*
-		pageName = "AdmDealerCRM.html";
-		s += "<li" + (pageName==me?" class='active'":"") + "><a href='" + pageName + "'><i class='fa fa-table'></i> <span>客戶資料管理</span></a></li>";
-		*/
+		pageName = "AdmAdminSendTestNotification.html";
+		s += "<li" + (pageName==me?" class='active'":"") + "><a href='" + pageName + "'><i class='fa fa-table'></i> <span>LINE通知訊息測試</span></a></li>";
 	}	//if (myAccountType=="O" || myAccountType=="T"){	//電話主人
 	
 	if (notEmpty(s)) $('#sys-main-menu').append(s);

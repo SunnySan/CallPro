@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <!--<meta name="google-signin-client_id" content="752431198126-sv9ffo8ujqr5ml1ql3v9af350opibkt6.apps.googleusercontent.com">-->
-  <title>Call Pro | 用戶登入</title>
+  <title>Call-Pro | 用戶登入</title>
   <link rel="shortcut icon" href="images/favicon.ico">
   <!-- Tell the browser to be responsive to screen width -->
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
@@ -55,7 +55,7 @@
 <body class="hold-transition register-page">
 	<div id="login-box" class="register-box">
 		<div class="register-logo">
-			<a href="./index.html"><b>Call Pro 用戶登入</b></a>
+			<a href="./index.html"><b>Call-Pro 用戶登入</b></a>
 		</div>
 		
 		<div id="register-box" class="register-box-body">
@@ -68,7 +68,7 @@
 				<!--<a href="#" class="btn btn-block btn-social btn-google btn-flat"><i class="fa fa-google"></i> 使用Google帳號註冊</a>-->
 			</div>
 
-			<p class="login-box-msg"><span style="color:#FF0000;">注意：若因為您變更過Google帳號的設定，造成Call Pro無法順利上傳錄音檔，請按【<a href="login_full.html">這裡</a>】重新將Google帳號與Call Pro服務綁定</span></p>
+			<p class="login-box-msg"><span style="color:#FF0000;">注意：若因為您變更過Google帳號的設定，造成Call-Pro無法順利上傳錄音檔，請按【<a href="login_full.html">這裡</a>】重新將Google帳號與Call-Pro服務綁定</span></p>
 		</div><!-- /.register-box-body -->
 	</div><!-- /.register-box -->
 
@@ -138,6 +138,8 @@
 
 	$(function () {
 		clearCookie();
+		var callerPhoneNumber = getParameterByName("callerPhoneNumber");
+		if (notEmpty(callerPhoneNumber)) setLocalValue("callerPhoneNumber", callerPhoneNumber);
 		$('#tblResult').footable();
 		initGoogleAuth();
 	});
@@ -177,8 +179,9 @@
 				ux_mode: 'redirect',
 				prompt: 'select_account',
 				// Scopes to request in addition to 'profile' and 'email'
-				scope: 'profile email https://www.googleapis.com/auth/contacts https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/urlshortener'
+				scope: 'https://www.googleapis.com/auth/contacts https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/urlshortener'
 			});
+				//scope: 'profile email https://www.googleapis.com/auth/contacts https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/urlshortener'
 			initSigninButton();
 		});
 	}
@@ -216,6 +219,7 @@
 			}else{
 				if (data.resultCode=="00000"){
 					var recordCount = data.recordCount;
+					var Account_Type = "";
 					if (notEmpty(recordCount)){
 						if (recordCount=="1"){
 							$.each( data.records, function(i, r) {
@@ -224,11 +228,12 @@
 								setLocalValue("Account_Type", r.Account_Type);
 								setLocalValue("Bill_Type", r.Bill_Type);
 								setLocalValue("Audit_Phone_Number", r.Audit_Phone_Number);
+								Account_Type = r.Account_Type;
 							});	//$.each( data.orders, function(i, r) {
 							setLocalValue("Google_ID", data.Google_ID);
 							setLocalValue("Google_User_Name", data.Google_User_Name);
 							setLocalValue("Google_User_Picture_URL", data.Google_User_Picture_URL);
-							gotoAdmHomePage(r.Account_Type);
+							gotoAdmHomePage(Account_Type);
 						}else{
 							s = "";
 							$.each( data.records, function(i, r) {
@@ -316,7 +321,7 @@
 	function gotoAdmHomePage(myAccountType){
 		var s = "";
 		if (myAccountType=="A"){	//系統管理者
-			s = "index_admin.html";
+			s = "AdmAdminSendTestNotification.html";
 		}
 		if (myAccountType=="D"){	//加盟商
 			s = "AdmDealerCRM.html";

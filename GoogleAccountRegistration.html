@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>Call Pro | Google帳號註冊</title>
+  <title>Call-Pro | Google帳號註冊</title>
   <link rel="shortcut icon" href="images/favicon.ico">
   <!-- Tell the browser to be responsive to screen width -->
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
@@ -52,7 +52,7 @@
 <body class="hold-transition register-page">
 	<div class="register-box">
 		<div class="register-logo">
-			<a href="./index.html"><b>Call Pro</b></a>
+			<a href="./index.html"><b>Call-Pro</b></a>
 		</div>
 		
 		<div id="register-box" class="register-box-body" style="display:none;">
@@ -112,10 +112,11 @@
 			auth2 = gapi.auth2.init({
 				client_id: '752431198126-sv9ffo8ujqr5ml1ql3v9af350opibkt6.apps.googleusercontent.com',
 				// Scopes to request in addition to 'profile' and 'email'
-				scope: 'https://www.googleapis.com/auth/contacts https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/urlshortener',
+				scope: 'https://www.googleapis.com/auth/contacts https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/urlshortener',
 				prompt: 'consent'
 			});
 		});
+				//scope: 'https://www.googleapis.com/auth/contacts https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/urlshortener',
 	}	//function initGoogleAuth(){	//初始化Google Sign-In object
 	
 	function doLogin(){

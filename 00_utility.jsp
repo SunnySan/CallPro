@@ -908,7 +908,7 @@ public Hashtable getAccountProfileByLineId(String sLineChannel, String sLineUser
 
 /*********************************************************************************************************************/
 //檢查PC送來的電話主人資料是否正常、正確
-public java.lang.Boolean isValidPhoneOwner(String sAreaCode, String sPhoneNumber, String sAuthorizationCode) {
+public java.lang.Boolean isValidPhoneOwner(String sAreaCode, String sPhoneNumber, String sAuthorizationCode, String sLoginUserAccountType) {
 	java.lang.Boolean bOK = false;
 	Hashtable	ht					= new Hashtable();
 	String		sResultCode			= gcResultCodeSuccess;
@@ -934,6 +934,8 @@ public java.lang.Boolean isValidPhoneOwner(String sAreaCode, String sPhoneNumber
 		
 		if (beEmpty(s[0][4]) || !sAuthorizationCode.equals(s[0][4])){
 			bOK = false;
+			//系統管理者可以直接發送測試通知
+			if (notEmpty(sLoginUserAccountType) && sLoginUserAccountType.equals("A")) bOK = true;
 		}
 	}	//if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
 

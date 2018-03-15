@@ -12,6 +12,7 @@
 <%@include file="00_constants.jsp"%>
 <%@include file="00_utility.jsp"%>
 <%@include file="00_GoogleAPI.jsp"%>
+<%@include file="00_LineAPI.jsp"%>
 
 <%
 request.setCharacterEncoding("utf-8");
@@ -62,7 +63,10 @@ if (beEmpty(sAreaCode) || beEmpty(sPhoneNumber) || beEmpty(sAuthorizationCode) |
 	return;
 }
 
-if (!isValidPhoneOwner(sAreaCode, sPhoneNumber, sAuthorizationCode)){
+//登入用戶的資訊，系統管理者可以直接發送測試通知
+String sLoginUserAccountType = (String)session.getAttribute("Account_Type");
+
+if (!isValidPhoneOwner(sAreaCode, sPhoneNumber, sAuthorizationCode, sLoginUserAccountType)){
 	writeLog("error", "Authorization failed, areacode= " + sAreaCode + ", phonenumber1= " + sPhoneNumber + ", accesscode= " + sAuthorizationCode + ", callerphone= " + sCallerNumber);
 	obj.put("resultCode", gcResultCodeParametersValidationError);
 	obj.put("resultText", gcResultTextParametersValidationError);
@@ -86,6 +90,7 @@ String		sResultText			= gcResultTextSuccess;
 String		s[][]				= null;
 String		sSQL				= "";
 List<String> sSQLList			= new ArrayList<String>();
+String		sDate				= getDateTimeNow(gcDateFormatSlashYMDTime);
 
 int			i					= 0;
 int			j					= 0;
@@ -101,6 +106,7 @@ sSQL += " WHERE A.Audit_Phone_Number='" + sAreaCode + sPhoneNumber + "'";
 sSQL += " AND (A.Account_Type='O' OR A.Account_Type='T')";
 sSQL += " AND A.Send_Notification='Y'";
 sSQL += " AND A.Status='Active'";
+sSQL += " AND A.Expiry_Date>'" + sDate + "'";
 sSQL += " AND A.Account_Sequence=B.Main_Account_Sequence";
 
 ht = getDBData(sSQL, gcDataSourceName);
@@ -112,7 +118,7 @@ if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
 	s = (String[][])ht.get("Data");
 	if (beEmpty(s[0][0]) || beEmpty(s[0][1]) || beEmpty(s[0][2])){
 		obj.put("resultCode", gcResultCodeNoDataFound);
-		obj.put("resultText", "無法取得該門號主人Google帳號的Line Channel或Refresh Token，請門號主人至Google移除Call Pro服務後重新註冊");
+		obj.put("resultText", "無法取得該門號主人Google帳號的Line Channel或Refresh Token，請門號主人至Google移除Call-Pro服務後重新註冊");
 		//out.print(obj);
 		//out.flush();
 		return;
@@ -209,9 +215,12 @@ try{
 	//取得Google短網址(錄音檔)
 	String sFileURL = "";
 	String sShortURL = "";
-	if (bHasFile){
-		sFileURL = "https://drive.google.com/file/d/" + sGoogleDriveFileId + "/view";
+	if (bHasFile && notEmpty(sGoogleDriveFileId)){
+		//sFileURL = "https://drive.google.com/file/d/" + sGoogleDriveFileId + "/view";
+		sFileURL = gcSystemUri + "Event_ListenToMyAudio.jsp?fid=" + sGoogleDriveFileId;
+		writeLog("debug", "錄音檔長網址： " + sFileURL);
 		sShortURL = getShortenURL(HTTP_TRANSPORT, JSON_FACTORY, credential, sFileURL);
+		writeLog("debug", "錄音檔短網址： " + sShortURL);
 	}
 	
 	//取得Google短網址(Call Log 查詢)
@@ -220,67 +229,23 @@ try{
 	String sCallLogShortURL = getShortenURL(HTTP_TRANSPORT, JSON_FACTORY, credential, sCallLogURL);
 
 	//sMessageBody += "，通話時間" + sDuration + "秒，聽取通話內容: " + sShortURL;
-	if (bHasFile){
+	if (bHasFile && notEmpty(sGoogleDriveFileId)){
 		sMessageBody += "，通話時間為" + sTalkedTime + "秒，聽取錄音檔: \n" + (beEmpty(sShortURL)?sFileURL:sShortURL) + "\n，查詢歷史記錄：\n" + (beEmpty(sCallLogShortURL)?sCallLogURL:sCallLogShortURL);
 	}else{
 		sMessageBody += "，通話時間為" + sTalkedTime + "秒，此通話無錄音檔，查詢歷史記錄：\n" + (beEmpty(sCallLogShortURL)?sCallLogURL:sCallLogShortURL);
 	}
-	sPushMessage = generateTextMessage(sRecepientType, s, sMessageBody);
+	sPushMessage = generateLineTextMessage(sRecepientType, s, sMessageBody);
 	
 	//新增 Google 行事曆
 	ht = addGoogleCalendarEvent(HTTP_TRANSPORT, JSON_FACTORY, credential, Integer.parseInt(sTalkedTime), sAreaCode + sPhoneNumber + (sType.equals("0")?"來電自":"撥出電話到") + sCallerNumber, sMessageBody );
 	
 	//Push Line 訊息給客戶
-	String	sResponse	= "";
-	URL u;
-	try
-	{
-		writeLog("debug", "Send push message to Line: " + sPushMessage);
-		
-		u = new URL(sLineGatewayUrlSendTextPush + sLineChannelName + "&type=" + sRecepientType);
-		HttpURLConnection uc = (HttpURLConnection)u.openConnection();
-		uc.setRequestProperty ("Content-Type", "application/json");
-		uc.setRequestProperty("contentType", "utf-8");
-		uc.setRequestMethod("POST");
-		uc.setDoOutput(true);
-		uc.setDoInput(true);
-	
-		byte[] postData = sPushMessage.getBytes("UTF-8");	//避免中文亂碼問題
-		OutputStream os = uc.getOutputStream();
-		os.write(postData);
-		os.close();
-	
-		InputStream in = uc.getInputStream();
-		BufferedReader r = new BufferedReader(new InputStreamReader(in));
-		StringBuffer buf = new StringBuffer();
-		String line;
-		while ((line = r.readLine())!=null) {
-			buf.append(line);
-		}
-		in.close();
-		sResponse = buf.toString();	//取得回應值
-		if (notEmpty(sResponse)){
-			//解析JSON參數
-			JSONParser parser = new JSONParser();
-			Object objBody = parser.parse(sResponse);
-			JSONObject jsonObjectBody = (JSONObject) objBody;
-			sResultCode = (String) jsonObjectBody.get("resultCode");
-			sResultText = (String) jsonObjectBody.get("resultText");
-		}else{
-			sResultCode = gcResultCodeUnknownError;
-			sResultText = gcResultTextUnknownError;
-		}
-	}catch (IOException e){
-		sResponse = e.toString();
-		writeLog("error", "Exception when send message to Line: " + e.toString());
-		sResultCode = gcResultCodeUnknownError;
-		sResultText = sResponse;
-	}
-	
-	if (sResultCode.equals(gcResultCodeSuccess)){
-		writeLog("info", "Successfully send push message to Line!");
+	if (sendPushMessageToLine(sLineGatewayUrlSendTextPush + sLineChannelName + "&type=" + sRecepientType, sPushMessage)){
+		sResultCode = gcResultCodeSuccess;
+		sResultText = gcResultTextSuccess;
 	}else{
-		writeLog("error", "Failed to send push message to Line: " + sResponse + "\nrequest body=" + sPushMessage);
+		sResultCode = gcResultCodeUnknownError;
+		sResultText = gcResultTextUnknownError;
 	}
 	
 	/*
@@ -317,10 +282,14 @@ try{
 obj.put("resultCode", sResultCode);
 obj.put("resultText", sResultText);
 //out.print(obj);
-if (bHasFile){
-	out.print(sSavedFileName);
-}else{
-	out.print("ok");
+if (sResultCode.equals(gcResultCodeSuccess)){	//只有成功才有回傳值，若失敗就甚麼都不回覆
+	if (bHasFile && notEmpty(sGoogleDriveFileId)){
+		out.print(sSavedFileName);
+		//將錄音檔刪除 (callprotest.mp3除外，這是系統管理者測試用的)
+		if (notEmpty(sSavedFileName) && !sSavedFileName.equals("callprotest.mp3")) DeleteFile(saveDirectory + sSavedFileName);
+	}else{
+		out.print("ok");
+	}
 }
 out.flush();
 
@@ -409,38 +378,6 @@ body.setPermissionIds(list);
 %>
 
 <%!
-	private String generateTextMessage(String sRecepientType, String s[][], String sMessage){	//產生單一文字訊息
-		/* 範例
-			{"replyToken":"e627c4070a944e808486c9230ec6cf17","messages":[{"template":{"thumbnailImageUrl":"https:\/\/cms.gslssd.com\/PhoneHousekeeper\/images\/call-center-2537390_1280.jpg","text":"歡迎您使用電話管家服務\n請點選下方的服務","type":"buttons","title":"親愛的用戶您好!","actions":[{"label":"申請啟用LINE通知功能","type":"uri","uri":"https:\/\/cms.gslssd.com\/PhoneHousekeeper\/ApplyLineNotifyEnable.html?lineUserId=Ue913331687d5757ccff454aab90f55cb&lineUserType=user"},{"label":"申請取消LINE通知功能","type":"uri","uri":"https:\/\/cms.gslssd.com\/PhoneHousekeeper\/ApplyLineNotifyDisable.html?lineUserId=Ue913331687d5757ccff454aab90f55cb&lineUserType=user"}]},"altText":"選擇服務功能","type":"template"}]}
-		*/
-		int			i					= 0;
-		int			j					= 0;
-
-		JSONObject objPushMessage=new JSONObject();
-
-		if (sRecepientType.equals("push")){
-			objPushMessage.put("to", s[0][0]);
-		}else{
-			List  lMulticast = new LinkedList();
-			for (i=0;i<s.length;i++){	//每個i代表一個 row
-				lMulticast.add(s[i][0]);
-			}
-			objPushMessage.put("to", lMulticast);
-		}
-
-		List  lMessage = new LinkedList();
-		Map mapMessage = null;
-
-		mapMessage = new HashMap();
-		mapMessage.put("type", "text");
-		mapMessage.put("text", sMessage);
-		lMessage.add(mapMessage);
-		
-		objPushMessage.put("messages", lMessage);	//一次最多可以傳 5 個訊息，這個 function 只傳 1 個訊息
-		return objPushMessage.toString();
-	}	//private String generateTextMessage(String sRecepientType, String s[][], String sMessage){	//產生單一文字訊息
-	
-	
 	
 	//新增Call Log記錄至database
 	private void insertIntoCallLog(String sAuditPhoneNumber, String sCallerPhoneNumber, String sCallType, String sRecordLength, String sRecordTalkedTime, String sRecordTimeStart, String sRecordFileURL, String sCallerName, String sCallerAddress, String sCallerCompany, String sCallerEmail){

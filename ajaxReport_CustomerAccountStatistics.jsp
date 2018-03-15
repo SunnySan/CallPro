@@ -184,7 +184,7 @@ if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
 	for (i=0;i<s1.length;i++){
 		m1 = new HashMap();
 		m1.put("date", nullToString(s1[i][0], "") + "-" + MakesUpZero(nullToString(s1[i][1], ""), 2));
-		m1.put("allCount", nullToString(s1[i][1], "0"));
+		m1.put("allCount", nullToString(s1[i][2], "0"));
 		l1.add(m1);
 	}
 	obj.put("countData", l1);

@@ -151,101 +151,66 @@
 		<!-- Content Header (Page header) -->
 		<section class="content-header">
 			<h1>
-				客戶資料統計
-				<small>統計您目前各種類型的客戶數量，以及過去12個月，每月開通的客戶數量</small>
+				LINE通知訊息測試
+				<small>發送測試訊息給電話主人及子帳號</small>
 			</h1>
 		</section>
 		
 		<!-- Main content -->
 		<section class="content">
 			<!-- 主要功能的內容在這裡 -->
-				<!-- Info boxes -->
-				<div class="row">
-					<div class="col-md-3 col-sm-6 col-xs-12">
-						<div class="info-box">
-							<span class="info-box-icon bg-green"><i class="ion ion-ios-people"></i></span>
-						
-							<div class="info-box-content">
-								<span class="info-box-text">所有正式版用戶</span>
-								<span class="info-box-number" id="totalCustomerCount"></span>
-							</div><!-- /.info-box-content -->
-					
-						</div><!-- /.info-box -->
-					</div><!-- /.col -->
 
-					<div class="col-md-3 col-sm-6 col-xs-12">
-						<div class="info-box">
-							<span class="info-box-icon bg-aqua"><i class="ion ion-ios-personadd"></i></span>
-						
-							<div class="info-box-content">
-								<span class="info-box-text">正式進階版用戶</span>
-								<span class="info-box-number" id="advanceCustomerCount"></span>
-							</div><!-- /.info-box-content -->
-					
-						</div><!-- /.info-box -->
-					</div><!-- /.col -->
-					
-					<!-- fix for small devices only -->
-					<div class="clearfix visible-sm-block"></div>
-					
-					<div class="col-md-3 col-sm-6 col-xs-12">
-						<div class="info-box">
-							<span class="info-box-icon bg-yellow"><i class="ion ion-ios-person"></i></span>
-						
-							<div class="info-box-content">
-								<span class="info-box-text">正式入門版用戶</span>
-								<span class="info-box-number" id="basicCustomerCount"></span>
-							</div><!-- /.info-box-content -->
-					
-						</div><!-- /.info-box -->
-					</div><!-- /.col -->
+			<div class="alert alert-info alert-dismissible">
+				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+				<h4><i class="icon fa fa-info"></i> 使用說明</h4>
+				<ul>
+					<li>
+						請輸入電話主人的市話區碼及電話號碼，然後點選【發送】即可
+					</li>
+				</ul>
+			</div>
 
-					<div class="col-md-3 col-sm-6 col-xs-12">
-						<div class="info-box">
-							<span class="info-box-icon bg-red"><i class="ion ion-ios-personadd-outline"></i></span>
-						
-							<div class="info-box-content">
-								<span class="info-box-text">試用版用戶</span>
-								<span class="info-box-number" id="testCustomerCount"></span>
-							</div><!-- /.info-box-content -->
-					
-						</div><!-- /.info-box -->
-					</div><!-- /.col -->
-				</div><!-- /.row -->
+			<div class="box box-primary box-solid" id="boxResult">
+				<div class="box-header with-border">
+					<h3 class="box-title">電話主人資料</h3>
+				</div><!-- /.box-header -->
 
-			<div class="row">
-				<div class="col-md-12">
-					<div class="box box-success box-solid">
-						<div class="box-header with-border">
-							<h3 class="box-title">每月開通客戶數統計</h3>
-							<div class="box-tools pull-right">
-								<button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
-								<button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
-							</div>
-						</div><!-- /.box-header -->
-						
-						<div class="box-body chart-responsive">
-							<div class="chart" id="monthCountChart" style="height: 300px;"></div>
-							
-						</div><!-- /.box-body -->
-
-						<div class="box-footer">
-							<!--<button type="button" class="btn btn-success" onclick="doQuery();">確認</button>-->
-						</div><!-- /.box-footer -->
-						
-						<!-- Loading (remove the following to stop the loading)-->
-						<div class="overlay" style="display:none;">
-							<i class="fa fa-refresh fa-spin"></i>
+				<!-- form start -->
+				<form role="form">
+					<div class="box-body">
+						<div class="form-group">
+							<label for="areacode">區碼</label>
+							<input type="text" class="form-control" id="areacode" placeholder="02" maxlength="4">
 						</div>
-					</div><!-- /.box -->
-				</div><!-- /.col -->
 
-			</div><!-- /.row -->
-			
+						<div class="form-group">
+							<label for="phonenumber1">電話號碼</label>
+							<input type="text" class="form-control" id="phonenumber1" placeholder="21234567" maxlength="10">
+						</div>
 
-		
-		</section><!-- /.content -->
-	</div><!-- /.content-wrapper -->
+						<div class="form-group">
+							<label>即時通知訊息內容</label>
+							<textarea class="form-control" id="message1" rows="3" placeholder="點選發送後顯示" disabled></textarea>
+						</div>						
+					</div><!-- /.box-body -->
+					
+					<div class="box-footer">
+						<button type="button" class="btn btn-primary" onclick="doSend();">發送</button>
+					</div><!-- /.box-footer -->
+				</form>
+				
+				<div class="box-footer">
+				</div><!-- /.box-footer -->
+				<!-- Loading (remove the following to stop the loading)-->
+				<div class="overlay" style="display:none;">
+					<i class="fa fa-refresh fa-spin"></i>
+				</div>
+			</div><!-- /.box -->
+
+		</section>
+		<!-- /.content -->
+	</div>
+	<!-- /.content-wrapper -->
 
 
 
@@ -306,48 +271,97 @@
 <script>
 	$(function () {
 		pageInit();
-		getData();
 	});
 </script>
 
 <script>
 
-	function getData(){
+	function doSend(){
+		var areacode = $('#areacode').val();
+		var phonenumber1 = $('#phonenumber1').val();
+		
+		if (beEmpty(areacode) || beEmpty(phonenumber1)){
+			msgBox("請輸入區碼及電話號碼!");
+			return;
+		}
+
+		var accesscode = "8888";
+		var callerphone = "0988888888";
+		var callername = "Call-Pro客服中心";
+		var callerdetail = "Call-Pro客服中心測試，請確認是否有收到此訊息";
+
+		var message = areacode + phonenumber1 + "來電自" + callerphone + "，對方為" + callername + "，個人資料如下：\n" +  callerdetail;
+	
+		$('#message1').val(message);
 		$('.overlay').show();
 		
 		var sData = "";
+		sData = "areacode=" + areacode;
+		sData += "&phonenumber1=" + phonenumber1;
+		sData += "&accesscode=" + accesscode;
+		sData += "&callerphone=" + callerphone;
+		sData += "&callername=" + callername;
+		sData += "&callerdetail=" + callerdetail;
 		
-		getDataFromServer("ajaxReport_CustomerAccountStatistics.jsp", sData, "json", function(data){
+		getDataFromServer("Event_PCClientSendInstantNotification.jsp", sData, "json", function(data){
 			if (!data.resultCode || !data.resultText){
 				$('.overlay').hide();
-				msgBox("無法取得報表資料!");
+				msgBox("無法取得即時通知發送結果!");
 				return;
 			}else{
 				if (data.resultCode=="00000"){
-					$('#totalCustomerCount').text(toCurrency(data.totalCustomerCount));
-					$('#advanceCustomerCount').text(toCurrency(data.advanceCustomerCount));
-					$('#basicCustomerCount').text(toCurrency(data.basicCustomerCount));
-					$('#testCustomerCount').text(toCurrency(data.testCustomerCount));
-					// AREA CHART，用 yLabelFormat: function(y){return y != Math.round(y)?'':y;}, 來設定Y軸上的label一定是整數，不能有小數點
-					var area1 = new Morris.Area({
-						element: 'monthCountChart',
-						resize: true,
-						data: data.countData,
-						xkey: 'date',
-						ykeys: ['allCount'],
-						labels: ['本月開通用戶數'],
-						lineColors: ['#DF0101'],
-						hideHover: 'auto',
-						yLabelFormat: function(y){return y != Math.round(y)?'':y;},
-						behaveLikeLine: true
-					});
-
+					msgBox("即時通知發送成功，將繼續發送錄音檔通知訊息!", doSendCDR);
 				}else{
-					msgBox("取得報表資料失敗:<br>" + data.resultText);
+					msgBox("取得即時通知發送結果失敗:<br>" + data.resultText);
 				}
 				$('.overlay').hide();
 			}
+		});	//getDataFromServer("xxx.jsp", sData, "json", function(data){
+	}
 
+	function doSendCDR(){
+		var areacode = $('#areacode').val();
+		var phonenumber1 = $('#phonenumber1').val();
+		
+		if (beEmpty(areacode) || beEmpty(phonenumber1)){
+			msgBox("請輸入區碼及電話號碼!");
+			return;
+		}
+
+		var accesscode = "8888";
+		var callerphone = "0988888888";
+		var recordtime = "10";
+		var recordtimestart = getCurrentDate() + " " + getCurrentTime();
+		var call_direction = "0";
+		var recordfile = "callprotest.mp3";
+		var ring_time = "10";
+		var talked_time = "0";
+		var callername = "Call-Pro客服中心";
+		var calleraddr = "台北市忠孝東路一段一號";
+		var callercompany = "Call-Pro";
+		var calleremail = "m@call-pro.net";
+
+		$('.overlay').show();
+		
+		var sData = "";
+		sData = "areacode=" + areacode;
+		sData += "&phonenumber1=" + phonenumber1;
+		sData += "&accesscode=" + accesscode;
+		sData += "&callerphone=" + callerphone;
+		sData += "&recordtime=" + recordtime;
+		sData += "&recordtimestart=" + recordtimestart;
+		sData += "&call_direction=" + call_direction;
+		sData += "&recordfile=" + recordfile;
+		sData += "&ring_time=" + ring_time;
+		sData += "&talked_time=" + talked_time;
+		sData += "&callername=" + callername;
+		sData += "&calleraddr=" + calleraddr;
+		sData += "&callercompany=" + callercompany;
+		sData += "&calleremail=" + calleremail;
+		
+		getDataFromServer("Event_PCClientNewCDR.jsp", sData, "text", function(data){
+			$('.overlay').hide();
+			msgBox("錄音檔通知發送結果如下，若結果為【" + recordfile + "】，表示發送成功：<p>" + data);
 		});	//getDataFromServer("xxx.jsp", sData, "json", function(data){
 	}
 </script>

@@ -145,7 +145,7 @@ if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
 	s = (String[][])ht.get("Data");
 	if (beEmpty(s[0][0]) || beEmpty(s[0][1]) || beEmpty(s[0][2])){
 		obj.put("resultCode", gcResultCodeNoDataFound);
-		obj.put("resultText", "無法取得該門號主人Google帳號的Line Channel或Refresh Token，請門號主人至Google移除Call Pro服務後重新註冊");
+		obj.put("resultText", "無法取得該門號主人Google帳號的Line Channel或Refresh Token，請門號主人至Google移除Call-Pro服務後重新註冊");
 		out.print(obj);
 		out.flush();
 		return;

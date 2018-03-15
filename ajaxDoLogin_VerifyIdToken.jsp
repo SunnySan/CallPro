@@ -163,7 +163,7 @@ sSQL += " AND A.Status='Active'";
 sSQL += " AND A.Expiry_Date>'" + sDate + "'";
 */
 
-sSQL = "SELECT A.id, B.id, A.Account_Sequence, A.Account_Name, A.Account_Type, A.Bill_Type, A.Audit_Phone_Number, C.Channel_Desc";
+sSQL = "SELECT A.id, B.id, A.Account_Sequence, A.Account_Name, A.Account_Type, A.Bill_Type, A.Audit_Phone_Number, C.Channel_Desc, B.Google_User_Name, B.Google_User_Picture_URL";
 sSQL += " FROM callpro_account_detail B, callpro_account A LEFT JOIN callpro_line_channel C";
 sSQL += " ON A.Line_Channel_Name=C.Line_Channel_Name";
 sSQL += " WHERE B.Google_ID='" + userId + "'";
@@ -218,6 +218,8 @@ if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
 		writeLog("debug", "用戶登入, Account_Type=" + nullToString(s[0][4], ""));
 		writeLog("debug", "用戶登入, Bill_Type=" + nullToString(s[0][5], ""));
 		writeLog("debug", "用戶登入, Audit_Phone_Number=" + nullToString(s[0][6], ""));
+		if (beEmpty(name)) name = nullToString(s[0][8], "");
+		if (beEmpty(pictureUrl)) pictureUrl = nullToString(s[0][9], "");
 	}else{
 		String sRandom = generateTxId();	//產生一個隨機數回給browser，同時存入session，作為等一下用戶確認使用哪個帳號登入時使用
 		session.setAttribute("Google_ID", userId);	//將登入用戶資料存入 session 中

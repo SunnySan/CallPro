@@ -2,18 +2,56 @@
 
 
 <%!
+
 /*********************************************************************************************************************/
-//
-public java.lang.Boolean sendPushMessageToLine(String sRecepientType, String sLineUserId, String sPushMessage){
+//產生LINE訊息格式的內容
+private String generateLineTextMessage(String sRecepientType, String s[][], String sMessage){	//產生單一文字訊息
+	/* 範例
+		{"replyToken":"e627c4070a944e808486c9230ec6cf17","messages":[{"template":{"thumbnailImageUrl":"https:\/\/cms.gslssd.com\/PhoneHousekeeper\/images\/call-center-2537390_1280.jpg","text":"歡迎您使用電話管家服務\n請點選下方的服務","type":"buttons","title":"親愛的用戶您好!","actions":[{"label":"申請啟用LINE通知功能","type":"uri","uri":"https:\/\/cms.gslssd.com\/PhoneHousekeeper\/ApplyLineNotifyEnable.html?lineUserId=Ue913331687d5757ccff454aab90f55cb&lineUserType=user"},{"label":"申請取消LINE通知功能","type":"uri","uri":"https:\/\/cms.gslssd.com\/PhoneHousekeeper\/ApplyLineNotifyDisable.html?lineUserId=Ue913331687d5757ccff454aab90f55cb&lineUserType=user"}]},"altText":"選擇服務功能","type":"template"}]}
+	*/
+	int			i					= 0;
+	int			j					= 0;
+
+	JSONObject objPushMessage=new JSONObject();
+
+	if (sRecepientType.equals("push")){
+		objPushMessage.put("to", s[0][0]);
+	}else{
+		List  lMulticast = new LinkedList();
+		for (i=0;i<s.length;i++){	//每個i代表一個 row
+			lMulticast.add(s[i][0]);
+		}
+		objPushMessage.put("to", lMulticast);
+	}
+
+	List  lMessage = new LinkedList();
+	Map mapMessage = null;
+
+	mapMessage = new HashMap();
+	mapMessage.put("type", "text");
+	mapMessage.put("text", sMessage);
+	lMessage.add(mapMessage);
+	
+	objPushMessage.put("messages", lMessage);	//一次最多可以傳 5 個訊息，這個 function 只傳 1 個訊息
+	return objPushMessage.toString();
+}	//private String generateLineTextMessage(String sRecepientType, String s[][], String sMessage){	//產生單一文字訊息
+
+
+/*********************************************************************************************************************/
+//Push Line 訊息給客戶
+public java.lang.Boolean sendPushMessageToLine(String sLineGatewayUrl, String sPushMessage){
 	String				sResultCode			= gcResultCodeSuccess;
 	String				sResultText			= gcResultTextSuccess;
 	java.lang.Boolean	bOK					= false;
 
+	String	sResponse	= "";
+	URL u;
+	
 	try
 	{
 		writeLog("debug", "Send push message to Line: " + sPushMessage);
 		
-		u = new URL(gcLineGatewayUrlSendTextPush + "&type=" + sRecepientType);
+		u = new URL(sLineGatewayUrl);
 		HttpURLConnection uc = (HttpURLConnection)u.openConnection();
 		uc.setRequestProperty ("Content-Type", "application/json");
 		uc.setRequestProperty("contentType", "utf-8");
@@ -46,13 +84,13 @@ public java.lang.Boolean sendPushMessageToLine(String sRecepientType, String sLi
 			sResultCode = gcResultCodeUnknownError;
 			sResultText = gcResultTextUnknownError;
 		}
-	}catch (IOException e){
+	}catch (Exception e){
 		sResponse = e.toString();
 		writeLog("error", "Exception when send message to Line: " + e.toString());
 		sResultCode = gcResultCodeUnknownError;
 		sResultText = sResponse;
 	}
-	
+
 	if (sResultCode.equals(gcResultCodeSuccess)){
 		bOK = true;
 		writeLog("info", "Successfully send push message to Line: " + sPushMessage);
@@ -62,6 +100,7 @@ public java.lang.Boolean sendPushMessageToLine(String sRecepientType, String sLi
 	
 	return bOK;
 
-}	//public java.lang.Boolean sendPushMessageToLine(String sRecepientType, String sLineUserId, String sPushMessage){
+}	//public java.lang.Boolean sendPushMessageToLine(String sLineGatewayUrl, String sPushMessage){
+
 
 %>

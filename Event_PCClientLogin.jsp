@@ -50,6 +50,7 @@ String		sResultText			= gcResultTextSuccess;
 String		s[][]				= null;
 String		sSQL				= "";
 List<String> sSQLList			= new ArrayList<String>();
+String		sDate				= getDateTimeNow(gcDateFormatSlashYMDTime);
 
 int			i					= 0;
 int			j					= 0;

@@ -115,11 +115,11 @@ if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
 	session.setAttribute("Account_Type", nullToString(s[0][2], ""));	//將登入用戶資料存入 session 中
 	session.setAttribute("Bill_Type", nullToString(s[0][3], ""));	//將登入用戶資料存入 session 中
 	session.setAttribute("Audit_Phone_Number", nullToString(s[0][4], ""));	//將登入用戶資料存入 session 中
-	writeLog("debug", "用戶登入, Account_Sequence=" + nullToString(s[0][0], ""));
-	writeLog("debug", "用戶登入, Account_Type=" + nullToString(s[0][2], ""));
-	writeLog("debug", "用戶登入, Bill_Type=" + nullToString(s[0][3], ""));
-	writeLog("debug", "用戶登入, Audit_Phone_Number=" + nullToString(s[0][4], ""));
-	writeLog("debug", "用戶登入, Google_ID=" + Google_ID);
+	writeLog("info", "用戶登入, Account_Sequence=" + nullToString(s[0][0], ""));
+	writeLog("info", "用戶登入, Account_Type=" + nullToString(s[0][2], ""));
+	writeLog("info", "用戶登入, Bill_Type=" + nullToString(s[0][3], ""));
+	writeLog("info", "用戶登入, Audit_Phone_Number=" + nullToString(s[0][4], ""));
+	writeLog("info", "用戶登入, Google_ID=" + Google_ID);
 
 	obj.put("Account_Sequence", nullToString(s[0][0], ""));
 	obj.put("Account_Name", nullToString(s[0][1], ""));

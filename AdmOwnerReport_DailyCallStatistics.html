@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>Call Pro 管理中心</title>
+	<title>Call-Pro 管理中心</title>
 	<link rel="shortcut icon" href="images/favicon.ico">
 	<META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
 	<META HTTP-EQUIV="EXPIRES" CONTENT="0">
@@ -131,7 +131,7 @@
 				</div>
 				<div class="pull-left info">
 					<p class="sys-user-name"></p>
-					<div><i class="fa fa-circle text-success"></i> 歡迎您</div>
+					<div><i class="fa fa-smile-o"></i><span id="sys-account-type"></span></div>
 				</div>
 			</div>
 			<!-- sidebar menu: 主選單: style can be found in sidebar.less -->
@@ -228,7 +228,7 @@
 		<div class="pull-right hidden-xs">
 			<b>Version</b> 1.0.0
 		</div>
-		<strong>Copyright &copy; 2018 <a href="/index.html">Call Pro</a>.</strong> All rights reserved.
+		<strong>Copyright &copy; 2018 <a href="/index.html">Call-Pro</a>.</strong> All rights reserved.
 	</footer>
 	
 </div>
@@ -297,7 +297,7 @@
 				return;
 			}else{
 				if (data.resultCode=="00000"){
-					// AREA CHART
+					// AREA CHART，用 yLabelFormat: function(y){return y != Math.round(y)?'':y;}, 來設定Y軸上的label一定是整數，不能有小數點
 					var area1 = new Morris.Area({
 						element: 'dayCountChart',
 						resize: true,
@@ -307,10 +307,11 @@
 						labels: ['全部', '撥入', '撥出'],
 						lineColors: ['#DF0101', '#01DF3A', '#DBA901'],
 						hideHover: 'auto',
+						yLabelFormat: function(y){return y != Math.round(y)?'':y;},
 						behaveLikeLine: true
 					});
 
-					// AREA CHART
+					// AREA CHART，用 yLabelFormat: function(y){return y != Math.round(y)?'':y;}, 來設定Y軸上的label一定是整數，不能有小數點
 					var area2 = new Morris.Area({
 						element: 'dayMinuteChart',
 						resize: true,
@@ -320,6 +321,7 @@
 						labels: ['全部', '撥入', '撥出'],
 						lineColors: ['#DF0101', '#01DF3A', '#DBA901'],
 						hideHover: 'auto',
+						yLabelFormat: function(y){return y != Math.round(y)?'':y;},
 						behaveLikeLine: true
 					});
 				}else{

@@ -124,14 +124,14 @@ try{
 	out.flush();
 	return;
 }
-writeLog("debug", "accessToken= " + accessToken);
-writeLog("debug", "userId= " + userId);
-writeLog("debug", "email= " + email);
-writeLog("debug", "emailVerified= " + emailVerified);
-writeLog("debug", "pictureUrl= " + pictureUrl);
-writeLog("debug", "Name= " + name);
-writeLog("debug", "familyName= " + familyName);
-writeLog("debug", "givenName= " + givenName);
+writeLog("info", "accessToken= " + accessToken);
+writeLog("info", "userId= " + userId);
+writeLog("info", "email= " + email);
+writeLog("info", "emailVerified= " + emailVerified);
+writeLog("info", "pictureUrl= " + pictureUrl);
+writeLog("info", "Name= " + name);
+writeLog("info", "familyName= " + familyName);
+writeLog("info", "givenName= " + givenName);
 
 if (notEmpty(userId) && notEmpty(email) && notEmpty(accessToken)){	//Google正常回覆資料
 	//將用戶資料寫到將回覆 client 端及紀錄到 session 的 JSON物件中
@@ -218,11 +218,11 @@ if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
 		session.setAttribute("Account_Type", nullToString(s[0][4], ""));	//將登入用戶資料存入 session 中
 		session.setAttribute("Bill_Type", nullToString(s[0][5], ""));	//將登入用戶資料存入 session 中
 		session.setAttribute("Audit_Phone_Number", nullToString(s[0][6], ""));	//將登入用戶資料存入 session 中
-		writeLog("debug", "用戶登入, Google_ID=" + userId);
-		writeLog("debug", "用戶登入, Account_Sequence=" + nullToString(s[0][2], ""));
-		writeLog("debug", "用戶登入, Account_Type=" + nullToString(s[0][4], ""));
-		writeLog("debug", "用戶登入, Bill_Type=" + nullToString(s[0][5], ""));
-		writeLog("debug", "用戶登入, Audit_Phone_Number=" + nullToString(s[0][6], ""));
+		writeLog("info", "用戶登入, Google_ID=" + userId);
+		writeLog("info", "用戶登入, Account_Sequence=" + nullToString(s[0][2], ""));
+		writeLog("info", "用戶登入, Account_Type=" + nullToString(s[0][4], ""));
+		writeLog("info", "用戶登入, Bill_Type=" + nullToString(s[0][5], ""));
+		writeLog("info", "用戶登入, Audit_Phone_Number=" + nullToString(s[0][6], ""));
 	}else{
 		String sRandom = generateTxId();	//產生一個隨機數回給browser，同時存入session，作為等一下用戶確認使用哪個帳號登入時使用
 		session.setAttribute("Google_ID", userId);	//將登入用戶資料存入 session 中
