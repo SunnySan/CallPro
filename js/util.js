@@ -241,6 +241,34 @@ function doLogout(){
 	});	//getDataFromServer("xxx.jsp", sData, "json", function(data){
 }
 
+//將 Status 欄位的英文轉成中文
+function translateStatus(Status){
+	var s = Status;
+	if (s=="Active"){
+		s="正常";
+	}else if (s=="Suspend"){
+		s="停用";
+	}else if (s=="Unfollow"){
+		s="未加入LINE";
+	}else if (s=="Google"){
+		s="待Google綁定";
+	}else if (s=="Init"){
+		s="初始中";
+	}
+	return s;
+}
+
+//將電話主人類別轉成中文
+function translateBillType(Bill_Type){
+	var s = Bill_Type;
+	if (s=="A"){
+		s="進階版";
+	}else if (s=="B"){
+		s="入門版";
+	}
+	return s;
+}
+
 //在頁面填入一些預設值
 function pageInit(){
 	var myGoogleId = getLocalValue("Google_ID");
@@ -314,6 +342,10 @@ function generateMainMenu() {
 		s1 += "		<li" + (pageName==me?" class='active'":"") + "><a href='" + pageName + "'><i class='fa fa-circle-o'></i> 客戶資料統計</a></li>";
 		s += generateSeconeLevelMenu("fa-line-chart", bFound, "我的報表", s1);
 	}else if (myAccountType=="A"){	//系統管理者
+		pageName = "AdmAdminDealerManagement.html";
+		s += "<li" + (pageName==me?" class='active'":"") + "><a href='" + pageName + "'><i class='fa fa-table'></i> <span>加盟商資料管理</span></a></li>";
+		pageName = "AdmAdminPhoneOwnerManagement.html";
+		s += "<li" + (pageName==me?" class='active'":"") + "><a href='" + pageName + "'><i class='fa fa-table'></i> <span>電話主人資料管理</span></a></li>";
 		pageName = "AdmAdminSendTestNotification.html";
 		s += "<li" + (pageName==me?" class='active'":"") + "><a href='" + pageName + "'><i class='fa fa-table'></i> <span>LINE通知訊息測試</span></a></li>";
 	}	//if (myAccountType=="O" || myAccountType=="T"){	//電話主人

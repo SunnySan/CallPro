@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html>
 <head>
 	<meta charset="utf-8">
@@ -151,8 +151,8 @@
 		<!-- Content Header (Page header) -->
 		<section class="content-header">
 			<h1>
-				客戶資料管理
-				<small>查詢及修改您的客戶(電話主人)資料</small>
+				加盟商資料管理
+				<small>查詢、修改及刪除加盟商資料</small>
 			</h1>
 		</section>
 		
@@ -165,42 +165,14 @@
 				<h4><i class="icon fa fa-info"></i> 使用說明</h4>
 				<ul>
 					<li>
-						請先輸入欲查詢的電話號碼含區碼(未輸入表示查詢所有客戶資料)，按下【確認】進行查詢
-					</li>
-					<li>
-						若欲檢視客戶詳細資料或修改客戶資料，請點選該客戶資料列右邊的【詳細資料】按鈕
+						若欲檢視加盟商詳細資料或修改加盟商資料，請點選該加盟商資料列右邊的【詳細資料】按鈕
 					</li>
 				</ul>
 			</div>
 
-			<div class="box box-primary box-solid">
-				<div class="box-header with-border">
-					<h3 class="box-title">資料查詢條件</h3>
-				</div><!-- /.box-header -->
-
-				<!-- form start -->
-				<form role="form">
-					<div class="box-body">
-						<div class="form-group">
-							<label for="auditPhoneNumber">電話號碼</label>
-							<input type="text" class="form-control" id="auditPhoneNumber" placeholder="0227011234" maxlength="20">
-						</div>
-						
-					</div><!-- /.box-body -->
-					
-					<div class="box-footer">
-						<button type="button" class="btn btn-primary" onclick="doQuery();">確認</button>
-					</div><!-- /.box-footer -->
-				</form>
-				<!-- Loading (remove the following to stop the loading)-->
-				<div class="overlay" style="display:none;">
-					<i class="fa fa-refresh fa-spin"></i>
-				</div>
-			</div><!-- /.box -->
-
 			<div class="box box-success box-solid" id="boxResult">
 				<div class="box-header with-border">
-					<h3 class="box-title">資料查詢結果</h3>
+					<h3 class="box-title">加盟商列表</h3>
 				</div><!-- /.box-header -->
 
 				<div class="box-body">
@@ -209,11 +181,14 @@
 						<thead>
 							<tr>
 								<th>開通時間</th>
-								<th>客戶名稱</th>
-								<th>類別</th>
-								<th>市話號碼</th>
+								<th>加盟商名稱</th>
+								<th>LINE群組</th>
+								<th>購買數</th>
+								<th>開通數</th>
 								<th>狀態</th>
 								<th>詳細資料</th>
+								<th>停用</th>
+								<th>刪除</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -221,11 +196,14 @@
 						<tfoot>
 							<tr>
 								<th>開通時間</th>
-								<th>客戶名稱</th>
-								<th>類別</th>
-								<th>市話號碼</th>
+								<th>加盟商名稱</th>
+								<th>LINE群組</th>
+								<th>購買數</th>
+								<th>開通數</th>
 								<th>狀態</th>
 								<th>詳細資料</th>
+								<th>停用</th>
+								<th>刪除</th>
 							</tr>
 						</tfoot>
 					</table>
@@ -242,7 +220,7 @@
 
 			<div class="box box-success box-solid" id="boxDetail" style="display:none;">
 				<div class="box-header with-border">
-					<h3 class="box-title">客戶詳細資料</h3>
+					<h3 class="box-title">加盟商詳細資料</h3>
 				</div><!-- /.box-header -->
 
 				<form class="form-horizontal">
@@ -256,16 +234,9 @@
 						</div><!-- /.form-group -->
 
 						<div class="form-group col-md-6">
-							<label for="detailAccountName" class="col-sm-4 control-label">客戶名稱</label>
+							<label for="detailAccountName" class="col-sm-4 control-label">加盟商名稱</label>
 							<div class="col-sm-8">
 								<input type="text" class="form-control" id="detailAccountName" disabled>
-							</div>
-						</div><!-- /.form-group -->
-
-						<div class="form-group col-md-6">
-							<label for="detailBillType" class="col-sm-4 control-label">類別</label>
-							<div class="col-sm-8">
-								<input type="text" class="form-control" id="detailBillType" disabled>
 							</div>
 						</div><!-- /.form-group -->
 
@@ -273,34 +244,6 @@
 							<label for="detailLineChannelName" class="col-sm-4 control-label">LINE群組</label>
 							<div class="col-sm-8">
 								<input type="text" class="form-control" id="detailLineChannelName" disabled>
-							</div>
-						</div><!-- /.form-group -->
-
-						<div class="form-group col-md-6">
-							<label for="detailAuditPhoneNumber" class="col-sm-4 control-label">市話號碼</label>
-							<div class="col-sm-8">
-								<input type="text" class="form-control" id="detailAuditPhoneNumber" disabled>
-							</div>
-						</div><!-- /.form-group -->
-
-						<div class="form-group col-md-6">
-							<label for="detailSendNotification" class="col-sm-4 control-label">發送LINE通知</label>
-							<div class="col-sm-8">
-								<input type="text" class="form-control" id="detailSendNotification" disabled>
-							</div>
-						</div><!-- /.form-group -->
-
-						<div class="form-group col-md-6">
-							<label for="detailBillingStartDate" class="col-sm-4 control-label">起始計費日期</label>
-							<div class="col-sm-8">
-								<input type="text" class="form-control" id="detailBillingStartDate" disabled>
-							</div>
-						</div><!-- /.form-group -->
-
-						<div class="form-group col-md-6">
-							<label for="detailExpiryDate" class="col-sm-4 control-label">帳號有效日期</label>
-							<div class="col-sm-8">
-								<input type="text" class="form-control" id="detailExpiryDate" disabled>
 							</div>
 						</div><!-- /.form-group -->
 
@@ -315,6 +258,13 @@
 							<label for="detailGoogleUserName" class="col-sm-4 control-label">Google帳號姓名</label>
 							<div class="col-sm-8">
 								<input type="text" class="form-control" id="detailGoogleUserName" disabled>
+							</div>
+						</div><!-- /.form-group -->
+
+						<div class="form-group col-md-6">
+							<label for="detailGoogleUserPictureURL" class="col-sm-4 control-label">Google圖像</label>
+							<div class="col-sm-8">
+								<img id="detailGoogleUserPictureURL" src="">
 							</div>
 						</div><!-- /.form-group -->
 
@@ -347,16 +297,23 @@
 						</div><!-- /.form-group -->
 
 						<div class="form-group col-md-6">
-							<label for="detailPurchaseQuantity" class="col-sm-4 control-label">開通門號數</label>
+							<label for="detailPurchaseQuantity" class="col-sm-4 control-label">購買門號數</label>
 							<div class="col-sm-8">
 								<input type="text" class="form-control" id="detailPurchaseQuantity" disabled>
 							</div>
 						</div><!-- /.form-group -->
 
 						<div class="form-group col-md-6">
-							<label for="detailMemberQuantity" class="col-sm-4 control-label">子帳號數量</label>
+							<label for="detailProvisionQuantity" class="col-sm-4 control-label">開通門號數</label>
 							<div class="col-sm-8">
-								<input type="text" class="form-control" id="detailMemberQuantity" disabled>
+								<input type="text" class="form-control" id="detailProvisionQuantity" disabled>
+							</div>
+						</div><!-- /.form-group -->
+
+						<div class="form-group col-md-6">
+							<label for="detailLastLoginDate" class="col-sm-4 control-label">最近一次登入時間</label>
+							<div class="col-sm-8">
+								<input type="text" class="form-control" id="detailLastLoginDate" disabled>
 							</div>
 						</div><!-- /.form-group -->
 
@@ -373,14 +330,14 @@
 
 			<div class="box box-success box-solid" id="boxEdit" style="display:none;">
 				<div class="box-header with-border">
-					<h3 class="box-title">修改客戶資料</h3>
+					<h3 class="box-title">修改加盟商資料</h3>
 				</div><!-- /.box-header -->
 
 				<form class="form-horizontal">
 					<div class="box-body">
 	
 						<div class="form-group col-md-6">
-							<label for="accountName" class="col-sm-3 control-label">客戶名稱</label>
+							<label for="accountName" class="col-sm-3 control-label">加盟商名稱</label>
 							<div class="col-sm-9">
 								<input type="text" class="form-control" id="accountName" maxlength="20">
 							</div>
@@ -410,8 +367,8 @@
 					</div><!-- /.box-body -->
 				
 					<div class="box-footer">
-						<input type="hidden" id="rowId" value="">
-						<button type="button" class="btn btn-success" onclick="doEdit();">更新客戶資料</button>
+						<input type="hidden" id="accountSequence" value="">
+						<button type="button" class="btn btn-success" onclick="doEdit();">更新加盟商資料</button>
 					</div><!-- /.box-footer -->
 				</form>
 				<!-- Loading (remove the following to stop the loading)-->
@@ -484,6 +441,7 @@
 <script>
 	$(function () {
 		pageInit();
+		doQuery();
 	});
 </script>
 
@@ -492,13 +450,6 @@
 	var tableData = null;
 	
 	function doQuery(){
-		var auditPhoneNumber = $('#auditPhoneNumber').val();
-		
-		if (notEmpty(auditPhoneNumber) && auditPhoneNumber.length>20){
-			msgBox("電話號碼長度不可超過20個字，請重新輸入!");
-			return;
-		}
-
 		if ($.fn.dataTable.isDataTable(table) ) table.clear().draw();
 		clearDetailAndEditData();
 		
@@ -506,21 +457,20 @@
 		
 		var sData = "";
 		
-		sData = "auditPhoneNumber=" + auditPhoneNumber;
-		getDataFromServer("ajaxGetPhoneOwnerProfile.jsp", sData, "json", function(data){
+		getDataFromServer("ajaxGetDealerProfile.jsp", sData, "json", function(data){
 			if (!data.resultCode || !data.resultText){
 				$('.overlay').hide();
-				msgBox("無法取得客戶資料!");
+				msgBox("無法取得加盟商資料!");
 				return;
 			}else{
 				if (data.resultCode=="00000"){
-					s = "";
+					var tmp = "";
 					$.each( data.records, function(i, r) {
-						r.Bill_Type = translateBillType(r.Bill_Type);
+						tmp = r.Status;
 						r.Status = translateStatus(r.Status);
-						r.edit = "<input type='button' onclick=\"getAccountDetail('" + r.id + "');\" value='詳細資料'>";
-						//r.Record_File_URL = "<a href='" + r.Record_File_URL + "' target='_blank'>聽取</a>";
-
+						r.edit = "<input type='button' onclick=\"getAccountDetail('" + r.Account_Sequence + "');\" value='詳細資料'>";
+						r.suspend = "<input type='button' onclick=\"doSuspend('" + r.Account_Sequence + "', '" + tmp + "');\" value='" + (tmp=="Active"?"停用":"復用") + "'>";
+						r.delete = "<input type='button' onclick=\"doDelete('" + r.Account_Sequence + "');\" value='刪除'>";
 					});	//$.each( data.orders, function(i, r) {
 					
 					tableData = data;
@@ -530,9 +480,11 @@
 					table = $('#tblResult').DataTable( {
 						responsive: true,
 						columnDefs: [
-						{ responsivePriority: 1, targets: 0 },
-						{ responsivePriority: 1, targets: 3 },
-						{ responsivePriority: 1, targets: 5 }
+						{ responsivePriority: 1, targets: 1 },
+						{ responsivePriority: 1, targets: 5 },
+						{ responsivePriority: 1, targets: 6 },
+						{ responsivePriority: 1, targets: 7 },
+						{ responsivePriority: 1, targets: 8 }
 						],
 						language: {
 							url: 'bower_components/datatables.net/js/Chinese.json'
@@ -541,10 +493,13 @@
 						columns: [
 							{ data: 'Create_Date' },
 							{ data: 'Account_Name' },
-							{ data: 'Bill_Type' },
-							{ data: 'Audit_Phone_Number' },
+							{ data: 'Line_Channel_Name' },
+							{ data: 'Purchase_Quantity' },
+							{ data: 'Provision_Quantity' },
 							{ data: 'Status' },
-							{ data: 'edit' }
+							{ data: 'edit' },
+							{ data: 'suspend' },
+							{ data: 'delete' }
 						],
 						order: [[ 0, 'desc' ]]
 					} );
@@ -554,7 +509,7 @@
 					}, 1000);
 					
 				}else{
-					msgBox("取得客戶資料失敗:<br>" + data.resultText);
+					msgBox("取得加盟商資料失敗:<br>" + data.resultText);
 				}
 				$('.overlay').hide();
 			}
@@ -562,64 +517,48 @@
 		});	//getDataFromServer("xxx.jsp", sData, "json", function(data){
 	}
 	
-	function getAccountDetail(rowId){
+	function getAccountDetail(Account_Sequence){
 		
-		if (beEmpty(rowId)){
+		if (beEmpty(Account_Sequence)){
 			msgBox("無法取得資料鍵值!");
 			return;
 		}
+		
+		clearDetailAndEditData();
 
 		$('#boxDetail').show();
 		$('#boxEdit').show();
 
 		$('.overlay').show();
-		
-		var sData = "";
-		
-		sData = "rowId=" + rowId;
-		getDataFromServer("ajaxGetPhoneOwnerProfile.jsp", sData, "json", function(data){
-			if (!data.resultCode || !data.resultText){
-				$('.overlay').hide();
-				msgBox("無法取得客戶資料!");
-				return;
-			}else{
-				if (data.resultCode=="00000"){
-					s = "";
-					$.each( data.records, function(i, r) {
-						$('#detailCreateDate').val(r.Create_Date);
-						$('#detailAccountName').val(r.Account_Name);
-						$('#detailBillType').val(translateBillType(r.Bill_Type));
-						$('#detailLineChannelName').val(r.Line_Channel_Name);
-						$('#detailAuditPhoneNumber').val(r.Audit_Phone_Number);
-						$('#detailSendNotification').val((r.Send_Notification=='Y'?"是":"否"));
-						$('#detailBillingStartDate').val(r.Billing_Start_Date);
-						$('#detailExpiryDate').val(r.Expiry_Date);
-						$('#detailStatus').val(translateStatus(r.Status));
-						$('#detailGoogleUserName').val(r.Google_User_Name);
-						$('#detailGoogleEmail').val(r.Google_Email);
-						$('#detailContactPhone').val(r.Contact_Phone);
-						$('#detailContactAddress').val(r.Contact_Address);
-						$('#detailTaxIDNumber').val(r.Tax_ID_Number);
-						$('#detailPurchaseQuantity').val(r.Purchase_Quantity);
-						$('#detailMemberQuantity').val(r.Member_Quantity);
-						$('#accountName').val(r.Account_Name);
-						$('#contactPhone').val(r.Contact_Phone);
-						$('#contactAddress').val(r.Contact_Address);
-						$('#taxIDNumber').val(r.Tax_ID_Number);
-						$('#rowId').val(r.id);
-					});	//$.each( data.orders, function(i, r) {
 
-					$('html, body').animate({
-						scrollTop: $("#boxDetail").offset().top
-					}, 1000);
-					
-				}else{
-					msgBox("取得客戶資料失敗:<br>" + data.resultText);
-				}
-				$('.overlay').hide();
+		$.each( tableData.records, function(i, r) {
+			if (r.Account_Sequence==Account_Sequence){
+				$('#detailCreateDate').val(r.Create_Date);
+				$('#detailAccountName').val(r.Account_Name);
+				$('#detailLineChannelName').val(r.Line_Channel_Name);
+				$('#detailStatus').val(translateStatus(r.Status));
+				$('#detailGoogleUserName').val(r.Google_User_Name);
+				$('#detailGoogleUserPictureURL').attr("src", r.Google_User_Picture_URL);
+				$('#detailGoogleEmail').val(r.Google_Email);
+				$('#detailContactPhone').val(r.Contact_Phone);
+				$('#detailContactAddress').val(r.Contact_Address);
+				$('#detailTaxIDNumber').val(r.Tax_ID_Number);
+				$('#detailPurchaseQuantity').val(r.Purchase_Quantity);
+				$('#detailProvisionQuantity').val(r.Provision_Quantity);
+	
+				$('#accountName').val(r.Account_Name);
+				$('#contactPhone').val(r.Contact_Phone);
+				$('#contactAddress').val(r.Contact_Address);
+				$('#taxIDNumber').val(r.Tax_ID_Number);
+				$('#accountSequence').val(r.Account_Sequence);
 			}
+		});	//$.each( data.orders, function(i, r) {
 
-		});	//getDataFromServer("xxx.jsp", sData, "json", function(data){
+		$('html, body').animate({
+			scrollTop: $("#boxDetail").offset().top
+		}, 1000);
+		
+		$('.overlay').hide();
 	}
 
 	function doEdit(){
@@ -627,19 +566,19 @@
 		var contactPhone = $('#contactPhone').val();
 		var contactAddress = $('#contactAddress').val();
 		var taxIDNumber = $('#taxIDNumber').val();
-		var rowId = $('#rowId').val();
+		var accountSequence = $('#accountSequence').val();
 
 		if (beEmpty(accountName)){
-			msgBox("請輸入客戶名稱!");
+			msgBox("請輸入加盟商名稱!");
 			return;
 		}
-		if (beEmpty(rowId)){
+		if (beEmpty(accountSequence)){
 			msgBox("無法取得資料鍵值!");
 			return;
 		}
 
 		if (notEmpty(accountName) && accountName.length>20){
-			msgBox("客戶名稱長度不可超過20個字，請重新輸入!");
+			msgBox("加盟商名稱長度不可超過20個字，請重新輸入!");
 			return;
 		}
 		if (notEmpty(contactPhone) && contactPhone.length>20){
@@ -659,12 +598,12 @@
 		
 		var sData = "";
 		
-		sData = "rowId=" + rowId;
+		sData = "accountSequence=" + accountSequence;
 		sData += "&accountName=" + accountName;
 		sData += "&contactPhone=" + contactPhone;
 		sData += "&contactAddress=" + contactAddress;
 		sData += "&taxIDNumber=" + taxIDNumber;
-		getDataFromServer("ajaxSetPhoneOwnerProfile.jsp", sData, "json", function(data){
+		getDataFromServer("ajaxSetDealerProfile.jsp", sData, "json", function(data){
 			if (!data.resultCode || !data.resultText){
 				$('.overlay').hide();
 				msgBox("無法取得作業結果!");
@@ -682,7 +621,7 @@
 					$('#detailContactAddress').val(contactAddress);
 					$('#detailTaxIDNumber').val(taxIDNumber);
 					$.each( tableData.records, function(i, r) {
-						if (r.id==rowId){
+						if (r.Account_Sequence==accountSequence){
 							r.Account_Name = accountName;
 						}
 					});	//$.each( tableData, function(i, r) {
@@ -704,5 +643,10 @@
 	
 	function clearDetailAndEditData(){
 		$('.form-horizontal input:text').val("");
+		$('#detailGoogleUserPictureURL').attr("src", "");
+		/*
+		$('#boxDetail').hide();
+		$('#boxEdit').hide();
+		*/
 	}
 </script>

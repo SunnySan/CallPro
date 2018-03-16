@@ -340,12 +340,11 @@ writeLog("debug", obj.toString());
 			if (isExpired(s[0][1])){
 				return "您的帳號已過期，無法進行此操作";
 			}
-			/*
+			
 			sStatus = nullToString(s[0][2], "");
 			if (!sStatus.equals("Active")){
 				return "您的帳號狀態為非使用中，無法進行此操作";
 			}
-			*/
 			
 			sAccountName = sMessageText.substring(2);
 			
