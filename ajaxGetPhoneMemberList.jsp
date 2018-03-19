@@ -64,7 +64,7 @@ int			j					= 0;
 
 String		sWhere				= "";
 
-sSQL = "SELECT id, DATE_FORMAT(Create_Date,'%y-%m-%d %H:%i'), Account_Name, Send_Notification";
+sSQL = "SELECT id, DATE_FORMAT(Create_Date,'%y-%m-%d %H:%i'), Account_Name, Send_Instant_Notification";
 sSQL += " FROM callpro_account";
 sSQL += " WHERE Account_Type='M'";
 if (sLoginUserAccountType.equals("O") || sLoginUserAccountType.equals("T")){
@@ -87,7 +87,7 @@ if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
 	s = (String[][])ht.get("Data");
 
 	obj.put("recordCount", String.valueOf(s.length));
-	String[] fields2 = {"id", "Create_Date", "Account_Name", "Send_Notification"};
+	String[] fields2 = {"id", "Create_Date", "Account_Name", "Send_Instant_Notification"};
 	List  l1 = new LinkedList();
 	Map m1 = null;
 	for (i=0;i<s.length;i++){

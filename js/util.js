@@ -254,6 +254,8 @@ function translateStatus(Status){
 		s="待Google綁定";
 	}else if (s=="Init"){
 		s="初始中";
+	}else if (s=="Delete"){
+		s="已刪除";
 	}
 	return s;
 }

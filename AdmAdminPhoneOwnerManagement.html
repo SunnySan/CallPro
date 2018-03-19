@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html>
 <head>
 	<meta charset="utf-8">
@@ -35,6 +35,8 @@
 	<link rel="stylesheet" href="bower_components/bootstrap-daterangepicker/daterangepicker.css">
 	<!-- bootstrap wysihtml5 - text editor -->
 	<link rel="stylesheet" href="plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css">
+  <!-- iCheck -->
+  <link rel="stylesheet" href="plugins/iCheck/square/green.css">
 	
 	<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
 	<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -151,8 +153,8 @@
 		<!-- Content Header (Page header) -->
 		<section class="content-header">
 			<h1>
-				客戶資料管理
-				<small>查詢及修改您的客戶(電話主人)資料</small>
+				電話主人資料管理
+				<small>查詢及修改電話主人資料</small>
 			</h1>
 		</section>
 		
@@ -165,10 +167,10 @@
 				<h4><i class="icon fa fa-info"></i> 使用說明</h4>
 				<ul>
 					<li>
-						請先輸入欲查詢的電話號碼含區碼(未輸入表示查詢所有客戶資料)，按下【確認】進行查詢
+						請先輸入欲查詢的電話號碼含區碼(未輸入表示查詢所有電話主人資料)，按下【確認】進行查詢
 					</li>
 					<li>
-						若欲檢視客戶詳細資料或修改客戶資料，請點選該客戶資料列右邊的【詳細資料】按鈕
+						若欲檢視電話主人詳細資料或修改電話主人資料，請點選該電話主人資料列右邊的【詳細資料】按鈕
 					</li>
 				</ul>
 			</div>
@@ -209,7 +211,7 @@
 						<thead>
 							<tr>
 								<th>開通時間</th>
-								<th>客戶名稱</th>
+								<th>電話主人名稱</th>
 								<th>類別</th>
 								<th>市話號碼</th>
 								<th>狀態</th>
@@ -221,7 +223,7 @@
 						<tfoot>
 							<tr>
 								<th>開通時間</th>
-								<th>客戶名稱</th>
+								<th>電話主人名稱</th>
 								<th>類別</th>
 								<th>市話號碼</th>
 								<th>狀態</th>
@@ -242,7 +244,7 @@
 
 			<div class="box box-success box-solid" id="boxDetail" style="display:none;">
 				<div class="box-header with-border">
-					<h3 class="box-title">客戶詳細資料</h3>
+					<h3 class="box-title">電話主人詳細資料</h3>
 				</div><!-- /.box-header -->
 
 				<form class="form-horizontal">
@@ -256,7 +258,7 @@
 						</div><!-- /.form-group -->
 
 						<div class="form-group col-md-6">
-							<label for="detailAccountName" class="col-sm-4 control-label">客戶名稱</label>
+							<label for="detailAccountName" class="col-sm-4 control-label">電話主人名稱</label>
 							<div class="col-sm-8">
 								<input type="text" class="form-control" id="detailAccountName" disabled>
 							</div>
@@ -380,37 +382,51 @@
 
 			<div class="box box-success box-solid" id="boxEdit" style="display:none;">
 				<div class="box-header with-border">
-					<h3 class="box-title">修改客戶資料</h3>
+					<h3 class="box-title">修改電話主人資料</h3>
 				</div><!-- /.box-header -->
 
 				<form class="form-horizontal">
 					<div class="box-body">
 	
 						<div class="form-group col-md-6">
-							<label for="accountName" class="col-sm-3 control-label">客戶名稱</label>
-							<div class="col-sm-9">
+							<label for="accountName" class="col-sm-4 control-label">電話主人名稱</label>
+							<div class="col-sm-8">
 								<input type="text" class="form-control" id="accountName" maxlength="20">
 							</div>
 						</div><!-- /.form-group -->
 
 						<div class="form-group col-md-6">
-							<label for="contactPhone" class="col-sm-3 control-label">連絡電話</label>
-							<div class="col-sm-9">
+							<label for="contactPhone" class="col-sm-4 control-label">連絡電話</label>
+							<div class="col-sm-8">
 								<input type="text" class="form-control" id="contactPhone" maxlength="20">
 							</div>
 						</div><!-- /.form-group -->
 
 						<div class="form-group col-md-6">
-							<label for="contactAddress" class="col-sm-3 control-label">連絡地址</label>
-							<div class="col-sm-9">
+							<label for="contactAddress" class="col-sm-4 control-label">連絡地址</label>
+							<div class="col-sm-8">
 								<input type="text" class="form-control" id="contactAddress" maxlength="100">
 							</div>
 						</div><!-- /.form-group -->
 
 						<div class="form-group col-md-6">
-							<label for="taxIDNumber" class="col-sm-3 control-label">統一編號</label>
-							<div class="col-sm-9">
+							<label for="taxIDNumber" class="col-sm-4 control-label">統一編號</label>
+							<div class="col-sm-8">
 								<input type="text" class="form-control" id="taxIDNumber" maxlength="8">
+							</div>
+						</div><!-- /.form-group -->
+
+						<div class="form-group col-md-6">
+							<label for="sendInstantNotificationBox" class="col-sm-4 control-label">發送即時LINE通知</label>
+							<div class="col-sm-8">
+								<input type="checkbox" id="sendInstantNotificationBox">
+							</div>
+						</div><!-- /.form-group -->
+
+						<div class="form-group col-md-6">
+							<label for="sendCDRNotificationBox" class="col-sm-4 control-label">發送錄音檔LINE通知</label>
+							<div class="col-sm-8">
+								<input type="checkbox" id="sendCDRNotificationBox">
 							</div>
 						</div><!-- /.form-group -->
 
@@ -418,7 +434,9 @@
 				
 					<div class="box-footer">
 						<input type="hidden" id="rowId" value="">
-						<button type="button" class="btn btn-success" onclick="doEdit();">更新客戶資料</button>
+						<input type="hidden" id="sendInstantNotification" value="N">
+						<input type="hidden" id="sendCDRNotification" value="N">
+						<button type="button" class="btn btn-success" onclick="doEdit();">更新電話主人資料</button>
 					</div><!-- /.box-footer -->
 				</form>
 				<!-- Loading (remove the following to stop the loading)-->
@@ -481,6 +499,8 @@
 <!--<script src="bower_components/datatables.net/js/datatables.min.js"></script>-->
 <!-- AdminLTE App -->
 <script src="dist/js/adminlte.min.js"></script>
+<!-- iCheck -->
+<script src="./plugins/iCheck/icheck.min.js"></script>
 </body>
 </html>
 
@@ -491,6 +511,24 @@
 <script>
 	$(function () {
 		pageInit();
+	    $('input:checkbox').iCheck({
+			checkboxClass: 'icheckbox_square-green',
+			radioClass: 'iradio_square-green',
+			increaseArea: '20%' // optional
+	    });
+		$('#sendInstantNotificationBox').on('ifChecked', function(event){
+			$('#sendInstantNotification').val('Y');
+		});
+		$('#sendInstantNotificationBox').on('ifUnchecked', function(event){
+			$('#sendInstantNotification').val('N');
+		});
+
+		$('#sendCDRNotificationBox').on('ifChecked', function(event){
+			$('#sendCDRNotification').val('Y');
+		});
+		$('#sendCDRNotificationBox').on('ifUnchecked', function(event){
+			$('#sendCDRNotification').val('N');
+		});
 	});
 </script>
 
@@ -517,7 +555,7 @@
 		getDataFromServer("ajaxGetPhoneOwnerProfile.jsp", sData, "json", function(data){
 			if (!data.resultCode || !data.resultText){
 				$('.overlay').hide();
-				msgBox("無法取得客戶資料!");
+				msgBox("無法取得電話主人資料!");
 				return;
 			}else{
 				if (data.resultCode=="00000"){
@@ -565,7 +603,7 @@
 					}, 1000);
 					
 				}else{
-					msgBox("取得客戶資料失敗:<br>" + data.resultText);
+					msgBox("取得電話主人資料失敗:<br>" + data.resultText);
 				}
 				$('.overlay').hide();
 			}
@@ -591,7 +629,7 @@
 		getDataFromServer("ajaxGetPhoneOwnerProfile.jsp", sData, "json", function(data){
 			if (!data.resultCode || !data.resultText){
 				$('.overlay').hide();
-				msgBox("無法取得客戶資料!");
+				msgBox("無法取得電話主人資料!");
 				return;
 			}else{
 				if (data.resultCode=="00000"){
@@ -622,6 +660,21 @@
 						$('#contactPhone').val(r.Contact_Phone);
 						$('#contactAddress').val(r.Contact_Address);
 						$('#taxIDNumber').val(r.Tax_ID_Number);
+						if (r.Send_Instant_Notification=="Y"){
+							$('#sendInstantNotification').val('Y');
+							$('#sendInstantNotificationBox').iCheck('check');
+						}else{
+							$('#sendInstantNotification').val('N');
+							$('#sendInstantNotificationBox').iCheck('uncheck');
+						}
+						if (r.Send_CDR_Notification=="Y"){
+							$('#sendCDRNotification').val('Y');
+							$('#sendCDRNotificationBox').iCheck('check');
+						}else{
+							$('#sendCDRNotification').val('N');
+							$('#sendCDRNotificationBox').iCheck('uncheck');
+						}
+						$('#taxIDNumber').val(r.Tax_ID_Number);
 						$('#rowId').val(r.id);
 					});	//$.each( data.orders, function(i, r) {
 
@@ -630,7 +683,7 @@
 					}, 1000);
 					
 				}else{
-					msgBox("取得客戶資料失敗:<br>" + data.resultText);
+					msgBox("取得電話主人資料失敗:<br>" + data.resultText);
 				}
 				$('.overlay').hide();
 			}
@@ -643,10 +696,13 @@
 		var contactPhone = $('#contactPhone').val();
 		var contactAddress = $('#contactAddress').val();
 		var taxIDNumber = $('#taxIDNumber').val();
+		var sendInstantNotification = $('#sendInstantNotification').val();
+		var sendCDRNotification = $('#sendCDRNotification').val();
+		
 		var rowId = $('#rowId').val();
 
 		if (beEmpty(accountName)){
-			msgBox("請輸入客戶名稱!");
+			msgBox("請輸入電話主人名稱!");
 			return;
 		}
 		if (beEmpty(rowId)){
@@ -655,7 +711,7 @@
 		}
 
 		if (notEmpty(accountName) && accountName.length>20){
-			msgBox("客戶名稱長度不可超過20個字，請重新輸入!");
+			msgBox("電話主人名稱長度不可超過20個字，請重新輸入!");
 			return;
 		}
 		if (notEmpty(contactPhone) && contactPhone.length>20){
@@ -680,6 +736,8 @@
 		sData += "&contactPhone=" + contactPhone;
 		sData += "&contactAddress=" + contactAddress;
 		sData += "&taxIDNumber=" + taxIDNumber;
+		sData += "&sendInstantNotification=" + sendInstantNotification;
+		sData += "&sendCDRNotification=" + sendCDRNotification;
 		getDataFromServer("ajaxSetPhoneOwnerProfile.jsp", sData, "json", function(data){
 			if (!data.resultCode || !data.resultText){
 				$('.overlay').hide();
@@ -697,6 +755,8 @@
 					$('#detailContactPhone').val(contactPhone);
 					$('#detailContactAddress').val(contactAddress);
 					$('#detailTaxIDNumber').val(taxIDNumber);
+					$('#detailSendInstantNotification').val((sendInstantNotification=='Y'?"是":"否"));
+					$('#detailSendCDRNotification').val((sendCDRNotification=='Y'?"是":"否"));
 					$.each( tableData.records, function(i, r) {
 						if (r.id==rowId){
 							r.Account_Name = accountName;

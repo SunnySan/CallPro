@@ -20,6 +20,7 @@
 
 <%@include file="00_constants.jsp"%>
 <%@include file="00_utility.jsp"%>
+<%@include file="00_ClientContact.jsp"%>
 
 <%
 request.setCharacterEncoding("utf-8");
@@ -34,10 +35,57 @@ out.clear();	//注意，一定要有out.clear();，要不然client端無法解�
 JSONObject obj=new JSONObject();
 
 String s = getQueryString(request);
-writeLog("debug", "request= " + s);
+//writeLog("debug", "request= " + s);
 
 //out.print("2,2,2,0");
-out.print("0,0,0,0");
+//out.print("queryString=" + s);
+
+s = nullToString(request.getParameter("contactall"), "");
+out.print("queryString=" + s);
+writeLog("debug", "queryString" + s);
+
+ClientUsers clientUsers = new ClientUsers(s);
+ClientUser[] aUsers = clientUsers.getUsers();
+PhoneNumbers mobilePhoneNumbers = null;
+PhoneNumbers homePhoneNumbers = null;
+PhoneNumbers workPhoneNumbers = null;
+String[] aMobilePhone = null;
+String[] aHomePhone = null;
+String[] aWorkPhone = null;
+int j = 0;
+int k = 0;
+for (int i=0;i<aUsers.length;i++){
+	writeLog("debug", "name" + String.valueOf(i) + "= " + aUsers[i].getName());
+	j = aUsers[i].getMobilePhoneNumbers().getPhoneNumberCount();
+	writeLog("debug", "MobilePhoneNumber count=" + String.valueOf(j));
+	if (j>0){
+		aMobilePhone = aUsers[i].getMobilePhoneNumbers().getPhoneNumberList();
+		for (k=0;k<j;k++){
+			writeLog("debug", "MobilePhone" + String.valueOf(k) + "= " + aMobilePhone[k]);
+		}
+	}
+
+	j = aUsers[i].getHomePhoneNumbers().getPhoneNumberCount();
+	writeLog("debug", "HomePhoneNumber count=" + String.valueOf(j));
+	if (j>0){
+		aHomePhone = aUsers[i].getHomePhoneNumbers().getPhoneNumberList();
+		for (k=0;k<j;k++){
+			writeLog("debug", "HomePhone" + String.valueOf(k) + "= " + aHomePhone[k]);
+		}
+	}
+
+	j = aUsers[i].getWorkPhoneNumbers().getPhoneNumberCount();
+	writeLog("debug", "WorkPhoneNumber count=" + String.valueOf(j));
+	if (j>0){
+		aWorkPhone = aUsers[i].getWorkPhoneNumbers().getPhoneNumberList();
+		for (k=0;k<j;k++){
+			writeLog("debug", "WorkPhone" + String.valueOf(k) + "= " + aWorkPhone[k]);
+		}
+	}
+}
+
+writeLog("debug", "clientUsers.toString()=" + clientUsers.toString());
+
 out.flush();
 
 %>

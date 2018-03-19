@@ -533,7 +533,8 @@ writeLog("debug", obj.toString());
 			sSQL += " ,Update_Date='" + sDate + "'";
 			sSQL += " ,Line_User_ID='" + sLineUserId + "'";
 			sSQL += " ,Line_Channel_Name='" + sLineChannel + "'";
-			sSQL += " ,Send_Notification='" + "Y" + "'";
+			sSQL += " ,Send_Instant_Notification='" + "Y" + "'";
+			sSQL += " ,Send_CDR_Notification='" + "Y" + "'";
 			if (sAccountType.equals("D") || ((sAccountType.equals("O")||sAccountType.equals("T"))&&!sBillType.equals("B"))){
 				sSQL += " ,Status='" + "Google" + "'";	//加盟商、非入門版的門號擁有者下一步須進行Google帳號註冊
 			}else{

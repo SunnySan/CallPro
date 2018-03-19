@@ -334,8 +334,8 @@
 				if (data.resultCode=="00000"){
 					s = "";
 					$.each( data.records, function(i, r) {
-						r.Suspend = (r.Send_Notification=="Y"?"<input type='button' value='停用' onclick=\"doEdit('suspend', '" + r.id + "');\">":"<input type='button' value='復用' onclick=\"doEdit('revert', '" + r.id + "');\">");
-						r.Send_Notification = (r.Send_Notification=="Y"?"正常":"<span style='color:#FF0000;'>停用</span>");
+						r.Suspend = (r.Send_Instant_Notification=="Y"?"<input type='button' value='停用' onclick=\"doEdit('suspend', '" + r.id + "');\">":"<input type='button' value='復用' onclick=\"doEdit('revert', '" + r.id + "');\">");
+						r.Send_Instant_Notification = (r.Send_Instant_Notification=="Y"?"正常":"<span style='color:#FF0000;'>停用</span>");
 						r.Delete = "<input type='button' value='刪除' onclick=\"doDelete('" + r.id + "', '" + r.Account_Name + "');\">";
 
 					});	//$.each( data.orders, function(i, r) {
@@ -345,7 +345,7 @@
 					table = $('#tblResult').DataTable( {
 						responsive: true,
 						columnDefs: [
-						{ responsivePriority: 1, targets: 1 },
+						{ responsivePriority: 1, targets: 0 },
 						{ responsivePriority: 1, targets: 2 },
 						{ responsivePriority: 1, targets: 3 },
 						{ responsivePriority: 1, targets: 4 }
@@ -355,9 +355,9 @@
 						},
 						data: data.records,
 						columns: [
-							{ data: 'Create_Date' },
 							{ data: 'Account_Name' },
-							{ data: 'Send_Notification' },
+							{ data: 'Create_Date' },
+							{ data: 'Send_Instant_Notification' },
 							{ data: 'Suspend' },
 							{ data: 'Delete' },
 						],

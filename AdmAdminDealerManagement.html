@@ -377,6 +377,25 @@
 				</div>
 			</div><!-- /.box -->
 		
+			<!-- 刪除資料的確認視窗 -->
+			<div class="modal modal-danger fade" id="modal-danger">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span></button>
+							<h4 class="modal-title">資料刪除確認</h4>
+						</div>
+						<div class="modal-body">
+							<p>此作業將會刪除加盟商【<span id="modalAccountName"></span>】的資料</p>
+							</div>
+							<div class="modal-footer">
+							<button type="button" class="btn btn-outline pull-left" data-dismiss="modal">取消</button>
+							<button type="button" class="btn btn-outline" onclick="confirmDelete();">確認刪除</button>
+						</div>
+					</div><!-- /.modal-content -->
+				</div><!-- /.modal-dialog -->
+			</div><!-- /.modal -->		
 		</section>
 		<!-- /.content -->
 	</div>
@@ -468,9 +487,10 @@
 					$.each( data.records, function(i, r) {
 						tmp = r.Status;
 						r.Status = translateStatus(r.Status);
+						if (tmp!="Active") r.Status = "<span style='color:#FF0000;'>" + r.Status + "</span>";
 						r.edit = "<input type='button' onclick=\"getAccountDetail('" + r.Account_Sequence + "');\" value='詳細資料'>";
 						r.suspend = "<input type='button' onclick=\"doSuspend('" + r.Account_Sequence + "', '" + tmp + "');\" value='" + (tmp=="Active"?"停用":"復用") + "'>";
-						r.delete = "<input type='button' onclick=\"doDelete('" + r.Account_Sequence + "');\" value='刪除'>";
+						r.delete = "<input type='button' onclick=\"doDelete('" + r.Account_Sequence + "', '" + r.Account_Name + "');\" value='刪除'>";
 					});	//$.each( data.orders, function(i, r) {
 					
 					tableData = data;
@@ -480,7 +500,7 @@
 					table = $('#tblResult').DataTable( {
 						responsive: true,
 						columnDefs: [
-						{ responsivePriority: 1, targets: 1 },
+						{ responsivePriority: 1, targets: 0 },
 						{ responsivePriority: 1, targets: 5 },
 						{ responsivePriority: 1, targets: 6 },
 						{ responsivePriority: 1, targets: 7 },
@@ -491,8 +511,8 @@
 						},
 						data: tableData.records,
 						columns: [
-							{ data: 'Create_Date' },
 							{ data: 'Account_Name' },
+							{ data: 'Create_Date' },
 							{ data: 'Line_Channel_Name' },
 							{ data: 'Purchase_Quantity' },
 							{ data: 'Provision_Quantity' },
@@ -641,6 +661,63 @@
 		});	//getDataFromServer("xxx.jsp", sData, "json", function(data){
 	}
 	
+	function doSuspend(accountSequence, status){
+		if (beEmpty(accountSequence) || beEmpty(status)){
+			msgBox("無法取得加盟商資料，請重新整理本頁!");
+			return;
+		}
+
+		var action;
+		if (status=="Active") action="suspend"; else action="revert";
+			
+		doSuspendAndDelete(accountSequence, action);
+	}
+
+	var accountSequenceToBeDeleted;
+	
+	function doDelete(accountSequence, accountName){
+		accountSequenceToBeDeleted = accountSequence;
+		$('#modalAccountName').text(accountName);
+		//$('#modal-danger').modal({backdrop:false});	//若設為 false，則用戶按背景時將不會關閉 modal window
+		$('#modal-danger').modal('show');
+	}
+	
+	function confirmDelete(){
+		$('#modal-danger').modal('hide');
+		doSuspendAndDelete(accountSequenceToBeDeleted, 'delete');
+	}
+
+	function doSuspendAndDelete(accountSequence, action){
+		if (beEmpty(accountSequence) || beEmpty(action)){
+			msgBox("無法取得作業資料，請確認要執行的作業或重新整理本頁!");
+			return;
+		}
+
+		$('.overlay').show();
+		
+		var sData = "";
+		
+		sData = "accountSequence=" + accountSequence;
+		sData += "&action=" + action;
+		getDataFromServer("ajaxDoDealerSuspendAndDelete.jsp", sData, "json", function(data){
+			if (!data.resultCode || !data.resultText){
+				$('.overlay').hide();
+				msgBox("無法取得作業結果!");
+				return;
+			}else{
+				if (data.resultCode=="00000"){
+					msgBox("作業成功，將重新整理本頁!", function(){
+						location.reload();
+					});
+				}else{
+					msgBox("作業失敗:<br>" + data.resultText);
+					$('.overlay').hide();
+				}
+			}
+
+		});	//getDataFromServer("xxx.jsp", sData, "json", function(data){
+	}
+
 	function clearDetailAndEditData(){
 		$('.form-horizontal input:text').val("");
 		$('#detailGoogleUserPictureURL').attr("src", "");

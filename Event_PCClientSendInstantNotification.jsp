@@ -78,7 +78,9 @@ sSQL = "SELECT Line_Channel_Name FROM callpro_account";
 sSQL += " WHERE Audit_Phone_Number='" + sAreaCode + sPhoneNumber + "'";
 sSQL += " AND (Account_Type='O' OR Account_Type='T')";
 sSQL += " AND Expiry_Date>'" + sDate + "'";
+sSQL += " AND (Status='Active' OR Status='Google')";
 //sSQL += " AND Status='Active'";	//先不要這一行，也就是說若尚未註冊Google帳號也能收到通知
+//writeLog("debug", "sSQL: " + sSQL);
 
 ht = getDBData(sSQL, gcDataSourceName);
 
@@ -101,7 +103,7 @@ String		sRecepientType		= "";
 //找出通知對象
 sSQL = "SELECT Line_User_ID FROM callpro_account";
 sSQL += " WHERE Audit_Phone_Number='" + sAreaCode + sPhoneNumber + "'";
-sSQL += " AND Send_Notification='Y'";
+sSQL += " AND Send_Instant_Notification='Y'";
 //sSQL += " AND Status='Active'";	//先不要這一行，也就是說若尚未註冊Google帳號也能收到通知
 sSQL += " AND (Status='Active' OR Status='Google')";
 
@@ -139,6 +141,7 @@ sMessageBody = sAreaCode + sPhoneNumber + "來電自" + sAPartyNumber + "，對�
 sPushMessage = generateLineTextMessage(sRecepientType, s, sMessageBody);
 
 //Push Line 訊息給客戶
+//writeLog("debug", "Send line push to the following URL: " + sLineGatewayUrlSendTextPush + sLineChannelName + "&type=" + sRecepientType);
 if (!sendPushMessageToLine(sLineGatewayUrlSendTextPush + sLineChannelName + "&type=" + sRecepientType, sPushMessage)){
 	sResultCode = gcResultCodeUnknownError;
 	sResultText = gcResultTextUnknownError;

@@ -26,6 +26,11 @@
 <%@page import="com.google.api.services.people.v1.model.Person" %>
 <%@page import="com.google.api.services.people.v1.model.PhoneNumber" %>
 <%@page import="com.google.api.services.people.v1.model.Name" %>
+<%@page import="com.google.api.services.people.v1.model.Occupation" %>
+<%@page import="com.google.api.services.people.v1.model.Residence" %>
+<%@page import="com.google.api.services.people.v1.model.Address" %>
+<%@page import="com.google.api.services.people.v1.model.Organization" %>
+<%@page import="com.google.api.services.people.v1.model.EmailAddress" %>
 
 <%@page import="com.google.api.services.urlshortener.Urlshortener" %>
 <%@page import="com.google.api.services.urlshortener.model.Url" %>
@@ -146,7 +151,7 @@ public Hashtable doRefreshGoogleToken(String refreshToken, String clientId, Stri
 		htResponse.put("ResultText", sResultText);
 		return htResponse;
 	}else{
-		writeLog("debug", "Google response after getting new Google access token: " + sResponse);
+		//writeLog("debug", "Google response after getting new Google access token: " + sResponse);
 	}
 	
 	//取得 Google 回傳的資料了，解析 Access Token
@@ -162,7 +167,8 @@ public Hashtable doRefreshGoogleToken(String refreshToken, String clientId, Stri
 			htResponse.put("ResultText", sResultText);
 			return htResponse;
 		}else{
-			writeLog("debug", "Got Access Token=" + sAccessToken);
+			//writeLog("debug", "Got Access Token=" + sAccessToken);
+			writeLog("debug", "Got Access Token successfully");
 			htResponse.put("AccessToken", sAccessToken);
 		}
 	} catch (Exception e) {

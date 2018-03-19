@@ -29,6 +29,8 @@ String sAccountName	= nullToString(request.getParameter("accountName"), "");
 String sContactPhone	= nullToString(request.getParameter("contactPhone"), "");
 String sContactAddress	= nullToString(request.getParameter("contactAddress"), "");
 String sTaxIDNumber	= nullToString(request.getParameter("taxIDNumber"), "");
+String sSendInstantNotification	= nullToString(request.getParameter("sendInstantNotification"), "");
+String sSendCDRNotification	= nullToString(request.getParameter("sendCDRNotification"), "");
 
 if (beEmpty(sRowId) || beEmpty(sAccountName)){
 	obj.put("resultCode", gcResultCodeParametersNotEnough);
@@ -89,6 +91,20 @@ if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
 }
 
 sSQL = "UPDATE callpro_account SET ";
+if (notEmpty(sSendInstantNotification)){
+	if (sSendInstantNotification.equals("Y")){
+		sSQL += "Send_Instant_Notification='Y',";
+	}else{
+		sSQL += "Send_Instant_Notification='N',";
+	}
+}
+if (notEmpty(sSendCDRNotification)){
+	if (sSendCDRNotification.equals("Y")){
+		sSQL += "Send_CDR_Notification='Y',";
+	}else{
+		sSQL += "Send_CDR_Notification='N',";
+	}
+}
 sSQL += "Account_Name='" + sAccountName + "'";
 sSQL += " WHERE id=" + sRowId;
 sSQLList.add(sSQL);

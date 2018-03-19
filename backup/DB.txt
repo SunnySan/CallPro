@@ -12,7 +12,8 @@
   `Line_Channel_Name` varchar(30) COLLATE utf8_bin DEFAULT NULL,
   `Parent_Account_Sequence` int(11) DEFAULT NULL,
   `Audit_Phone_Number` varchar(20) COLLATE utf8_bin DEFAULT NULL COMMENT '監控電話號碼，當callpro_account的Account_Type=O或T時使用',
-  `Send_Notification` char(1) COLLATE utf8_bin DEFAULT NULL,
+  `Send_Instant_Notification` char(1) COLLATE utf8_bin DEFAULT NULL,
+  `Send_CDR_Notification` char(1) COLLATE utf8_bin DEFAULT NULL,
   `Billing_Start_Date` datetime DEFAULT NULL,
   `Expiry_Date` datetime DEFAULT NULL,
   `Authorization_Code` varchar(10) COLLATE utf8_bin DEFAULT NULL,
@@ -21,7 +22,7 @@
   UNIQUE KEY `Account_Sequence_UNIQUE` (`Account_Sequence`),
   KEY `IDX_Audit_Phone_Number` (`Audit_Phone_Number`),
   KEY `IDX_Line_ID_Channel` (`Line_User_ID`,`Line_Channel_Name`)
-) ENGINE=InnoDB AUTO_INCREMENT=62 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=75 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 
 CREATE TABLE `callpro_account_detail` (

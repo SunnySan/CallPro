@@ -24,21 +24,16 @@ out.clear();	//注意，一定要有out.clear();，要不然client端無法解�
 /*********************開始做事吧*********************/
 JSONObject obj=new JSONObject();
 
-String sAuditPhoneNumber	= nullToString(request.getParameter("auditPhoneNumber"), "");
+String sAccountSequence	= nullToString(request.getParameter("accountSequence"), "");
 String sAction	= nullToString(request.getParameter("action"), "");
-String sRowId	= nullToString(request.getParameter("rowId"), "");
 
 //登入用戶的資訊
 String sLoginUserAccountSequence	= (String)session.getAttribute("Account_Sequence");
 String sLoginUserAccountType		= (String)session.getAttribute("Account_Type");
 String sLoginUserAuditPhoneNumber	= (String)session.getAttribute("Audit_Phone_Number");
 
-if (notEmpty(sLoginUserAuditPhoneNumber)){
-	sAuditPhoneNumber = sLoginUserAuditPhoneNumber;	//如果登入的是電話主人，只能查自己的紀錄
-}
-
-//加盟商不能做
-if (beEmpty(sLoginUserAccountSequence) || beEmpty(sLoginUserAccountType) || sLoginUserAccountType.equals("D")){
+//只有系統管理者能執行此作業
+if (beEmpty(sLoginUserAccountSequence) || beEmpty(sLoginUserAccountType) || !sLoginUserAccountType.equals("A")){
 	obj.put("resultCode", gcResultCodeNoPriviledge);
 	obj.put("resultText", gcResultTextNoPriviledge);
 	out.print(obj);
@@ -46,9 +41,9 @@ if (beEmpty(sLoginUserAccountSequence) || beEmpty(sLoginUserAccountType) || sLog
 	return;
 }
 
-writeLog("info", "Do member suspend or delete, sAuditPhoneNumber=" + sAuditPhoneNumber + ", sLoginUserAccountSequence=" + sLoginUserAccountSequence + ", sAction=" + sAction + ", sRowId=" + sRowId);
+writeLog("info", "Do dealer suspend or delete, sLoginUserAccountSequence=" + sLoginUserAccountSequence + ", sAction=" + sAction + ", sAccountSequence=" + sAccountSequence);
 
-if (beEmpty(sAuditPhoneNumber) || beEmpty(sAction) || beEmpty(sRowId)){
+if (beEmpty(sAccountSequence) || beEmpty(sAction)){
 	obj.put("resultCode", gcResultCodeParametersNotEnough);
 	obj.put("resultText", gcResultTextParametersNotEnough);
 	out.print(obj);
@@ -69,11 +64,12 @@ int			j					= 0;
 String		sWhere				= "";
 
 if (sAction.equals("delete")){	//刪除
-	sSQL = "DELETE FROM callpro_account";
+	//sSQL = "DELETE FROM callpro_account";
+	sSQL = "UPDATE callpro_account SET Status='Delete'";	//先不刪除加盟商，只將狀態改為Delete，以免電話主人帳號找不到Parent_Account_Sequence
 }else if (sAction.equals("suspend")){	//停用
-	sSQL = "UPDATE callpro_account SET Send_Instant_Notification='N'";
+	sSQL = "UPDATE callpro_account SET Status='Suspend'";
 }else if (sAction.equals("revert")){	//復用
-	sSQL = "UPDATE callpro_account SET Send_Instant_Notification='Y'";
+	sSQL = "UPDATE callpro_account SET Status='Active'";
 }else{
 	obj.put("resultCode", gcResultCodeParametersValidationError);
 	obj.put("resultText", gcResultTextParametersValidationError);
@@ -81,14 +77,8 @@ if (sAction.equals("delete")){	//刪除
 	out.flush();
 	return;
 }
-sSQL += " WHERE id=" + sRowId;
-sSQL += " AND (Account_Type='M' OR Account_Type='M')";
-if (sLoginUserAccountType.equals("O") || sLoginUserAccountType.equals("T")){
-	sSQL += " AND Parent_Account_Sequence='" + sLoginUserAccountSequence + "'";
-}else{
-	sSQL += " AND Audit_Phone_Number='" + sAuditPhoneNumber + "'";
-}
-//sSQL += " AND Status='Active'";
+sSQL += " WHERE Account_Sequence=" + sAccountSequence;
+sSQL += " AND Account_Type='D'";
 sSQLList.add(sSQL);
 
 //writeLog("debug", sSQL);

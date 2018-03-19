@@ -104,7 +104,7 @@ sSQL = "SELECT A.Line_User_ID, A.Line_Channel_Name, B.Google_Refresh_Token";
 sSQL += " FROM callpro_account A, callpro_account_detail B";
 sSQL += " WHERE A.Audit_Phone_Number='" + sAreaCode + sPhoneNumber + "'";
 sSQL += " AND (A.Account_Type='O' OR A.Account_Type='T')";
-sSQL += " AND A.Send_Notification='Y'";
+sSQL += " AND A.Send_CDR_Notification='Y'";
 sSQL += " AND A.Status='Active'";
 sSQL += " AND A.Expiry_Date>'" + sDate + "'";
 sSQL += " AND A.Account_Sequence=B.Main_Account_Sequence";
