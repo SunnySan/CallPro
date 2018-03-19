@@ -120,6 +120,8 @@ ht = updateDBData(sSQLList, gcDataSourceName, false);
 sResultCode = ht.get("ResultCode").toString();
 sResultText = ht.get("ResultText").toString();
 
+writeLog("debug", "修改電話主人資料，管理者(加盟商)Account_Sequence= " + sLoginUserAccountSequence + ", 電話主人row id= " + sRowId + ", 電話主人姓名= " + sAccountName + ", 連絡電話= " + sContactPhone + ", 地址= " + sContactAddress + ", 統編= " + sTaxIDNumber + ", 發送即時LINE通知= " + sSendInstantNotification + ", 發送錄音檔LINE通知= " + sSendCDRNotification);
+
 //回覆 client 端
 obj.put("resultCode", sResultCode);
 obj.put("resultText", sResultText);
