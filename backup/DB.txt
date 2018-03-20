@@ -4,7 +4,7 @@
   `Create_Date` datetime DEFAULT NULL,
   `Update_User` varchar(50) COLLATE utf8_bin DEFAULT NULL,
   `Update_Date` datetime DEFAULT NULL,
-  `Account_Sequence` int(11) NOT NULL,
+  `Account_Sequence` int(11) NOT NULL COMMENT 'Unique ID to identify this user',
   `Account_Name` varchar(30) COLLATE utf8_bin NOT NULL,
   `Account_Type` char(1) COLLATE utf8_bin NOT NULL COMMENT 'A=Admin, D=Dealer, O=Phone owner, M=Phone member, T=Phone owner for trial, U=Phone member for trial',
   `Bill_Type` char(1) COLLATE utf8_bin DEFAULT NULL COMMENT '當Account_Type=O或T時有值，B為入門版、A為進階版',
@@ -12,17 +12,21 @@
   `Line_Channel_Name` varchar(30) COLLATE utf8_bin DEFAULT NULL,
   `Parent_Account_Sequence` int(11) DEFAULT NULL,
   `Audit_Phone_Number` varchar(20) COLLATE utf8_bin DEFAULT NULL COMMENT '監控電話號碼，當callpro_account的Account_Type=O或T時使用',
-  `Send_Instant_Notification` char(1) COLLATE utf8_bin DEFAULT NULL,
-  `Send_CDR_Notification` char(1) COLLATE utf8_bin DEFAULT NULL,
+  `Send_Instant_Notification` char(1) COLLATE utf8_bin DEFAULT NULL COMMENT 'Y=發送即時LINE通知、N=不發送即時LINE通知',
+  `Send_CDR_Notification` char(1) COLLATE utf8_bin DEFAULT NULL COMMENT 'Y=發送錄音檔LINE通知、N=不發送錄音檔LINE通知',
   `Billing_Start_Date` datetime DEFAULT NULL,
   `Expiry_Date` datetime DEFAULT NULL,
   `Authorization_Code` varchar(10) COLLATE utf8_bin DEFAULT NULL,
-  `Status` varchar(10) COLLATE utf8_bin NOT NULL COMMENT 'Init: 等待用戶輸入授權碼、Google: 等待取得Google帳號(經銷商及進階版擁有者)、Active: 正常、Block: 用戶已封鎖LINE官網帳號、Suspend: 帳號暫停使用',
+  `Status` varchar(10) COLLATE utf8_bin NOT NULL COMMENT 'Init: 等待用戶輸入授權碼、Google: 等待取得Google帳號(經銷商及進階版擁有者)、Active: 正常、Unfollow: 用戶已封鎖LINE官網帳號、Suspend: 帳號暫停使用、Delete: 帳號已刪除',
   PRIMARY KEY (`id`),
   UNIQUE KEY `Account_Sequence_UNIQUE` (`Account_Sequence`),
   KEY `IDX_Audit_Phone_Number` (`Audit_Phone_Number`),
   KEY `IDX_Line_ID_Channel` (`Line_User_ID`,`Line_Channel_Name`)
-) ENGINE=InnoDB AUTO_INCREMENT=75 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=76 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+
+
+
 
 
 CREATE TABLE `callpro_account_detail` (
@@ -36,6 +40,7 @@ CREATE TABLE `callpro_account_detail` (
   `Google_User_Picture_URL` varchar(200) COLLATE utf8_bin DEFAULT NULL,
   `Google_Email` varchar(100) COLLATE utf8_bin DEFAULT NULL,
   `Google_Refresh_Token` varchar(200) COLLATE utf8_bin DEFAULT NULL,
+  `Google_People_API_SyncToken` varchar(128) COLLATE utf8_bin DEFAULT NULL,
   `Contact_Phone` varchar(20) COLLATE utf8_bin DEFAULT NULL,
   `Contact_Address` varchar(100) COLLATE utf8_bin DEFAULT NULL,
   `Tax_ID_Number` varchar(8) COLLATE utf8_bin DEFAULT NULL,
@@ -46,7 +51,11 @@ CREATE TABLE `callpro_account_detail` (
   `Main_Account_Sequence` int(11) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `IDX_Main_Account_Sequence` (`Main_Account_Sequence`)
-) ENGINE=InnoDB AUTO_INCREMENT=37 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=40 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+
+
+
 
 
 CREATE TABLE `callpro_call_log` (
@@ -55,6 +64,7 @@ CREATE TABLE `callpro_call_log` (
   `Create_Date` datetime DEFAULT NULL,
   `Update_User` varchar(50) COLLATE utf8_bin DEFAULT NULL,
   `Update_Date` datetime DEFAULT NULL,
+  `Account_Sequence` int(11) DEFAULT NULL,
   `Audit_Phone_Number` varchar(20) COLLATE utf8_bin NOT NULL,
   `Caller_Phone_Number` varchar(20) COLLATE utf8_bin NOT NULL,
   `Call_Type` varchar(1) COLLATE utf8_bin NOT NULL COMMENT '0=撥入、1=撥出',
@@ -67,7 +77,36 @@ CREATE TABLE `callpro_call_log` (
   `Caller_Company` varchar(50) COLLATE utf8_bin DEFAULT NULL,
   `Caller_Email` varchar(100) COLLATE utf8_bin DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=276 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+
+
+
+
+CREATE TABLE `callpro_call_log_deleted` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `Create_User` varchar(50) COLLATE utf8_bin DEFAULT NULL,
+  `Create_Date` datetime DEFAULT NULL,
+  `Update_User` varchar(50) COLLATE utf8_bin DEFAULT NULL,
+  `Update_Date` datetime DEFAULT NULL,
+  `Account_Sequence` int(11) DEFAULT NULL,
+  `Audit_Phone_Number` varchar(20) COLLATE utf8_bin NOT NULL,
+  `Caller_Phone_Number` varchar(20) COLLATE utf8_bin NOT NULL,
+  `Call_Type` varchar(1) COLLATE utf8_bin NOT NULL COMMENT '0=撥入、1=撥出',
+  `Record_Length` int(11) DEFAULT NULL,
+  `Record_Talked_Time` int(11) DEFAULT NULL,
+  `Record_Time_Start` datetime DEFAULT NULL,
+  `Record_File_URL` varchar(100) COLLATE utf8_bin DEFAULT NULL,
+  `Caller_Name` varchar(50) COLLATE utf8_bin DEFAULT NULL,
+  `Caller_Address` varchar(100) COLLATE utf8_bin DEFAULT NULL,
+  `Caller_Company` varchar(50) COLLATE utf8_bin DEFAULT NULL,
+  `Caller_Email` varchar(100) COLLATE utf8_bin DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=266 DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='當電話主人資料被刪除時，將該電話主人的CDR資料移到這裡來';
+
+
+
+
 
 
 CREATE TABLE `callpro_line_channel` (
@@ -75,6 +114,10 @@ CREATE TABLE `callpro_line_channel` (
   `Channel_Desc` varchar(50) COLLATE utf8_bin NOT NULL,
   PRIMARY KEY (`Line_Channel_Name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+
+
+
 
 
 CREATE TABLE `sequence` (
@@ -86,6 +129,10 @@ CREATE TABLE `sequence` (
   `cycle` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`name`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+
+
+
 
 
 DELIMITER $$
@@ -123,3 +170,9 @@ BEGIN
     RETURN cur_val;
 END$$
 DELIMITER ;
+
+
+
+
+
+

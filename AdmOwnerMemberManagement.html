@@ -189,9 +189,10 @@
 					<table id="tblResult" class="table table-bordered table-striped">
 						<thead>
 							<tr>
-								<th>開通日期</th>
 								<th>帳號姓名</th>
+								<th>開通日期</th>
 								<th>狀態</th>
+								<th>更名</th>
 								<th>停用</th>
 								<th>刪除</th>
 							</tr>
@@ -200,9 +201,10 @@
 						</tbody>
 						<tfoot>
 							<tr>
-								<th>開通日期</th>
 								<th>帳號姓名</th>
+								<th>開通日期</th>
 								<th>狀態</th>
+								<th>更名</th>
 								<th>停用</th>
 								<th>刪除</th>
 							</tr>
@@ -230,10 +232,37 @@
 						</div>
 						<div class="modal-body">
 							<p>此作業將會刪除子帳號【<span id="modalAccountName"></span>】的資料</p>
-							</div>
-							<div class="modal-footer">
+						</div>
+						<div class="modal-footer">
 							<button type="button" class="btn btn-outline pull-left" data-dismiss="modal">取消</button>
 							<button type="button" class="btn btn-outline" onclick="confirmDelete();">確認刪除</button>
+						</div>
+					</div><!-- /.modal-content -->
+				</div><!-- /.modal-dialog -->
+			</div><!-- /.modal -->		
+
+			<!-- 修改子帳號姓名的視窗 -->
+			<div class="modal modal-warning fade" id="modal-warning-edit-member-name">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span></button>
+							<h4 class="modal-title">修改子帳號姓名</h4>
+						</div>
+						<div class="modal-body">
+							<div class="row">
+								<div class="form-group col-md-12">
+									<label for="newMemberName" class="col-sm-3 control-label">子帳號姓名</label>
+									<div class="col-sm-9">
+										<input type="text" class="form-control" id="newMemberName" maxlength="20">
+									</div>
+								</div><!-- /.form-group -->
+							</div>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-outline pull-left" data-dismiss="modal">取消</button>
+							<button type="button" class="btn btn-outline" onclick="confirmRename();">確認更名</button>
 						</div>
 					</div><!-- /.modal-content -->
 				</div><!-- /.modal-dialog -->
@@ -334,9 +363,10 @@
 				if (data.resultCode=="00000"){
 					s = "";
 					$.each( data.records, function(i, r) {
-						r.Suspend = (r.Send_Instant_Notification=="Y"?"<input type='button' value='停用' onclick=\"doEdit('suspend', '" + r.id + "');\">":"<input type='button' value='復用' onclick=\"doEdit('revert', '" + r.id + "');\">");
+						r.rename = "<input type='button' value='更名' onclick=\"popupRenameMemberModal('" + r.id + "', '" + r.Account_Name + "');\">";
+						r.suspend = (r.Send_Instant_Notification=="Y"?"<input type='button' value='停用' onclick=\"doEdit('suspend', '" + r.id + "', '');\">":"<input type='button' value='復用' onclick=\"doEdit('revert', '" + r.id + "', '');\">");
 						r.Send_Instant_Notification = (r.Send_Instant_Notification=="Y"?"正常":"<span style='color:#FF0000;'>停用</span>");
-						r.Delete = "<input type='button' value='刪除' onclick=\"doDelete('" + r.id + "', '" + r.Account_Name + "');\">";
+						r.delete = "<input type='button' value='刪除' onclick=\"doDelete('" + r.id + "', '" + r.Account_Name + "');\">";
 
 					});	//$.each( data.orders, function(i, r) {
 					if ($.fn.dataTable.isDataTable(table) ){
@@ -358,8 +388,9 @@
 							{ data: 'Account_Name' },
 							{ data: 'Create_Date' },
 							{ data: 'Send_Instant_Notification' },
-							{ data: 'Suspend' },
-							{ data: 'Delete' },
+							{ data: 'rename' },
+							{ data: 'suspend' },
+							{ data: 'delete' }
 						],
 						order: [[ 0, 'desc' ]]
 					} );
@@ -378,7 +409,15 @@
 	}
 
 	var rowIdToBeDeleted;
-	
+	var rowIdToBeRenamed;
+
+	function popupRenameMemberModal(rowId, accountName){
+		rowIdToBeRenamed = rowId;
+		$('#newMemberName').val(accountName);
+		//$('#modal-danger').modal({backdrop:false});	//若設為 false，則用戶按背景時將不會關閉 modal window
+		$('#modal-warning-edit-member-name').modal('show');
+	}
+
 	function doDelete(rowId, accountName){
 		rowIdToBeDeleted = rowId;
 		$('#modalAccountName').text(accountName);
@@ -386,17 +425,29 @@
 		$('#modal-danger').modal('show');
 	}
 	
-	function confirmDelete(){
-		$('#modal-danger').modal('hide');
-		doEdit('delete', rowIdToBeDeleted);
+	function confirmRename(){
+		var newName = $('#newMemberName').val();
+		if (beEmpty(newName) || newName.length>20){
+			msgBox("子帳號需有姓名且長度不可超過20個字，請重新輸入!");
+			return;
+		}
+
+		$('#modal-warning-edit-member-name').modal('hide');
+		doEdit('rename', rowIdToBeRenamed, newName);
 	}
 
-	function doEdit(myAction, rowId){
+	function confirmDelete(){
+		$('#modal-danger').modal('hide');
+		doEdit('delete', rowIdToBeDeleted, '');
+	}
+
+	function doEdit(myAction, rowId, newMemberName){
 		$('.overlay').show();
 		
 		var sData = "";
 		sData = "action=" + myAction;
 		sData += "&rowId=" + rowId;
+		sData += "&newMemberName=" + newMemberName;
 		
 		getDataFromServer("ajaxDoPhoneMemberSuspendAndDelete.jsp", sData, "json", function(data){
 			if (!data.resultCode || !data.resultText){

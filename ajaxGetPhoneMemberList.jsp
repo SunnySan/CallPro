@@ -25,6 +25,7 @@ out.clear();	//注意，一定要有out.clear();，要不然client端無法解�
 JSONObject obj=new JSONObject();
 
 String sAuditPhoneNumber	= nullToString(request.getParameter("auditPhoneNumber"), "");
+String sAccountSequence		= nullToString(request.getParameter("accountSequence"), "");
 
 //登入用戶的資訊
 String sLoginUserAccountSequence	= (String)session.getAttribute("Account_Sequence");
@@ -32,6 +33,7 @@ String sLoginUserAccountType		= (String)session.getAttribute("Account_Type");
 String sLoginUserAuditPhoneNumber	= (String)session.getAttribute("Audit_Phone_Number");
 
 if (notEmpty(sLoginUserAuditPhoneNumber)){
+	sAccountSequence = sLoginUserAccountSequence;
 	sAuditPhoneNumber = sLoginUserAuditPhoneNumber;	//如果登入的是電話主人，只能查自己的紀錄
 }
 
@@ -44,7 +46,7 @@ if (beEmpty(sLoginUserAccountSequence) || beEmpty(sLoginUserAccountType) || sLog
 	return;
 }
 
-if (beEmpty(sAuditPhoneNumber)){
+if (beEmpty(sAccountSequence)){
 	obj.put("resultCode", gcResultCodeParametersNotEnough);
 	obj.put("resultText", gcResultTextParametersNotEnough);
 	out.print(obj);
@@ -66,12 +68,8 @@ String		sWhere				= "";
 
 sSQL = "SELECT id, DATE_FORMAT(Create_Date,'%y-%m-%d %H:%i'), Account_Name, Send_Instant_Notification";
 sSQL += " FROM callpro_account";
-sSQL += " WHERE Account_Type='M'";
-if (sLoginUserAccountType.equals("O") || sLoginUserAccountType.equals("T")){
-	sSQL += " AND Parent_Account_Sequence='" + sLoginUserAccountSequence + "'";
-}else{
-	sSQL += " AND Audit_Phone_Number='" + sAuditPhoneNumber + "'";
-}
+sSQL += " WHERE (Account_Type='M' OR Account_Type='U')";
+sSQL += " AND Parent_Account_Sequence='" + sAccountSequence + "'";
 sSQL += " AND Status='Active'";
 sSQL += " ORDER BY id DESC";
 

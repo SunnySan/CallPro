@@ -312,7 +312,7 @@
 				if (data.resultCode=="00000"){
 					msgBox("即時通知發送成功，將繼續發送錄音檔通知訊息!", doSendCDR);
 				}else{
-					msgBox("取得即時通知發送結果失敗:<br>" + data.resultText);
+					msgBox("即時通知發送失敗:<br>" + data.resultText + "，將繼續嘗試發送錄音檔通知訊息!", doSendCDR);
 				}
 				$('.overlay').hide();
 			}
@@ -361,7 +361,7 @@
 		
 		getDataFromServer("Event_PCClientNewCDR.jsp", sData, "text", function(data){
 			$('.overlay').hide();
-			msgBox("錄音檔通知發送結果如下，若結果為【" + recordfile + "】，表示發送成功：<p>" + data);
+			msgBox("錄音檔通知上傳Google/發送結果如下，若結果為【" + recordfile + "】，表示發送成功：<p>" + data);
 		});	//getDataFromServer("xxx.jsp", sData, "json", function(data){
 	}
 </script>

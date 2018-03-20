@@ -98,13 +98,15 @@ int			k					= 0;
 
 String		sLineChannelName	= "";
 String		sRefreshToken		= "";
+String		sAccountSequence	= "";
+java.lang.Boolean	bSendLineNotification	= false;
 
 //確認門號主人狀態正常且已取得Google帳號
-sSQL = "SELECT A.Line_User_ID, A.Line_Channel_Name, B.Google_Refresh_Token";
+sSQL = "SELECT A.Line_User_ID, A.Line_Channel_Name, B.Google_Refresh_Token, A.Account_Sequence, A.Send_CDR_Notification";
 sSQL += " FROM callpro_account A, callpro_account_detail B";
 sSQL += " WHERE A.Audit_Phone_Number='" + sAreaCode + sPhoneNumber + "'";
 sSQL += " AND (A.Account_Type='O' OR A.Account_Type='T')";
-sSQL += " AND A.Send_CDR_Notification='Y'";
+//sSQL += " AND A.Send_CDR_Notification='Y'";
 sSQL += " AND A.Status='Active'";
 sSQL += " AND A.Expiry_Date>'" + sDate + "'";
 sSQL += " AND A.Account_Sequence=B.Main_Account_Sequence";
@@ -123,8 +125,10 @@ if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
 		//out.flush();
 		return;
 	}
-	sLineChannelName = s[0][1];
-	sRefreshToken = s[0][2];
+	sLineChannelName = nullToString(s[0][1], "");
+	sRefreshToken = nullToString(s[0][2], "");
+	sAccountSequence = nullToString(s[0][3], "");
+	if (nullToString(s[0][4], "").equals("Y")) bSendLineNotification = true;
 }else{
 	obj.put("resultCode", sResultCode);
 	obj.put("resultText", sResultText);
@@ -240,12 +244,14 @@ try{
 	ht = addGoogleCalendarEvent(HTTP_TRANSPORT, JSON_FACTORY, credential, Integer.parseInt(sTalkedTime), sAreaCode + sPhoneNumber + (sType.equals("0")?"來電自":"撥出電話到") + sCallerNumber, sMessageBody );
 	
 	//Push Line 訊息給客戶
-	if (sendPushMessageToLine(sLineGatewayUrlSendTextPush + sLineChannelName + "&type=" + sRecepientType, sPushMessage)){
-		sResultCode = gcResultCodeSuccess;
-		sResultText = gcResultTextSuccess;
-	}else{
-		sResultCode = gcResultCodeUnknownError;
-		sResultText = gcResultTextUnknownError;
+	if (bSendLineNotification){
+		if (sendPushMessageToLine(sLineGatewayUrlSendTextPush + sLineChannelName + "&type=" + sRecepientType, sPushMessage)){
+			sResultCode = gcResultCodeSuccess;
+			sResultText = gcResultTextSuccess;
+		}else{
+			sResultCode = gcResultCodeUnknownError;
+			sResultText = gcResultTextUnknownError;
+		}
 	}
 	
 	/*
@@ -266,7 +272,7 @@ try{
     */
     
     //新增Call Log記錄至database
-    insertIntoCallLog(sAreaCode + sPhoneNumber, sCallerNumber, sType, sRecordTime, sTalkedTime, sRecordTimeStart, (beEmpty(sShortURL)?sFileURL:sShortURL), sCallerName, sCallerAddr, sCallerCompany, sCallerEmail);
+    insertIntoCallLog(sAreaCode + sPhoneNumber, sCallerNumber, sType, sRecordTime, sTalkedTime, sRecordTimeStart, (beEmpty(sShortURL)?sFileURL:sShortURL), sCallerName, sCallerAddr, sCallerCompany, sCallerEmail, sAccountSequence);
 }catch (Exception e){
 	writeLog("error", "Google Drive Error" + e.toString());
 	sResultCode = gcResultCodeUnknownError;
@@ -380,7 +386,7 @@ body.setPermissionIds(list);
 <%!
 	
 	//新增Call Log記錄至database
-	private void insertIntoCallLog(String sAuditPhoneNumber, String sCallerPhoneNumber, String sCallType, String sRecordLength, String sRecordTalkedTime, String sRecordTimeStart, String sRecordFileURL, String sCallerName, String sCallerAddress, String sCallerCompany, String sCallerEmail){
+	private void insertIntoCallLog(String sAuditPhoneNumber, String sCallerPhoneNumber, String sCallType, String sRecordLength, String sRecordTalkedTime, String sRecordTimeStart, String sRecordFileURL, String sCallerName, String sCallerAddress, String sCallerCompany, String sCallerEmail, String sAccountSequence){
 		Hashtable	ht					= new Hashtable();
 		String		sSQL				= "";
 		String		sResultCode			= gcResultCodeSuccess;
@@ -389,11 +395,12 @@ body.setPermissionIds(list);
 		String		sDate				= getDateTimeNow(gcDateFormatSlashYMDTime);
 		String		sUser				= "System";
 
-		sSQL = "INSERT INTO callpro_call_log (Create_User, Create_Date, Update_User, Update_Date, Audit_Phone_Number, Caller_Phone_Number, Call_Type, Record_Length, Record_Talked_Time, Record_Time_Start, Record_File_URL, Caller_Name, Caller_Address, Caller_Company, Caller_Email) VALUES (";
+		sSQL = "INSERT INTO callpro_call_log (Create_User, Create_Date, Update_User, Update_Date, Account_Sequence, Audit_Phone_Number, Caller_Phone_Number, Call_Type, Record_Length, Record_Talked_Time, Record_Time_Start, Record_File_URL, Caller_Name, Caller_Address, Caller_Company, Caller_Email) VALUES (";
 		sSQL += "'" + sUser + "',";
 		sSQL += "'" + sDate + "',";
 		sSQL += "'" + sUser + "',";
 		sSQL += "'" + sDate + "',";
+		sSQL += "'" + sAccountSequence + "',";
 		sSQL += "'" + sAuditPhoneNumber + "',";
 		sSQL += "'" + sCallerPhoneNumber + "',";
 		sSQL += "'" + sCallType + "',";

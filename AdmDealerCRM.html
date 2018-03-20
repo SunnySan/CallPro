@@ -528,9 +528,10 @@
 						if (r.Account_Type=="O") tmp = "正式";
 						if (r.Account_Type=="T") tmp = "測試";
 						r.Account_And_Bill_Type = tmp + translateBillType(r.Bill_Type);
+						tmp = r.Status;
 						r.Status = translateStatus(r.Status);
-						r.edit = "<input type='button' onclick=\"getAccountDetail('" + r.id + "');\" value='詳細資料'>";
-						//r.Record_File_URL = "<a href='" + r.Record_File_URL + "' target='_blank'>聽取</a>";
+						if (tmp!="Active") r.Status = "<span style='color:#FF0000;'>" + r.Status + "</span>";
+						r.edit = "<input type='button' onclick=\"getAccountDetail('" + r.id + "', '" + r.Account_Sequence + "', '" + tmp + "');\" value='詳細資料'>";
 
 					});	//$.each( data.orders, function(i, r) {
 					
@@ -573,7 +574,7 @@
 		});	//getDataFromServer("xxx.jsp", sData, "json", function(data){
 	}
 	
-	function getAccountDetail(rowId){
+	function getAccountDetail(rowId, accountSequence, status){
 		
 		if (beEmpty(rowId)){
 			msgBox("無法取得資料鍵值!");
@@ -581,9 +582,15 @@
 		}
 
 		$('#boxDetail').show();
-		$('#boxEdit').show();
+		if (status=="Delete"){
+			$('#boxEdit').hide();
+		}else{
+			$('#boxEdit').show();
+		}
 
 		$('.overlay').show();
+		
+		clearDetailAndEditData();
 		
 		var sData = "";
 		

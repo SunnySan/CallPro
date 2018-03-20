@@ -28,6 +28,7 @@ String sAuditPhoneNumber	= nullToString(request.getParameter("auditPhoneNumber")
 String sCallerPhoneNumber	= nullToString(request.getParameter("callerPhoneNumber"), "");
 String sDateStart			= nullToString(request.getParameter("dateStart"), "");
 String sDateEnd				= nullToString(request.getParameter("dateEnd"), "");
+String sAccountSequence		= nullToString(request.getParameter("accountSequence"), "");
 
 //登入用戶的資訊
 String sLoginUserAccountSequence	= (String)session.getAttribute("Account_Sequence");
@@ -35,11 +36,14 @@ String sLoginUserAccountType		= (String)session.getAttribute("Account_Type");
 String sLoginUserAuditPhoneNumber	= (String)session.getAttribute("Audit_Phone_Number");
 
 if (notEmpty(sLoginUserAuditPhoneNumber)){
+	sAccountSequence = sLoginUserAccountSequence;
 	sAuditPhoneNumber = sLoginUserAuditPhoneNumber;	//如果登入的是電話主人，只能查自己的紀錄
 }
 
 //由於用戶從LINE browser無法登入Google，所以允許用戶未登入就查詢某個 sAuditPhoneNumber + sCallerPhoneNumber 的記錄
-if ((beEmpty(sLoginUserAccountSequence) && beEmpty(sAuditPhoneNumber)) || ((beEmpty(sDateStart) || beEmpty(sDateEnd)) && beEmpty(sCallerPhoneNumber))){
+//if ((beEmpty(sLoginUserAccountSequence) && beEmpty(sAuditPhoneNumber)) || ((beEmpty(sDateStart) || beEmpty(sDateEnd)) && beEmpty(sCallerPhoneNumber))){
+//用戶要登入後才能查
+if (beEmpty(sLoginUserAccountSequence) || ((beEmpty(sDateStart) || beEmpty(sDateEnd)) && beEmpty(sCallerPhoneNumber))){
 	obj.put("resultCode", gcResultCodeParametersNotEnough);
 	obj.put("resultText", gcResultTextParametersNotEnough + "，或閒置過久遭系統自動登出，請確認資料正確並重新登入!");
 	out.print(obj);
@@ -71,6 +75,7 @@ int			j					= 0;
 
 String		sWhere				= "";
 
+if (notEmpty(sAccountSequence)) sWhere += " AND Account_Sequence='" + sAccountSequence + "'";
 if (notEmpty(sAuditPhoneNumber)) sWhere += " AND Audit_Phone_Number='" + sAuditPhoneNumber + "'";
 if (notEmpty(sCallerPhoneNumber)) sWhere += " AND Caller_Phone_Number='" + sCallerPhoneNumber + "'";
 if (notEmpty(sDateStart)) sWhere += " AND Record_Time_Start>='" + sDateStart + "'";

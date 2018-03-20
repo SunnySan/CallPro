@@ -24,24 +24,16 @@ out.clear();	//注意，一定要有out.clear();，要不然client端無法解�
 /*********************開始做事吧*********************/
 JSONObject obj=new JSONObject();
 
-String sAuditPhoneNumber	= nullToString(request.getParameter("auditPhoneNumber"), "");
+String sAccountSequence	= nullToString(request.getParameter("accountSequence"), "");
 String sAction	= nullToString(request.getParameter("action"), "");
-String sRowId	= nullToString(request.getParameter("rowId"), "");
-String sAccountSequence		= nullToString(request.getParameter("accountSequence"), "");
-String sNewMemberName		= nullToString(request.getParameter("newMemberName"), "");
 
 //登入用戶的資訊
 String sLoginUserAccountSequence	= (String)session.getAttribute("Account_Sequence");
 String sLoginUserAccountType		= (String)session.getAttribute("Account_Type");
 String sLoginUserAuditPhoneNumber	= (String)session.getAttribute("Audit_Phone_Number");
 
-if (notEmpty(sLoginUserAuditPhoneNumber)){
-	sAccountSequence = sLoginUserAccountSequence;
-	sAuditPhoneNumber = sLoginUserAuditPhoneNumber;	//如果登入的是電話主人，只能查自己的紀錄
-}
-
-//加盟商不能做
-if (beEmpty(sLoginUserAccountSequence) || beEmpty(sLoginUserAccountType) || sLoginUserAccountType.equals("D")){
+//只有系統管理者能執行此作業
+if (beEmpty(sLoginUserAccountSequence) || beEmpty(sLoginUserAccountType) || !sLoginUserAccountType.equals("A")){
 	obj.put("resultCode", gcResultCodeNoPriviledge);
 	obj.put("resultText", gcResultTextNoPriviledge);
 	out.print(obj);
@@ -49,19 +41,11 @@ if (beEmpty(sLoginUserAccountSequence) || beEmpty(sLoginUserAccountType) || sLog
 	return;
 }
 
-writeLog("info", "Do member suspend or delete, sAuditPhoneNumber=" + sAuditPhoneNumber + ", sLoginUserAccountSequence=" + sLoginUserAccountSequence + ", sAction=" + sAction + ", sRowId=" + sRowId);
+writeLog("info", "Do phone owner suspend or delete, sLoginUserAccountSequence=" + sLoginUserAccountSequence + ", sAction=" + sAction + ", sAccountSequence=" + sAccountSequence);
 
-if (beEmpty(sAccountSequence) || beEmpty(sAction) || beEmpty(sRowId)){
+if (beEmpty(sAccountSequence) || beEmpty(sAction)){
 	obj.put("resultCode", gcResultCodeParametersNotEnough);
 	obj.put("resultText", gcResultTextParametersNotEnough);
-	out.print(obj);
-	out.flush();
-	return;
-}
-
-if (sAction.equals("rename") && (beEmpty(sNewMemberName) || sNewMemberName.length()>20)){
-	obj.put("resultCode", gcResultCodeParametersValidationError);
-	obj.put("resultText", gcResultTextParametersValidationError);
 	out.print(obj);
 	out.flush();
 	return;
@@ -80,13 +64,12 @@ int			j					= 0;
 String		sWhere				= "";
 
 if (sAction.equals("delete")){	//刪除
-	sSQL = "DELETE FROM callpro_account";
+	//sSQL = "DELETE FROM callpro_account";
+	sSQL = "UPDATE callpro_account SET Status='Delete'";	//先不刪除加盟商，只將狀態改為Delete，以免電話主人帳號找不到Parent_Account_Sequence
 }else if (sAction.equals("suspend")){	//停用
-	sSQL = "UPDATE callpro_account SET Send_Instant_Notification='N'";
+	sSQL = "UPDATE callpro_account SET Status='Suspend'";
 }else if (sAction.equals("revert")){	//復用
-	sSQL = "UPDATE callpro_account SET Send_Instant_Notification='Y'";
-}else if (sAction.equals("rename")){	//更名
-	sSQL = "UPDATE callpro_account SET Account_Name='" + sNewMemberName + "'";
+	sSQL = "UPDATE callpro_account SET Status='Active'";
 }else{
 	obj.put("resultCode", gcResultCodeParametersValidationError);
 	obj.put("resultText", gcResultTextParametersValidationError);
@@ -94,12 +77,21 @@ if (sAction.equals("delete")){	//刪除
 	out.flush();
 	return;
 }
-sSQL += " WHERE id=" + sRowId;
-sSQL += " AND (Account_Type='M' OR Account_Type='M')";
-sSQL += " AND Parent_Account_Sequence='" + sAccountSequence + "'";
-//sSQL += " AND Status='Active'";
+sSQL += " WHERE Account_Sequence=" + sAccountSequence;
+sSQL += " AND (Account_Type='O' OR Account_Type='T')";
 sSQLList.add(sSQL);
 
+if (sAction.equals("delete")){	//刪除，將通話記錄移到 callpro_call_log_deleted 去
+	sSQL = "INSERT INTO callpro_call_log_deleted (Create_User, Create_Date, Update_User, Update_Date, Account_Sequence, Audit_Phone_Number, Caller_Phone_Number, Call_Type, Record_Length, Record_Talked_Time, Record_Time_Start, Record_File_URL, Caller_Name, Caller_Address, Caller_Company, Caller_Email)";
+	sSQL += " SELECT Create_User, Create_Date, Update_User, Update_Date, Account_Sequence, Audit_Phone_Number, Caller_Phone_Number, Call_Type, Record_Length, Record_Talked_Time, Record_Time_Start, Record_File_URL, Caller_Name, Caller_Address, Caller_Company, Caller_Email";
+	sSQL += " FROM callpro_call_log";
+	sSQL += " WHERE Account_Sequence=" + sAccountSequence;
+	sSQLList.add(sSQL);
+
+	sSQL = " DELETE FROM callpro_call_log";
+	sSQL += " WHERE Account_Sequence=" + sAccountSequence;
+	sSQLList.add(sSQL);
+}
 //writeLog("debug", sSQL);
 
 ht = updateDBData(sSQLList, gcDataSourceName, false);

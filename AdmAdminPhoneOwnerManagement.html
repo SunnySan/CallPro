@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
 	<meta charset="utf-8">
@@ -170,7 +170,13 @@
 						請先輸入欲查詢的電話號碼含區碼(未輸入表示查詢所有電話主人資料)，按下【確認】進行查詢
 					</li>
 					<li>
-						若欲檢視電話主人詳細資料或修改電話主人資料，請點選該電話主人資料列右邊的【詳細資料】按鈕
+						若欲檢視電話主人詳細資料或修改電話主人資料，請點選該電話主人資料列右邊的【電話主人詳細資料】按鈕
+					</li>
+					<li>
+						【電話主人詳細資料】包含【基本資料】、【子帳號】及【通話記錄】三個區塊
+					</li>
+					<li>
+						【電話主人詳細資料】下方為【修改電話主人基本資料】功能，您可以在這裡修改電話主人的基本資料及發送LINE通知的功能
 					</li>
 				</ul>
 			</div>
@@ -216,6 +222,8 @@
 								<th>市話號碼</th>
 								<th>狀態</th>
 								<th>詳細資料</th>
+								<th>停用</th>
+								<th>刪除</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -228,6 +236,8 @@
 								<th>市話號碼</th>
 								<th>狀態</th>
 								<th>詳細資料</th>
+								<th>停用</th>
+								<th>刪除</th>
 							</tr>
 						</tfoot>
 					</table>
@@ -250,124 +260,327 @@
 				<form class="form-horizontal">
 					<div class="box-body">
 	
-						<div class="form-group col-md-6">
-							<label for="detailCreateDate" class="col-sm-4 control-label">開通時間</label>
-							<div class="col-sm-8">
-								<input type="text" class="form-control" id="detailCreateDate" disabled>
-							</div>
-						</div><!-- /.form-group -->
+						<div class="row">
+							<div class="col-md-12">
+								<div class="nav-tabs-custom"><!-- Custom Tabs -->
+									<ul class="nav nav-tabs">
+										<li class="active"><a href="#tab_1" data-toggle="tab">基本資料</a></li>
+										<li><a href="#tab_2" data-toggle="tab">子帳號</a></li>
+										<li><a href="#tab_3" data-toggle="tab">通話記錄</a></li>
+										<!--<li class="pull-right"><a href="#" class="text-muted"><i class="fa fa-gear"></i></a></li>-->
+									</ul>
+									<div class="tab-content">
+										<div class="tab-pane active" id="tab_1">
+											<div class="form-group col-md-6">
+												<label for="detailCreateDate" class="col-sm-4 control-label">開通時間</label>
+												<div class="col-sm-8">
+													<input type="text" class="form-control" id="detailCreateDate" disabled>
+												</div>
+											</div><!-- /.form-group -->
+					
+											<div class="form-group col-md-6">
+												<label for="detailAccountName" class="col-sm-4 control-label">電話主人名稱</label>
+												<div class="col-sm-8">
+													<input type="text" class="form-control" id="detailAccountName" disabled>
+												</div>
+											</div><!-- /.form-group -->
+					
+											<div class="form-group col-md-6">
+												<label for="detailBillType" class="col-sm-4 control-label">類別</label>
+												<div class="col-sm-8">
+													<input type="text" class="form-control" id="detailBillType" disabled>
+												</div>
+											</div><!-- /.form-group -->
+					
+											<div class="form-group col-md-6">
+												<label for="detailLineChannelName" class="col-sm-4 control-label">LINE群組</label>
+												<div class="col-sm-8">
+													<input type="text" class="form-control" id="detailLineChannelName" disabled>
+												</div>
+											</div><!-- /.form-group -->
+					
+											<div class="form-group col-md-6">
+												<label for="detailAuditPhoneNumber" class="col-sm-4 control-label">市話號碼</label>
+												<div class="col-sm-8">
+													<input type="text" class="form-control" id="detailAuditPhoneNumber" disabled>
+												</div>
+											</div><!-- /.form-group -->
+					
+											<div class="form-group col-md-6">
+												<label for="detailSendInstantNotification" class="col-sm-4 control-label">發送即時LINE通知</label>
+												<div class="col-sm-8">
+													<input type="text" class="form-control" id="detailSendInstantNotification" disabled>
+												</div>
+											</div><!-- /.form-group -->
+					
+											<div class="form-group col-md-6">
+												<label for="detailSendCDRNotification" class="col-sm-4 control-label">發送錄音檔LINE通知</label>
+												<div class="col-sm-8">
+													<input type="text" class="form-control" id="detailSendCDRNotification" disabled>
+												</div>
+											</div><!-- /.form-group -->
+					
+											<div class="form-group col-md-6">
+												<label for="detailBillingStartDate" class="col-sm-4 control-label">起始計費日期</label>
+												<div class="col-sm-8">
+													<input type="text" class="form-control" id="detailBillingStartDate" disabled>
+												</div>
+											</div><!-- /.form-group -->
+					
+											<div class="form-group col-md-6">
+												<label for="detailExpiryDate" class="col-sm-4 control-label">帳號有效日期</label>
+												<div class="col-sm-8">
+													<input type="text" class="form-control" id="detailExpiryDate" disabled>
+												</div>
+											</div><!-- /.form-group -->
+					
+											<div class="form-group col-md-6">
+												<label for="detailStatus" class="col-sm-4 control-label">狀態</label>
+												<div class="col-sm-8">
+													<input type="text" class="form-control" id="detailStatus" disabled>
+												</div>
+											</div><!-- /.form-group -->
+					
+											<div class="form-group col-md-6">
+												<label for="detailGoogleUserName" class="col-sm-4 control-label">Google帳號姓名</label>
+												<div class="col-sm-8">
+													<input type="text" class="form-control" id="detailGoogleUserName" disabled>
+												</div>
+											</div><!-- /.form-group -->
+					
+											<div class="form-group col-md-6">
+												<label for="detailGoogleEmail" class="col-sm-4 control-label">GMail信箱</label>
+												<div class="col-sm-8">
+													<input type="text" class="form-control" id="detailGoogleEmail" disabled>
+												</div>
+											</div><!-- /.form-group -->
+					
+											<div class="form-group col-md-6">
+												<label for="detailContactPhone" class="col-sm-4 control-label">連絡電話</label>
+												<div class="col-sm-8">
+													<input type="text" class="form-control" id="detailContactPhone" disabled>
+												</div>
+											</div><!-- /.form-group -->
+					
+											<div class="form-group col-md-6">
+												<label for="detailContactAddress" class="col-sm-4 control-label">連絡地址</label>
+												<div class="col-sm-8">
+													<input type="text" class="form-control" id="detailContactAddress" disabled>
+												</div>
+											</div><!-- /.form-group -->
+					
+											<div class="form-group col-md-6">
+												<label for="detailTaxIDNumber" class="col-sm-4 control-label">統一編號</label>
+												<div class="col-sm-8">
+													<input type="text" class="form-control" id="detailTaxIDNumber" disabled>
+												</div>
+											</div><!-- /.form-group -->
+					
+											<div class="form-group col-md-6">
+												<label for="detailPurchaseQuantity" class="col-sm-4 control-label">開通門號數</label>
+												<div class="col-sm-8">
+													<input type="text" class="form-control" id="detailPurchaseQuantity" disabled>
+												</div>
+											</div><!-- /.form-group -->
+					
+											<div class="form-group col-md-6">
+												<label for="detailMemberQuantity" class="col-sm-4 control-label">子帳號數量</label>
+												<div class="col-sm-8">
+													<input type="text" class="form-control" id="detailMemberQuantity" disabled>
+												</div>
+											</div><!-- /.form-group -->
 
-						<div class="form-group col-md-6">
-							<label for="detailAccountName" class="col-sm-4 control-label">電話主人名稱</label>
-							<div class="col-sm-8">
-								<input type="text" class="form-control" id="detailAccountName" disabled>
-							</div>
-						</div><!-- /.form-group -->
+										</div><!-- /.tab-pane -->
 
-						<div class="form-group col-md-6">
-							<label for="detailBillType" class="col-sm-4 control-label">類別</label>
-							<div class="col-sm-8">
-								<input type="text" class="form-control" id="detailBillType" disabled>
-							</div>
-						</div><!-- /.form-group -->
 
-						<div class="form-group col-md-6">
-							<label for="detailLineChannelName" class="col-sm-4 control-label">LINE群組</label>
-							<div class="col-sm-8">
-								<input type="text" class="form-control" id="detailLineChannelName" disabled>
-							</div>
-						</div><!-- /.form-group -->
 
-						<div class="form-group col-md-6">
-							<label for="detailAuditPhoneNumber" class="col-sm-4 control-label">市話號碼</label>
-							<div class="col-sm-8">
-								<input type="text" class="form-control" id="detailAuditPhoneNumber" disabled>
-							</div>
-						</div><!-- /.form-group -->
 
-						<div class="form-group col-md-6">
-							<label for="detailSendInstantNotification" class="col-sm-4 control-label">發送即時LINE通知</label>
-							<div class="col-sm-8">
-								<input type="text" class="form-control" id="detailSendInstantNotification" disabled>
-							</div>
-						</div><!-- /.form-group -->
 
-						<div class="form-group col-md-6">
-							<label for="detailSendCDRNotification" class="col-sm-4 control-label">發送錄音檔LINE通知</label>
-							<div class="col-sm-8">
-								<input type="text" class="form-control" id="detailSendCDRNotification" disabled>
-							</div>
-						</div><!-- /.form-group -->
 
-						<div class="form-group col-md-6">
-							<label for="detailBillingStartDate" class="col-sm-4 control-label">起始計費日期</label>
-							<div class="col-sm-8">
-								<input type="text" class="form-control" id="detailBillingStartDate" disabled>
-							</div>
-						</div><!-- /.form-group -->
+										<div class="tab-pane" id="tab_2">
+											<div class="alert alert-info alert-dismissible">
+												<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+												<h4><i class="icon fa fa-info"></i> 使用說明</h4>
+												<ul>
+													<li>
+														下方表格顯示此電話主人已開通的子帳號，以及該帳號目前的狀態
+													</li>
+													<li>
+														若您點選【停用】，則系統會暫停將來電訊息發送給該帳號
+													</li>
+													<li>
+														若您點選【復用】，則系統會開始將來電訊息發送給該帳號
+													</li>
+													<li>
+														若您點選【刪除】，則此帳號將被永久刪除
+													</li>
+												</ul>
+											</div>
+								
+											<div class="box box-success box-solid" id="boxResult">
+												<div class="box-header with-border">
+													<h3 class="box-title">已開通的子帳號</h3>
+												</div><!-- /.box-header -->
+								
+												<div class="box-body">
+								
+													<table id="tblMemberResult" class="table table-bordered table-striped">
+														<thead>
+															<tr>
+																<th>帳號姓名</th>
+																<th>開通日期</th>
+																<th>狀態</th>
+																<th>停用</th>
+																<th>刪除</th>
+															</tr>
+														</thead>
+														<tbody>
+														</tbody>
+														<tfoot>
+															<tr>
+																<th>帳號姓名</th>
+																<th>開通日期</th>
+																<th>狀態</th>
+																<th>停用</th>
+																<th>刪除</th>
+															</tr>
+														</tfoot>
+													</table>
+													
+												</div><!-- /.box-body -->
+												
+												<div class="box-footer">
+												</div><!-- /.box-footer -->
+												<!-- Loading (remove the following to stop the loading)-->
+												<div class="overlay" style="display:none;">
+													<i class="fa fa-refresh fa-spin"></i>
+												</div>
+											</div><!-- /.box -->
 
-						<div class="form-group col-md-6">
-							<label for="detailExpiryDate" class="col-sm-4 control-label">帳號有效日期</label>
-							<div class="col-sm-8">
-								<input type="text" class="form-control" id="detailExpiryDate" disabled>
-							</div>
-						</div><!-- /.form-group -->
+										</div><!-- /.tab-pane -->
 
-						<div class="form-group col-md-6">
-							<label for="detailStatus" class="col-sm-4 control-label">狀態</label>
-							<div class="col-sm-8">
-								<input type="text" class="form-control" id="detailStatus" disabled>
-							</div>
-						</div><!-- /.form-group -->
 
-						<div class="form-group col-md-6">
-							<label for="detailGoogleUserName" class="col-sm-4 control-label">Google帳號姓名</label>
-							<div class="col-sm-8">
-								<input type="text" class="form-control" id="detailGoogleUserName" disabled>
-							</div>
-						</div><!-- /.form-group -->
 
-						<div class="form-group col-md-6">
-							<label for="detailGoogleEmail" class="col-sm-4 control-label">GMail信箱</label>
-							<div class="col-sm-8">
-								<input type="text" class="form-control" id="detailGoogleEmail" disabled>
-							</div>
-						</div><!-- /.form-group -->
 
-						<div class="form-group col-md-6">
-							<label for="detailContactPhone" class="col-sm-4 control-label">連絡電話</label>
-							<div class="col-sm-8">
-								<input type="text" class="form-control" id="detailContactPhone" disabled>
-							</div>
-						</div><!-- /.form-group -->
 
-						<div class="form-group col-md-6">
-							<label for="detailContactAddress" class="col-sm-4 control-label">連絡地址</label>
-							<div class="col-sm-8">
-								<input type="text" class="form-control" id="detailContactAddress" disabled>
-							</div>
-						</div><!-- /.form-group -->
 
-						<div class="form-group col-md-6">
-							<label for="detailTaxIDNumber" class="col-sm-4 control-label">統一編號</label>
-							<div class="col-sm-8">
-								<input type="text" class="form-control" id="detailTaxIDNumber" disabled>
-							</div>
-						</div><!-- /.form-group -->
+										<div class="tab-pane" id="tab_3">
+											<div class="alert alert-info alert-dismissible">
+												<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+												<h4><i class="icon fa fa-info"></i> 使用說明</h4>
+												<ul>
+													<li>
+														請先輸入撥入或撥出的電話號碼(未輸入表示查詢所有電話)，然後再選擇查詢的日期區間，按下【確認】進行查詢
+													</li>
+													<li>
+														一次最多可查<span style="color:#FF0000;">200</span>筆記錄
+													</li>
+												</ul>
+											</div>
+								
+											<div class="box box-primary box-solid">
+												<div class="box-header with-border">
+													<h3 class="box-title">資料查詢條件</h3>
+												</div><!-- /.box-header -->
+								
+												<!-- form start -->
+												<form role="form">
+													<div class="box-body">
+														<div class="form-group" style="margin-right:15px;margin-left:15px;">
+															<label for="callerPhoneNumber">電話號碼</label>
+															<input type="text" class="form-control" id="callerPhoneNumber" placeholder="0988520178" maxlength="20">
+														</div>
+														
+														<div class="form-group" style="margin-right:15px;margin-left:15px;">
+															<label>日期區間</label>
+															
+															<div class="input-group">
+																<div class="input-group-addon">
+																	<i class="fa fa-calendar"></i>
+																</div>
+																<input type="text" class="form-control" id="dateRange">
+																<input type="hidden" id="dateStart" value="">
+																<input type="hidden" id="dateEnd" value="">
+															</div>
+														</div><!-- /.input group -->
+														
+													</div><!-- /.box-body -->
+													
+													<div class="box-footer" style="margin-right:15px;margin-left:15px;">
+														<button type="button" class="btn btn-primary" onclick="doQueryCallLog();">確認</button>
+													</div><!-- /.box-footer -->
+												</form>
+												<!-- Loading (remove the following to stop the loading)-->
+												<div class="overlay" style="display:none;">
+													<i class="fa fa-refresh fa-spin"></i>
+												</div>
+											</div><!-- /.box -->
+								
+											<div class="box box-success box-solid" id="boxCallLogResult">
+												<div class="box-header with-border">
+													<h3 class="box-title">資料查詢結果</h3>
+												</div><!-- /.box-header -->
+								
+												<div class="box-body">
+								
+													<table id="tblCallLog" class="table table-bordered table-striped">
+														<thead>
+															<tr>
+																<th>類型</th>
+																<th>主人電話</th>
+																<th>對方電話</th>
+																<th>起始時間</th>
+																<th>通話秒數</th>
+																<th>錄音檔案</th>
+																<th>對方姓名</th>
+																<th>對方地址</th>
+																<th>對方公司名稱</th>
+																<th>對方Email</th>
+															</tr>
+														</thead>
+														<tbody>
+														</tbody>
+														<tfoot>
+															<tr>
+																<th>類型</th>
+																<th>主人電話</th>
+																<th>對方電話</th>
+																<th>起始時間</th>
+																<th>通話秒數</th>
+																<th>錄音檔案</th>
+																<th>對方姓名</th>
+																<th>對方地址</th>
+																<th>對方公司名稱</th>
+																<th>對方Email</th>
+															</tr>
+														</tfoot>
+													</table>
+													
+												</div><!-- /.box-body -->
+												
+												<div class="box-footer">
+												</div><!-- /.box-footer -->
+												<!-- Loading (remove the following to stop the loading)-->
+												<div class="overlay" style="display:none;">
+													<i class="fa fa-refresh fa-spin"></i>
+												</div>
+											</div><!-- /.box -->
 
-						<div class="form-group col-md-6">
-							<label for="detailPurchaseQuantity" class="col-sm-4 control-label">開通門號數</label>
-							<div class="col-sm-8">
-								<input type="text" class="form-control" id="detailPurchaseQuantity" disabled>
-							</div>
-						</div><!-- /.form-group -->
 
-						<div class="form-group col-md-6">
-							<label for="detailMemberQuantity" class="col-sm-4 control-label">子帳號數量</label>
-							<div class="col-sm-8">
-								<input type="text" class="form-control" id="detailMemberQuantity" disabled>
-							</div>
-						</div><!-- /.form-group -->
+
+
+
+
+
+
+
+
+
+										</div><!-- /.tab-pane -->
+									</div><!-- /.tab-content -->
+								</div><!-- nav-tabs-custom -->
+							</div><!-- /.col -->
+						</div><!-- /.row -->
 
 					</div><!-- /.box-body -->
 				
@@ -382,7 +595,7 @@
 
 			<div class="box box-success box-solid" id="boxEdit" style="display:none;">
 				<div class="box-header with-border">
-					<h3 class="box-title">修改電話主人資料</h3>
+					<h3 class="box-title">修改電話主人基本資料</h3>
 				</div><!-- /.box-header -->
 
 				<form class="form-horizontal">
@@ -445,6 +658,45 @@
 				</div>
 			</div><!-- /.box -->
 		
+			<!-- 刪除資料的確認視窗 -->
+			<div class="modal modal-danger fade" id="modal-danger">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span></button>
+							<h4 class="modal-title">資料刪除確認</h4>
+						</div>
+						<div class="modal-body">
+							<p>此作業將會刪除加盟商【<span id="modalAccountName"></span>】的資料</p>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-outline pull-left" data-dismiss="modal">取消</button>
+							<button type="button" class="btn btn-outline" onclick="confirmDelete();">確認刪除</button>
+						</div>
+					</div><!-- /.modal-content -->
+				</div><!-- /.modal-dialog -->
+			</div><!-- /.modal -->		
+
+			<!-- 刪除資料的確認視窗 -->
+			<div class="modal modal-danger fade" id="modal-danger-Member">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span></button>
+							<h4 class="modal-title">資料刪除確認</h4>
+						</div>
+						<div class="modal-body">
+							<p>此作業將會刪除子帳號【<span id="modalMemberAccountName"></span>】的資料</p>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-outline pull-left" data-dismiss="modal">取消</button>
+							<button type="button" class="btn btn-outline" onclick="confirmDeleteMember();">確認刪除</button>
+						</div>
+					</div><!-- /.modal-content -->
+				</div><!-- /.modal-dialog -->
+			</div><!-- /.modal -->		
 		</section>
 		<!-- /.content -->
 	</div>
@@ -529,6 +781,40 @@
 		$('#sendCDRNotificationBox').on('ifUnchecked', function(event){
 			$('#sendCDRNotification').val('N');
 		});
+
+		//Date range picker
+    	$('#dateRange').daterangepicker({
+			ranges   : {
+				'今天'       : [moment(), moment()],
+				'昨天'   : [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+				'過去7天' : [moment().subtract(6, 'days'), moment()],
+				'過去30天': [moment().subtract(29, 'days'), moment()],
+				'這個月'  : [moment().startOf('month'), moment().endOf('month')],
+				'上個月'  : [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+			},
+    		locale : {
+				applyLabel : "確定",
+				cancelLabel : "取消",
+				fromLabel : "開始日期",
+				toLabel : "結束日期",
+				customRangeLabel : "自訂日期區間",
+				daysOfWeek : [ "日", "一", "二", "三", "四", "五", "六" ],
+				monthNames : [ "1月", "2月", "3月", "4月", "5月", "6月",
+				"7月", "8月", "9月", "10月", "11月", "12月" ],
+				firstDay : 1,
+				format: "YYYY/MM/DD"
+			}
+    	});
+
+		$('#dateStart').val(moment().format('YYYY/MM/DD'));
+		$('#dateEnd').val(moment().format('YYYY/MM/DD'));
+    	
+		$('#dateRange').on("apply.daterangepicker", function(ev, picker) {
+			$('#dateStart').val(picker.startDate.format('YYYY/MM/DD'));
+			$('#dateEnd').val(picker.endDate.format('YYYY/MM/DD'));
+		});
+
+
 	});
 </script>
 
@@ -566,9 +852,17 @@
 						if (r.Account_Type=="O") tmp = "正式";
 						if (r.Account_Type=="T") tmp = "測試";
 						r.Account_And_Bill_Type = tmp + translateBillType(r.Bill_Type);
+						tmp = r.Status;
 						r.Status = translateStatus(r.Status);
-						r.edit = "<input type='button' onclick=\"getAccountDetail('" + r.id + "');\" value='詳細資料'>";
-						//r.Record_File_URL = "<a href='" + r.Record_File_URL + "' target='_blank'>聽取</a>";
+						if (tmp!="Active") r.Status = "<span style='color:#FF0000;'>" + r.Status + "</span>";
+						r.edit = "<input type='button' onclick=\"getAccountDetail('" + r.id + "', '" + r.Account_Sequence + "', '" + tmp + "');\" value='詳細資料'>";
+						if (tmp=="Delete"){
+							r.suspend = "&nbsp;";
+							r.delete = "&nbsp;";
+						}else{
+							r.suspend = "<input type='button' onclick=\"doSuspend('" + r.Account_Sequence + "', '" + tmp + "');\" value='" + (tmp=="Active"?"停用":"復用") + "'>";
+							r.delete = "<input type='button' onclick=\"doDelete('" + r.Account_Sequence + "', '" + r.Account_Name + "');\" value='刪除'>";
+						}
 
 					});	//$.each( data.orders, function(i, r) {
 					
@@ -593,7 +887,9 @@
 							{ data: 'Account_And_Bill_Type' },
 							{ data: 'Audit_Phone_Number' },
 							{ data: 'Status' },
-							{ data: 'edit' }
+							{ data: 'edit' },
+							{ data: 'suspend' },
+							{ data: 'delete' }
 						],
 						order: [[ 0, 'desc' ]]
 					} );
@@ -611,7 +907,7 @@
 		});	//getDataFromServer("xxx.jsp", sData, "json", function(data){
 	}
 	
-	function getAccountDetail(rowId){
+	function getAccountDetail(rowId, accountSequence, status){
 		
 		if (beEmpty(rowId)){
 			msgBox("無法取得資料鍵值!");
@@ -619,9 +915,20 @@
 		}
 
 		$('#boxDetail').show();
-		$('#boxEdit').show();
+		if (status=="Delete"){
+			$('#boxEdit').hide();
+		}else{
+			$('#boxEdit').show();
+		}
 
 		$('.overlay').show();
+		
+		clearDetailAndEditData();
+
+		if ($.fn.dataTable.isDataTable(tableMember) ) tableMember.clear().draw();
+		if ($.fn.dataTable.isDataTable(tableCallLog) ) tableCallLog.clear().draw();
+		
+		currentAccountSequence = accountSequence;
 		
 		var sData = "";
 		
@@ -656,26 +963,28 @@
 						$('#detailTaxIDNumber').val(r.Tax_ID_Number);
 						$('#detailPurchaseQuantity').val(r.Purchase_Quantity);
 						$('#detailMemberQuantity').val(r.Member_Quantity);
-						$('#accountName').val(r.Account_Name);
-						$('#contactPhone').val(r.Contact_Phone);
-						$('#contactAddress').val(r.Contact_Address);
-						$('#taxIDNumber').val(r.Tax_ID_Number);
-						if (r.Send_Instant_Notification=="Y"){
-							$('#sendInstantNotification').val('Y');
-							$('#sendInstantNotificationBox').iCheck('check');
-						}else{
-							$('#sendInstantNotification').val('N');
-							$('#sendInstantNotificationBox').iCheck('uncheck');
-						}
-						if (r.Send_CDR_Notification=="Y"){
-							$('#sendCDRNotification').val('Y');
-							$('#sendCDRNotificationBox').iCheck('check');
-						}else{
-							$('#sendCDRNotification').val('N');
-							$('#sendCDRNotificationBox').iCheck('uncheck');
-						}
-						$('#taxIDNumber').val(r.Tax_ID_Number);
-						$('#rowId').val(r.id);
+						if (status!="Delete"){
+							$('#accountName').val(r.Account_Name);
+							$('#contactPhone').val(r.Contact_Phone);
+							$('#contactAddress').val(r.Contact_Address);
+							$('#taxIDNumber').val(r.Tax_ID_Number);
+							if (r.Send_Instant_Notification=="Y"){
+								$('#sendInstantNotification').val('Y');
+								$('#sendInstantNotificationBox').iCheck('check');
+							}else{
+								$('#sendInstantNotification').val('N');
+								$('#sendInstantNotificationBox').iCheck('uncheck');
+							}
+							if (r.Send_CDR_Notification=="Y"){
+								$('#sendCDRNotification').val('Y');
+								$('#sendCDRNotificationBox').iCheck('check');
+							}else{
+								$('#sendCDRNotification').val('N');
+								$('#sendCDRNotificationBox').iCheck('uncheck');
+							}
+							$('#taxIDNumber').val(r.Tax_ID_Number);
+							$('#rowId').val(r.id);
+						}	//if (status!="Delete"){
 					});	//$.each( data.orders, function(i, r) {
 
 					$('html, body').animate({
@@ -689,6 +998,7 @@
 			}
 
 		});	//getDataFromServer("xxx.jsp", sData, "json", function(data){
+		doQueryMember(accountSequence);
 	}
 
 	function doEdit(){
@@ -777,8 +1087,263 @@
 
 		});	//getDataFromServer("xxx.jsp", sData, "json", function(data){
 	}
+
+	function doSuspend(accountSequence, status){
+		if (beEmpty(accountSequence) || beEmpty(status)){
+			msgBox("無法取得加盟商資料，請重新整理本頁!");
+			return;
+		}
+
+		var action;
+		if (status=="Active") action="suspend"; else action="revert";
+			
+		doSuspendAndDelete(accountSequence, action);
+	}
+
+	var accountSequenceToBeDeleted;
+	
+	function doDelete(accountSequence, accountName){
+		accountSequenceToBeDeleted = accountSequence;
+		$('#modalAccountName').text(accountName);
+		//$('#modal-danger').modal({backdrop:false});	//若設為 false，則用戶按背景時將不會關閉 modal window
+		$('#modal-danger').modal('show');
+	}
+	
+	function confirmDelete(){
+		$('#modal-danger').modal('hide');
+		doSuspendAndDelete(accountSequenceToBeDeleted, 'delete');
+	}
+
+	function doSuspendAndDelete(accountSequence, action){
+		if (beEmpty(accountSequence) || beEmpty(action)){
+			msgBox("無法取得作業資料，請確認要執行的作業或重新整理本頁!");
+			return;
+		}
+
+		$('.overlay').show();
+		
+		var sData = "";
+		
+		sData = "accountSequence=" + accountSequence;
+		sData += "&action=" + action;
+		getDataFromServer("ajaxDoPhoneOwnerSuspendAndDelete.jsp", sData, "json", function(data){
+			if (!data.resultCode || !data.resultText){
+				$('.overlay').hide();
+				msgBox("無法取得作業結果!");
+				return;
+			}else{
+				if (data.resultCode=="00000"){
+					msgBox("作業成功，將重新整理本頁!", function(){
+						location.reload();
+					});
+				}else{
+					msgBox("作業失敗:<br>" + data.resultText);
+					$('.overlay').hide();
+				}
+			}
+
+		});	//getDataFromServer("xxx.jsp", sData, "json", function(data){
+	}
 	
 	function clearDetailAndEditData(){
 		$('.form-horizontal input:text').val("");
+	}
+
+	var currentAccountSequence = "";
+	var tableCallLog = null;
+	var tableDataCallLog = null;
+
+	function doQueryCallLog(){
+		var callerPhoneNumber = $('#callerPhoneNumber').val();
+		var dateStart = $('#dateStart').val();
+		var dateEnd = $('#dateEnd').val();
+		var accountSequence = currentAccountSequence;
+		
+		if (beEmpty(accountSequence)){
+			msgBox("無法得知目前電話主人的鍵值，請重新查詢!");
+			return;
+		}
+		
+		if (callerPhoneNumber.length>20){
+			msgBox("電話號碼長度不可超過20個字，請重新輸入!");
+			return;
+		}
+		if (beEmpty(callerPhoneNumber) && (beEmpty(dateStart) || beEmpty(dateEnd))){
+			msgBox("請選擇日期區間!");
+			return;
+		}
+		if (dateStart.length>10 || dateEnd.length>10){
+			msgBox("請選擇日期區間!");
+			return;
+		}
+
+		if ($.fn.dataTable.isDataTable(tableCallLog) ) tableCallLog.clear().draw();
+		$('.overlay').show();
+		
+		var sData = "";
+		
+		sData = "callerPhoneNumber=" + callerPhoneNumber;
+		sData += "&dateStart=" + dateStart;
+		sData += "&dateEnd=" + dateEnd;
+		sData += "&accountSequence=" + accountSequence;
+		getDataFromServer("ajaxGetCallLog.jsp", sData, "json", function(data){
+			if (!data.resultCode || !data.resultText){
+				$('.overlay').hide();
+				msgBox("無法取得通話記錄!");
+				return;
+			}else{
+				if (data.resultCode=="00000"){
+					s = "";
+					$.each( data.records, function(i, r) {
+						r.Call_Type = (r.Call_Type=="0"?"撥入":"撥出");
+						r.Record_File_URL = "<a href='" + r.Record_File_URL + "' target='_blank'>聽取</a>";
+
+					});	//$.each( data.orders, function(i, r) {
+					
+					tableDataCallLog = data;
+					if ($.fn.dataTable.isDataTable(tableCallLog) ){
+						tableCallLog.destroy();
+					}
+					tableCallLog = $('#tblCallLog').DataTable( {
+						responsive: true,
+						columnDefs: [
+						{ responsivePriority: 1, targets: 2 },
+						{ responsivePriority: 1, targets: 3 },
+						{ responsivePriority: 1, targets: 5 },
+						{ responsivePriority: 1, targets: 0 }
+						],
+						language: {
+							url: 'bower_components/datatables.net/js/Chinese.json'
+						},
+						data: tableDataCallLog.records,
+						columns: [
+							{ data: 'Call_Type' },
+							{ data: 'Audit_Phone_Number' },
+							{ data: 'Caller_Phone_Number' },
+							{ data: 'Record_Time_Start' },
+							{ data: 'Record_Talked_Time' },
+							{ data: 'Record_File_URL' },
+							{ data: 'Caller_Name' },
+							{ data: 'Caller_Address' },
+							{ data: 'Caller_Company' },
+							{ data: 'Caller_Email' }
+						],
+						order: [[ 3, 'desc' ], [ 0, 'asc' ]]
+					} );
+
+					$('html, body').animate({
+						scrollTop: $("#boxCallLogResult").offset().top
+					}, 1000);
+				}else if (data.resultCode=="00004"){	//需重新登入
+					msgBox(data.resultText, function(){location.href = "login_simple.html";});
+				}else{
+					msgBox("取得通話記錄失敗:<br>" + data.resultText);
+				}
+				$('.overlay').hide();
+			}
+
+		});	//getDataFromServer("xxx.jsp", sData, "json", function(data){
+	}
+	//以下是管理子帳號用的
+	var tableMember = null;
+	
+	function doQueryMember(accountSequence){
+		if ($.fn.dataTable.isDataTable(tableMember) ) tableMember.clear().draw();
+
+		if (beEmpty(accountSequence)){
+			msgBox("查詢子帳號作業無法得知目前電話主人的鍵值，請重新查詢!");
+			return;
+		}
+
+		$('.overlay').show();
+		
+		var sData = "";
+		sData = "accountSequence=" + accountSequence;
+		
+		getDataFromServer("ajaxGetPhoneMemberList.jsp", sData, "json", function(data){
+			if (!data.resultCode || !data.resultText){
+				$('.overlay').hide();
+				msgBox("無法取得子帳號資料!");
+				return;
+			}else{
+				if (data.resultCode=="00000"){
+					s = "";
+					$.each( data.records, function(i, r) {
+						r.Suspend = (r.Send_Instant_Notification=="Y"?"<input type='button' value='停用' onclick=\"doEditMember('suspend', '" + r.id + "');\">":"<input type='button' value='復用' onclick=\"doEditMember('revert', '" + r.id + "');\">");
+						r.Send_Instant_Notification = (r.Send_Instant_Notification=="Y"?"正常":"<span style='color:#FF0000;'>停用</span>");
+						r.Delete = "<input type='button' value='刪除' onclick=\"doDeleteMember('" + r.id + "', '" + r.Account_Name + "');\">";
+
+					});	//$.each( data.orders, function(i, r) {
+					if ($.fn.dataTable.isDataTable(tableMember) ){
+						tableMember.destroy();
+					}
+					tableMember = $('#tblMemberResult').DataTable( {
+						responsive: true,
+						columnDefs: [
+						{ responsivePriority: 1, targets: 0 },
+						{ responsivePriority: 1, targets: 2 },
+						{ responsivePriority: 1, targets: 3 },
+						{ responsivePriority: 1, targets: 4 }
+						],
+						language: {
+							url: 'bower_components/datatables.net/js/Chinese.json'
+						},
+						data: data.records,
+						columns: [
+							{ data: 'Account_Name' },
+							{ data: 'Create_Date' },
+							{ data: 'Send_Instant_Notification' },
+							{ data: 'Suspend' },
+							{ data: 'Delete' },
+						],
+						order: [[ 0, 'desc' ]]
+					} );
+
+				}else if (data.resultCode!="00006"){
+					msgBox("取得子帳號資料失敗:<br>" + data.resultText);
+				}
+				$('.overlay').hide();
+			}
+
+		});	//getDataFromServer("xxx.jsp", sData, "json", function(data){
+	}
+
+	var rowMemberIdToBeDeleted;
+	
+	function doDeleteMember(rowId, accountName){
+		rowMemberIdToBeDeleted = rowId;
+		$('#modalMemberAccountName').text(accountName);
+		//$('#modal-danger').modal({backdrop:false});	//若設為 false，則用戶按背景時將不會關閉 modal window
+		$('#modal-danger-Member').modal('show');
+	}
+	
+	function confirmDeleteMember(){
+		$('#modal-danger-Member').modal('hide');
+		doEditMember('delete', rowMemberIdToBeDeleted);
+	}
+
+	function doEditMember(myAction, rowId){
+		$('.overlay').show();
+		
+		var sData = "";
+		sData = "action=" + myAction;
+		sData += "&rowId=" + rowId;
+		sData += "&accountSequence=" + currentAccountSequence;
+		
+		getDataFromServer("ajaxDoPhoneMemberSuspendAndDelete.jsp", sData, "json", function(data){
+			if (!data.resultCode || !data.resultText){
+				$('.overlay').hide();
+				msgBox("無法取得作業結果!");
+				return;
+			}else{
+				if (data.resultCode=="00000"){
+					msgBox("作業成功!", doQueryMember(currentAccountSequence));
+				}else{
+					msgBox("作業失敗:<br>" + data.resultText);
+				}
+				$('.overlay').hide();
+			}
+
+		});	//getDataFromServer("xxx.jsp", sData, "json", function(data){
 	}
 </script>
