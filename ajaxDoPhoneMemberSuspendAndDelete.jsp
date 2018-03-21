@@ -59,7 +59,7 @@ if (beEmpty(sAccountSequence) || beEmpty(sAction) || beEmpty(sRowId)){
 	return;
 }
 
-if (sAction.equals("rename") && (beEmpty(sNewMemberName) || sNewMemberName.length()>20)){
+if ((sAction.equals("rename") || sAction.equals("add")) && (beEmpty(sNewMemberName) || sNewMemberName.length()>20)){
 	obj.put("resultCode", gcResultCodeParametersValidationError);
 	obj.put("resultText", gcResultTextParametersValidationError);
 	out.print(obj);
@@ -74,10 +74,15 @@ String		sResultText			= gcResultTextSuccess;
 String		s[][]				= null;
 String		sSQL				= "";
 List<String> sSQLList			= new ArrayList<String>();
+String		sDate				= getDateTimeNow(gcDateFormatSlashYMDTime);
+String		sUser				= "System";
 int			i					= 0;
 int			j					= 0;
 
 String		sWhere				= "";
+
+String		sSequence			= "";
+String		sAuthorizationCode	= "";
 
 if (sAction.equals("delete")){	//刪除
 	sSQL = "DELETE FROM callpro_account";
@@ -87,6 +92,55 @@ if (sAction.equals("delete")){	//刪除
 	sSQL = "UPDATE callpro_account SET Send_Instant_Notification='Y'";
 }else if (sAction.equals("rename")){	//更名
 	sSQL = "UPDATE callpro_account SET Account_Name='" + sNewMemberName + "'";
+}else if (sAction.equals("add")){		//新增
+	//找出電話主人的Line_Channel_Name資料
+	sSQL = "SELECT Line_Channel_Name, Account_Type, Bill_Type, Audit_Phone_Number, DATE_FORMAT(Expiry_Date, '%Y-%m-%d %H:%i:%s')";
+	sSQL += " FROM callpro_account";
+	sSQL += " WHERE (Account_Type='O' OR Account_Type='T')";	//電話主人
+	sSQL += " AND Bill_Type<>'B'";	//入門版不用建立子帳號
+	sSQL += " AND Account_Sequence='" + sAccountSequence + "'";
+	sSQL += " AND Status='Active'";
+	//writeLog("debug", sSQL);
+	ht = getDBData(sSQL, gcDataSourceName);
+	sResultCode = ht.get("ResultCode").toString();
+	sResultText = ht.get("ResultText").toString();
+	if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
+		s = (String[][])ht.get("Data");
+		if (isExpired(s[0][4])){
+			obj.put("resultCode", gcResultCodeAccountWasSuspended);
+			obj.put("resultText", "您的帳號已過期，無法進行此操作");
+			out.print(obj);
+			out.flush();
+			return;
+		}
+		//電話主人建立子帳號
+		sSequence = getSequence(gcDataSourceName);	//取得新的Account_Sequence序號
+		sAuthorizationCode = generateRandomNumber();
+		if (isDuplicateAuthorizationCode(sAuthorizationCode)){
+			obj.put("resultCode", gcResultCodeUnknownError);
+			obj.put("resultText", "目前系統中有相同的授權碼待用戶註冊帳號，請稍後再試一次!");
+			out.print(obj);
+			out.flush();
+			return;
+		}
+		sSQL = "INSERT INTO callpro_account (Create_User, Create_Date, Update_User, Update_Date, Account_Sequence, Account_Name, Account_Type, Bill_Type, Line_User_ID, Line_Channel_Name, Parent_Account_Sequence, Audit_Phone_Number, Expiry_Date, Authorization_Code, Status) VALUES (";
+		sSQL += "'" + sUser + "',";
+		sSQL += "'" + sDate + "',";
+		sSQL += "'" + sUser + "',";
+		sSQL += "'" + sDate + "',";
+		sSQL += sSequence + ",";
+		sSQL += "'" + sNewMemberName + "',";
+		sSQL += "'" + (s[0][1].equals("O")?"M":"U") + "',";
+		sSQL += "'" + (s[0][2]==null?"":s[0][2]) + "',";
+		sSQL += "'" + "" + "',";
+		sSQL += "'" + s[0][0] + "',";	//子帳號的Line_Channel_Name應和電話主人相同
+		sSQL += "'" + sAccountSequence + "',";
+		sSQL += "'" + (s[0][3]==null?"":s[0][3]) + "',";
+		sSQL += "'" + (s[0][4]==null?"":s[0][4]) + "',";
+		sSQL += "'" + sAuthorizationCode + "',";
+		sSQL += "'" + "Init" + "'";
+		sSQL += ")";
+	}	//if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
 }else{
 	obj.put("resultCode", gcResultCodeParametersValidationError);
 	obj.put("resultText", gcResultTextParametersValidationError);
@@ -94,10 +148,14 @@ if (sAction.equals("delete")){	//刪除
 	out.flush();
 	return;
 }
-sSQL += " WHERE id=" + sRowId;
-sSQL += " AND (Account_Type='M' OR Account_Type='M')";
-sSQL += " AND Parent_Account_Sequence='" + sAccountSequence + "'";
-//sSQL += " AND Status='Active'";
+
+if (!sAction.equals("add")){
+	sSQL += " WHERE id=" + sRowId;
+	sSQL += " AND (Account_Type='M' OR Account_Type='U')";
+	sSQL += " AND Parent_Account_Sequence='" + sAccountSequence + "'";
+	//sSQL += " AND Status='Active'";
+}
+
 sSQLList.add(sSQL);
 
 //writeLog("debug", sSQL);
@@ -110,6 +168,7 @@ sResultText = ht.get("ResultText").toString();
 //回覆 client 端
 obj.put("resultCode", sResultCode);
 obj.put("resultText", sResultText);
+obj.put("Authorization_Code", sAuthorizationCode);
 out.print(obj);
 out.flush();
 

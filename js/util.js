@@ -278,6 +278,7 @@ function pageInit(){
 	var myAccountName = getLocalValue("Account_Name");
 	var myGoogleName = getLocalValue("Google_User_Name");
 	var myGooglePicture = getLocalValue("Google_User_Picture_URL");
+	var myAuditPhoneNumber = getLocalValue("Audit_Phone_Number");
 	if (beEmpty(myGoogleId) || beEmpty(myAccountType)){
 		var me = window.location.pathname;
 		var i = me.lastIndexOf("/");
@@ -296,7 +297,11 @@ function pageInit(){
 	if (beEmpty(myGooglePicture)) myGooglePicture = "images/JohnDoe.jpg";
 	
 	$('.sys-user-image').attr('src', myGooglePicture);
-	$('.sys-user-name').text(myGoogleName);
+	if (beEmpty(myAuditPhoneNumber)){
+		$('.sys-user-name').text(myGoogleName);
+	}else{
+		$('.sys-user-name').text(myAuditPhoneNumber);
+	}
 	$('.sys-user-account-name').text(myAccountName);
 	var myType = "歡迎您";
 	if (myAccountType=="A") myType = "系統管理者";
@@ -325,6 +330,8 @@ function generateMainMenu() {
 		s += "<li" + (pageName==me?" class='active'":"") + "><a href='" + pageName + "'><i class='fa fa-table'></i> <span>通話記錄查詢</span></a></li>";
 		pageName = "AdmOwnerMemberManagement.html";
 		s += "<li" + (pageName==me?" class='active'":"") + "><a href='" + pageName + "'><i class='fa fa-user'></i> <span>子帳號管理</span></a></li>";
+		pageName = "AdmOwnerMyProfile.html";
+		s += "<li" + (pageName==me?" class='active'":"") + "><a href='" + pageName + "'><i class='fa fa-check-square'></i> <span>我的設定</span></a></li>";
 
 		s1 = "";
 		pageName = "AdmOwnerReport_DailyCallStatistics.html";
@@ -349,7 +356,16 @@ function generateMainMenu() {
 		pageName = "AdmAdminPhoneOwnerManagement.html";
 		s += "<li" + (pageName==me?" class='active'":"") + "><a href='" + pageName + "'><i class='fa fa-table'></i> <span>電話主人資料管理</span></a></li>";
 		pageName = "AdmAdminSendTestNotification.html";
-		s += "<li" + (pageName==me?" class='active'":"") + "><a href='" + pageName + "'><i class='fa fa-table'></i> <span>LINE通知訊息測試</span></a></li>";
+		s += "<li" + (pageName==me?" class='active'":"") + "><a href='" + pageName + "'><i class='fa fa-comment'></i> <span>LINE通知訊息測試</span></a></li>";
+
+		s1 = "";
+		pageName = "AdmAdminrReport_DealerStatistics.html";
+		if (pageName==me) bFound = true;
+		s1 += "		<li" + (pageName==me?" class='active'":"") + "><a href='" + pageName + "'><i class='fa fa-circle-o'></i> 加盟商資料統計</a></li>";
+		pageName = "AdmAdminrReport_PhoneOwnerStatistics.html";
+		if (pageName==me) bFound = true;
+		s1 += "		<li" + (pageName==me?" class='active'":"") + "><a href='" + pageName + "'><i class='fa fa-circle-o'></i> 電話主人資料統計</a></li>";
+		s += generateSeconeLevelMenu("fa-line-chart", bFound, "我的報表", s1);
 	}	//if (myAccountType=="O" || myAccountType=="T"){	//電話主人
 	
 	if (notEmpty(s)) $('#sys-main-menu').append(s);

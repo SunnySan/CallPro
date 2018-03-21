@@ -214,6 +214,11 @@
 				</div><!-- /.box-body -->
 				
 				<div class="box-footer">
+					<div class="row">
+						<div class="col-md-6">
+							<button type="button" class="btn btn-success btn-lg" onclick="popupAddMemberModal();"><i class='fa fa-plus-circle'></i>&nbsp;新增子帳號</button>
+						</div>
+					</div>
 				</div><!-- /.box-footer -->
 				<!-- Loading (remove the following to stop the loading)-->
 				<div class="overlay" style="display:none;">
@@ -263,6 +268,33 @@
 						<div class="modal-footer">
 							<button type="button" class="btn btn-outline pull-left" data-dismiss="modal">取消</button>
 							<button type="button" class="btn btn-outline" onclick="confirmRename();">確認更名</button>
+						</div>
+					</div><!-- /.modal-content -->
+				</div><!-- /.modal-dialog -->
+			</div><!-- /.modal -->		
+
+			<!-- 新增子帳號姓名的視窗 -->
+			<div class="modal modal-warning fade" id="modal-warning-edit-new-member-name">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span></button>
+							<h4 class="modal-title">新增子帳號</h4>
+						</div>
+						<div class="modal-body">
+							<div class="row">
+								<div class="form-group col-md-12">
+									<label for="newAddMemberName" class="col-sm-3 control-label">子帳號姓名</label>
+									<div class="col-sm-9">
+										<input type="text" class="form-control" id="newAddMemberName" maxlength="20">
+									</div>
+								</div><!-- /.form-group -->
+							</div>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-outline pull-left" data-dismiss="modal">取消</button>
+							<button type="button" class="btn btn-outline" onclick="confirmAdd();">確認新增</button>
 						</div>
 					</div><!-- /.modal-content -->
 				</div><!-- /.modal-dialog -->
@@ -394,11 +426,13 @@
 						],
 						order: [[ 0, 'desc' ]]
 					} );
-
+					/*
 					$('html, body').animate({
 						scrollTop: $("#boxResult").offset().top
 					}, 1000);
-					
+					*/
+				}else if (data.resultCode=="00006"){
+					msgBox("您目前尚無子帳號!");
 				}else{
 					msgBox("取得子帳號資料失敗:<br>" + data.resultText);
 				}
@@ -418,6 +452,13 @@
 		$('#modal-warning-edit-member-name').modal('show');
 	}
 
+	//新增子帳號
+	function popupAddMemberModal(){
+		$('#newAddMemberName').val('');
+		//$('#modal-danger').modal({backdrop:false});	//若設為 false，則用戶按背景時將不會關閉 modal window
+		$('#modal-warning-edit-new-member-name').modal('show');
+	}
+
 	function doDelete(rowId, accountName){
 		rowIdToBeDeleted = rowId;
 		$('#modalAccountName').text(accountName);
@@ -431,9 +472,19 @@
 			msgBox("子帳號需有姓名且長度不可超過20個字，請重新輸入!");
 			return;
 		}
-
 		$('#modal-warning-edit-member-name').modal('hide');
 		doEdit('rename', rowIdToBeRenamed, newName);
+	}
+
+	function confirmAdd(){
+		var newName = $('#newAddMemberName').val();
+		if (beEmpty(newName) || newName.length>20){
+			msgBox("子帳號需有姓名且長度不可超過20個字，請重新輸入!");
+			return;
+		}
+
+		$('#modal-warning-edit-new-member-name').modal('hide');
+		doEdit('add', '0', newName);
 	}
 
 	function confirmDelete(){
@@ -456,7 +507,11 @@
 				return;
 			}else{
 				if (data.resultCode=="00000"){
-					msgBox("作業成功!", doQuery);
+					if (myAction=="add"){
+						msgBox("執行成功，請通知子帳號用戶5分鐘內於LINE群組中輸入以下授權碼：<br>" + data.Authorization_Code);
+					}else{
+						msgBox("作業成功!", doQuery);
+					}
 				}else{
 					msgBox("作業失敗:<br>" + data.resultText);
 				}
@@ -465,4 +520,5 @@
 
 		});	//getDataFromServer("xxx.jsp", sData, "json", function(data){
 	}
+	
 </script>

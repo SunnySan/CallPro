@@ -943,6 +943,35 @@ public java.lang.Boolean isValidPhoneOwner(String sAreaCode, String sPhoneNumber
 }	//public java.lang.Boolean beEmpty(String s) {
 
 /*********************************************************************************************************************/
+//檢查目前(5分鐘內)是否有重複的授權碼在等待用戶輸入
+private java.lang.Boolean isDuplicateAuthorizationCode(String sAuthorizationCode){
+	Hashtable	ht					= new Hashtable();
+	String		sSQL				= "";
+	String		s[][]				= null;
+	String		sResultCode			= gcResultCodeSuccess;
+	String		sResultText			= gcResultTextSuccess;
+	String		sDate				= getDateTimeNow(gcDateFormatSlashYMDTime);
+	
+	sSQL = "SELECT A.Account_Sequence";
+	sSQL += " FROM callpro_account A";
+	sSQL += " WHERE A.Authorization_Code='" + sAuthorizationCode + "'";
+	sSQL += " AND A.Status='Init'";
+	sSQL += " AND DATE_ADD( Create_Date , INTERVAL 5 MINUTE )>'" + sDate + "'";
+	//writeLog("debug", "SQL= " + sSQL);
+	ht = getDBData(sSQL, gcDataSourceName);
+	sResultCode = ht.get("ResultCode").toString();
+	sResultText = ht.get("ResultText").toString();
+	if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
+		return true;
+	}else if (sResultCode.equals(gcResultCodeNoDataFound)){	//沒資料，可能還沒設授權碼或授權碼輸入錯誤
+		return false;
+	}else{	//有誤
+		writeLog("error", "Failed to check duplicate authorization code, SQL= " + sSQL + ", sResultText=" + sResultText);
+		return true;
+	}
+}	//private java.lang.Boolean isDuplicateAuthorizationCode(String sAuthorizationCode){
+
+/*********************************************************************************************************************/
 //讓單引號等字元可以寫入MySQL DB中，用法為escape(String)
 private static final HashMap<String,String> sqlTokens;
 private static java.util.regex.Pattern sqlTokenPattern;

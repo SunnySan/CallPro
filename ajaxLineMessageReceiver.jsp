@@ -579,13 +579,14 @@ writeLog("debug", obj.toString());
 				sSQL += ")";
 				sSQLList.add(sSQL);
 				
-				if (sAccountType.equals("O")){	//這是電話主人帳號，將所屬加盟商的Provision_Quantity加1
+				if (sAccountType.equals("O")){	//這是正式版電話主人帳號，將所屬加盟商的Provision_Quantity加1
 					sSQL = "UPDATE callpro_account_detail SET";
 					sSQL += " Update_User='" + sUser + "'";
 					sSQL += " ,Update_Date='" + sDate + "'";
 					sSQL += " ,Provision_Quantity=Provision_Quantity+1";
 					sSQL += " WHERE Main_Account_Sequence=" + s[0][5];
 					sSQLList.add(sSQL);
+					//writeLog("debug", "sSQL= " + sSQL);
 				}
 			}	//if (!sAccountType.equals("M") && !sAccountType.equals("U")){	//經銷商及門號擁有者須新增一筆資料至callpro_account_detail
 
@@ -616,12 +617,15 @@ writeLog("debug", obj.toString());
 			sSQL += " AND Line_User_ID='" + sLineUserId + "'";
 			sSQL += " AND Line_Channel_Name='" + sLineChannel + "'";
 			sSQL += " AND Status='Active'";
-			writeLog("debug", sSQL);
+			//writeLog("debug", sSQL);
 			ht = getDBData(sSQL, gcDataSourceName);
 			sResultCode = ht.get("ResultCode").toString();
 			sResultText = ht.get("ResultText").toString();
 			if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
 				s = (String[][])ht.get("Data");
+				if (s.length>1){
+					return "您的名下已開通不只一個電話，請登入Call-Pro網站，於【子帳號管理】功能中新增子帳號";
+				}
 				if (isExpired(s[0][4])){
 					return "您的帳號已過期，無法進行此操作";
 				}
@@ -667,35 +671,6 @@ writeLog("debug", obj.toString());
 		}
 		//return sReplyMessageText;
 	}	//private String processOtherCommand (String sLineUserId, String sLineChannel, String sMessageText){
-
-	/*********************************************************************************************************************/
-	//檢查目前(5分鐘內)是否有重複的授權碼在等待用戶輸入
-	private java.lang.Boolean isDuplicateAuthorizationCode(String sAuthorizationCode){
-		Hashtable	ht					= new Hashtable();
-		String		sSQL				= "";
-		String		s[][]				= null;
-		String		sResultCode			= gcResultCodeSuccess;
-		String		sResultText			= gcResultTextSuccess;
-		String		sDate				= getDateTimeNow(gcDateFormatSlashYMDTime);
-		
-		sSQL = "SELECT A.Account_Sequence";
-		sSQL += " FROM callpro_account A";
-		sSQL += " WHERE A.Authorization_Code='" + sAuthorizationCode + "'";
-		sSQL += " AND A.Status='Init'";
-		sSQL += " AND DATE_ADD( Create_Date , INTERVAL 5 MINUTE )>'" + sDate + "'";
-		//writeLog("debug", "SQL= " + sSQL);
-		ht = getDBData(sSQL, gcDataSourceName);
-		sResultCode = ht.get("ResultCode").toString();
-		sResultText = ht.get("ResultText").toString();
-		if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
-			return true;
-		}else if (sResultCode.equals(gcResultCodeNoDataFound)){	//沒資料，可能還沒設授權碼或授權碼輸入錯誤
-			return false;
-		}else{	//有誤
-			writeLog("error", "Failed to check duplicate authorization code, SQL= " + sSQL + ", sResultText=" + sResultText);
-			return true;
-		}
-	}	//private java.lang.Boolean isDuplicateAuthorizationCode(String sAuthorizationCode){
 
 	/*********************************************************************************************************************/
 	//加盟商想新增非試用的電話主人帳號，檢查這個加盟商的Purchase_Quantity 減 Provision_Quantity 是否還夠用
@@ -745,6 +720,7 @@ writeLog("debug", obj.toString());
 		sSQL += " WHERE A.Audit_Phone_Number='" + sAccountName + "'";
 		sSQL += " AND (A.Account_Type='O' OR A.Account_Type='T')";
 		sSQL += " AND A.Status<>'Init'";
+		sSQL += " AND A.Status<>'Delete'";
 		//writeLog("debug", "SQL= " + sSQL);
 		ht = getDBData(sSQL, gcDataSourceName);
 		sResultCode = ht.get("ResultCode").toString();
