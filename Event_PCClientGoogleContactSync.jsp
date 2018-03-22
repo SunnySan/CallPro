@@ -296,7 +296,7 @@ if (notEmpty(sContactListResponse)){
 	out.flush();
 }
 
-writeLog("info", "程式處理完畢!");
+writeLog("info", "程式處理完畢!電話主人是：" + sAreaCode + sPhoneNumber);
 
 %>
 

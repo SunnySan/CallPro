@@ -91,7 +91,7 @@ public Hashtable doRefreshGoogleToken(String refreshToken, String clientId, Stri
 	String	sAccessToken = "";
 	JSONParser parser = new JSONParser();
 	
-	writeLog("debug", "Trying to get new Google access token...");
+	//writeLog("debug", "Trying to get new Google access token...");
 	sResponse = "";
 
 	try{
@@ -168,7 +168,7 @@ public Hashtable doRefreshGoogleToken(String refreshToken, String clientId, Stri
 			return htResponse;
 		}else{
 			//writeLog("debug", "Got Access Token=" + sAccessToken);
-			writeLog("debug", "Got Access Token successfully");
+			//writeLog("debug", "Got Access Token successfully");
 			htResponse.put("AccessToken", sAccessToken);
 		}
 	} catch (Exception e) {
