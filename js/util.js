@@ -237,7 +237,7 @@ function doLogout(){
 	clearCookie();
 	var sData = "";
 	getDataFromServer("ajaxDoLogout.jsp", sData, "json", function(data){
-		location.href = "/index.html";
+		location.href = "index.html";
 	});	//getDataFromServer("xxx.jsp", sData, "json", function(data){
 }
 

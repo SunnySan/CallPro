@@ -90,9 +90,10 @@ String			sClientContactEmailAddress			= "";
 PhoneNumbers	pnClientContactMobilePhoneNumbers	= null;
 PhoneNumbers	pnClientContactHomePhoneNumbers		= null;
 PhoneNumbers	pnClientContactWorkPhoneNumbers		= null;
+String			sGoogleEmail						= "";
 
 //確認門號主人狀態正常且已取得Google帳號
-sSQL = "SELECT B.Google_Refresh_Token, B.Google_People_API_SyncToken, B.id";
+sSQL = "SELECT B.Google_Refresh_Token, B.Google_People_API_SyncToken, B.id, B.Google_Email";
 sSQL += " FROM callpro_account A, callpro_account_detail B";
 sSQL += " WHERE A.Audit_Phone_Number='" + sAreaCode + sPhoneNumber + "'";
 sSQL += " AND (A.Account_Type='O' OR A.Account_Type='T')";
@@ -117,6 +118,7 @@ if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
 	sRefreshToken = s[0][0];
 	sContactSyncToken = s[0][1];
 	sCallproAccountDetailRowId = s[0][2];
+	sGoogleEmail = s[0][3];
 }else{
 	obj.put("resultCode", sResultCode);
 	obj.put("resultText", sResultText);
@@ -145,6 +147,7 @@ try{
 	GoogleCredential credential = getGoogleCredential(sRefreshToken, CLIENT_SECRET_FILE);
 	if (credential==null){	//取得 credential 失敗
 		writeLog("error", "無法取得 Google credential");
+		sendFullLoginMailToGoogle(sGoogleEmail);
 		obj.put("resultCode", gcResultCodeUnknownError);
 		obj.put("resultText", "無法取得 Google credential");
 		out.print(obj);

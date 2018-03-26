@@ -2,21 +2,21 @@
 <%!
 
 //Database連線參數
-public static final String	gcDataSourceName							= "jdbc/cmsiot";
+public static final String	gcDataSourceName							= "jdbc/callpro";
 
 //Line Gateway URL
-public static final String	gcLineGatewayUrlSendTextReply				= "http://cms.gslssd.com/LineGateway/SendTextReply.jsp?lineChannel=";
-public static final String	gcLineGatewayUrlSendTextPush				= "http://cms.gslssd.com/LineGateway/SendTextPush.jsp?lineChannel=";
+public static final String	gcLineGatewayUrlSendTextReply				= "http://www.call-pro.net/LineGateway/SendTextReply.jsp?lineChannel=";
+public static final String	gcLineGatewayUrlSendTextPush				= "http://www.call-pro.net/LineGateway/SendTextPush.jsp?lineChannel=";
 
 //Google Sign-In API
 public static final String	gcGoogleClientSecretFilePath				= "/js/client_id.json";
 
 public static final String	gcGoogleUrlForGettingAccessToken			= "https://www.googleapis.com/oauth2/v4/token";
-public static final String	gcGoogleAccessTokenRedirectUri				= "https://cms.gslssd.com";
+public static final String	gcGoogleAccessTokenRedirectUri				= "https://www.call-pro.net";
 public static final String	gcGoogleDriveFolderName						= "CallPro";
 
 //系統參數
-public static final String	gcSystemUri									= "https://cms.gslssd.com/CallPro/";
+public static final String	gcSystemUri									= "https://www.call-pro.net/CallPro/";
 
 /*****************************************************************************/
 //Email相關設定

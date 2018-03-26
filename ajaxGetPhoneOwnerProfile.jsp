@@ -72,7 +72,7 @@ if (sLoginUserAccountType.equals("D")){	//加盟商只能查自己客戶的資�
 
 if (notEmpty(sRowId) || notEmpty(sAuditPhoneNumber) || notEmpty(sAccountSequence)){	//若有指定id或門號，則查單一門號的所有資料，若未指定門號，則查所有門號的最基本資料
 	//sSQL = "SELECT A.id, DATE_FORMAT(A.Create_Date,'%y-%m-%d %H:%i'), A.Account_Name, A.Bill_Type, A.Line_Channel_Name, A.Audit_Phone_Number, A.Send_Instant_Notification, A.Send_CDR_Notification, DATE_FORMAT(A.Billing_Start_Date,'%y-%m-%d %H:%i'), DATE_FORMAT(A.Expiry_Date,'%y-%m-%d %H:%i'), A.Status, B.Google_User_Name, B.Google_Email, B.Contact_Phone, B.Contact_Address, B.Tax_ID_Number, B.Purchase_Quantity, B.Member_Quantity";
-	sSQL = "SELECT A.id, A.Account_Sequence, DATE_FORMAT(A.Create_Date,'%y-%m-%d'), A.Account_Name, A.Bill_Type, A.Line_Channel_Name, A.Audit_Phone_Number, A.Send_Instant_Notification, A.Send_CDR_Notification, DATE_FORMAT(A.Billing_Start_Date,'%y-%m-%d'), DATE_FORMAT(A.Expiry_Date,'%y-%m-%d'), A.Status, B.Google_User_Name, B.Google_Email, B.Contact_Phone, B.Contact_Address, B.Tax_ID_Number, B.Purchase_Quantity, B.Member_Quantity, A.Account_Type";
+	sSQL = "SELECT A.id, A.Account_Sequence, DATE_FORMAT(A.Create_Date,'%y-%m-%d'), A.Account_Name, A.Bill_Type, A.Line_Channel_Name, A.Audit_Phone_Number, A.Send_Instant_Notification, A.Send_CDR_Notification, DATE_FORMAT(A.Billing_Start_Date,'%y-%m-%d'), DATE_FORMAT(A.Expiry_Date,'%y-%m-%d'), A.Authorization_Code, A.Status, B.Google_User_Name, B.Google_Email, B.Contact_Phone, B.Contact_Address, B.Tax_ID_Number, B.Purchase_Quantity, B.Member_Quantity, A.Account_Type";
 }else{
 	sSQL = "SELECT A.id, A.Account_Sequence, DATE_FORMAT(A.Create_Date,'%y-%m-%d'), A.Account_Name, A.Bill_Type, A.Line_Channel_Name, A.Audit_Phone_Number, A.Status, A.Account_Type";
 }
@@ -99,7 +99,7 @@ if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
 	obj.put("recordCount", String.valueOf(s.length));
 	String[] fields2 = null;
 	if (notEmpty(sRowId) || notEmpty(sAuditPhoneNumber) || notEmpty(sAccountSequence)){	//若有指定id或門號，則查單一門號的所有資料，若未指定門號，則查所有門號的最基本資料
-		fields2 = new String[]{"id", "Account_Sequence", "Create_Date", "Account_Name", "Bill_Type", "Line_Channel_Name", "Audit_Phone_Number", "Send_Instant_Notification", "Send_CDR_Notification", "Billing_Start_Date", "Expiry_Date", "Status", "Google_User_Name", "Google_Email", "Contact_Phone", "Contact_Address", "Tax_ID_Number", "Purchase_Quantity", "Member_Quantity", "Account_Type"};
+		fields2 = new String[]{"id", "Account_Sequence", "Create_Date", "Account_Name", "Bill_Type", "Line_Channel_Name", "Audit_Phone_Number", "Send_Instant_Notification", "Send_CDR_Notification", "Billing_Start_Date", "Expiry_Date", "Authorization_Code", "Status", "Google_User_Name", "Google_Email", "Contact_Phone", "Contact_Address", "Tax_ID_Number", "Purchase_Quantity", "Member_Quantity", "Account_Type"};
 	}else{
 		fields2 = new String[]{"id", "Account_Sequence", "Create_Date", "Account_Name", "Bill_Type", "Line_Channel_Name", "Audit_Phone_Number", "Status", "Account_Type"};
 	}

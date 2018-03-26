@@ -972,6 +972,20 @@ private java.lang.Boolean isDuplicateAuthorizationCode(String sAuthorizationCode
 }	//private java.lang.Boolean isDuplicateAuthorizationCode(String sAuthorizationCode){
 
 /*********************************************************************************************************************/
+//發送mail給用戶，請用戶重新使用完整登入功能將Google帳號與我們服務綁定
+public void sendFullLoginMailToGoogle(String gmailAddress){
+	java.lang.Boolean bOK = false;
+	String sSubject = "Call-Pro帳號重新驗證通知信";
+	String sBody = "";
+	String sLink = gcSystemUri + "login_full.html";
+	sBody = "親愛的用戶您好，";
+	sBody += "<p>感謝您使用Call-Pro服務，我們發現目前無法同步您的Google通訊錄，或無法上傳錄音檔至您的Google雲端硬碟。<br>若是因為您修改過Google帳號的設定，或是您Google帳號註冊的應用程式過多，請點選以下連結重新將Call-Pro服務註冊至您的Google帳號中。";
+	sBody += "<p><a href='" + sLink + "'>" + sLink + "</a>";
+	sBody += "<p>Call-Pro祝您有美好的一天";
+	bOK = sendHTMLMail(gcDefaultEmailFromAddress, gcDefaultEmailFromName, gmailAddress, sSubject, sBody, "", "", "", "");
+}	//public void sendFullLoginMailToGoogle(String gmailAddress){
+
+/*********************************************************************************************************************/
 //讓單引號等字元可以寫入MySQL DB中，用法為escape(String)
 private static final HashMap<String,String> sqlTokens;
 private static java.util.regex.Pattern sqlTokenPattern;

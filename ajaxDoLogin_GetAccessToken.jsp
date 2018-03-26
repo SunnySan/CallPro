@@ -201,6 +201,7 @@ if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
 		sSQL += " WHERE Google_ID='" + userId + "'";
 	}
 	sSQLList.add(sSQL);
+	//writeLog("debug", "更新 callpro_account_detail, SQL= " + sSQL);
 	ht = updateDBData(sSQLList, gcDataSourceName, false);	//更新 callpro_account_detail 中的 Google_Refresh_Token
 	sResultCode = ht.get("ResultCode").toString();
 	sResultText = ht.get("ResultText").toString();
