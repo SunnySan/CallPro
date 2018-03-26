@@ -367,6 +367,13 @@
 							</div>
 						</div><!-- /.form-group -->
 
+						<div class="form-group col-md-6">
+							<label for="detailAuthorizationCode" class="col-sm-4 control-label">授權碼</label>
+							<div class="col-sm-8">
+								<input type="text" class="form-control" id="detailAuthorizationCode" disabled>
+							</div>
+						</div><!-- /.form-group -->
+
 					</div><!-- /.box-body -->
 				
 					<div class="box-footer">
@@ -625,6 +632,8 @@
 						$('#detailTaxIDNumber').val(r.Tax_ID_Number);
 						$('#detailPurchaseQuantity').val(r.Purchase_Quantity);
 						$('#detailMemberQuantity').val(r.Member_Quantity);
+						$('#detailAuthorizationCode').val(r.Authorization_Code);
+						
 						$('#accountName').val(r.Account_Name);
 						$('#contactPhone').val(r.Contact_Phone);
 						$('#contactAddress').val(r.Contact_Address);
