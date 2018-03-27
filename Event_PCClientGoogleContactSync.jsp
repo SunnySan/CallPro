@@ -27,7 +27,7 @@ out.clear();	//注意，一定要有out.clear();，要不然client端無法解�
 JSONObject obj=new JSONObject();
 
 /************************************呼叫範例*******************************
-https://cms.gslssd.com/CallPro/Event_PCClientNewCDR.jsp?areacode=02&phonenumber1=26585888&accesscode=123456&callerphone=0988123456&recordtime=30&recordtimestart=2018-01-23 10:42&call_direction=0&recordfile=ringtone_04.wav&ring_time=10&talked_time=20&callername=John&calleraddr=台北市內湖區成功路四段&callercompany=Call-Pro&calleremail=hello@gmail.com
+https://www.call-pro.net/CallPro/Event_PCClientNewCDR.jsp?areacode=02&phonenumber1=26585888&accesscode=123456&callerphone=0988123456&recordtime=30&recordtimestart=2018-01-23 10:42&call_direction=0&recordfile=ringtone_04.wav&ring_time=10&talked_time=20&callername=John&calleraddr=台北市內湖區成功路四段&callercompany=Call-Pro&calleremail=hello@gmail.com
 ************************************呼叫範例*******************************/
 
 String CLIENT_SECRET_FILE	= application.getRealPath(gcGoogleClientSecretFilePath);
@@ -68,6 +68,8 @@ String		sResultText			= gcResultTextSuccess;
 String		s[][]				= null;
 String		sSQL				= "";
 List<String> sSQLList			= new ArrayList<String>();
+String		sDate				= getDateTimeNow(gcDateFormatSlashYMDTime);
+String		sUser				= "System";
 
 int			i					= 0;
 int			j					= 0;
@@ -273,6 +275,8 @@ try{
 	if (notEmpty(sNewContactSyncToken)){	//有新的SyncToken，更新至DB
 		sSQL = "UPDATE callpro_account_detail";
 		sSQL += " SET Google_People_API_SyncToken='" + sNewContactSyncToken + "'";
+		sSQL += " , Update_User='" + sUser + "'";
+		sSQL += " , Update_Date='" + sDate + "'";
 		sSQL += " WHERE id=" + sCallproAccountDetailRowId;
 		sSQLList.add(sSQL);
 		//有執行就好，不管成功或失敗都不影響回覆PC Client的資料

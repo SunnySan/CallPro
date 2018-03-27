@@ -30,6 +30,8 @@ public static final String	gcDefaultEmailSMTPServerPassword		= "sunny561227";	//
 public static final String	gcDefaultEmailFromAddress				= "m@call-pro.net";	//發送email的發信人email address
 public static final String	gcDefaultEmailFromName					= "Call-Pro官網";	//發送email的發信人名稱
 
+public static final String	gcAlarmEmailRecipientAddress			= "sunny561227@gmail.com;alex85899@gmail.com";	//接收系統告警email的人
+
 //ResultCode及ResultText定義
 public static final String	gcResultCodeSuccess						= "00000";
 public static final String	gcResultTextSuccess						= "成功";

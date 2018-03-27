@@ -1,4 +1,4 @@
-<%@ page language="java" pageEncoding="utf-8" contentType="text/html;charset=utf-8" %>
+﻿<%@ page language="java" pageEncoding="utf-8" contentType="text/html;charset=utf-8" %>
 <%@ page trimDirectiveWhitespaces="true" %>
 
 <%@page import="java.net.InetAddress" %>
@@ -26,38 +26,10 @@ out.clear();	//注意，一定要有out.clear();，要不然client端無法解�
 JSONObject obj=new JSONObject();
 
 /************************************呼叫範例*******************************
-https://www.call-pro.net/CallPro/Event_PCClientSendInstantNotification.jsp?areacode=02&phonenumber1=26585888&accesscode=123456&callerphone=0988123456&callername=hellokitty&callerdetail=great
+https://www.call-pro.net/CallPro/Event_SendSystemAliveNotification.jsp
 ************************************呼叫範例*******************************/
 
 String sLineGatewayUrlSendTextPush = gcLineGatewayUrlSendTextPush;
-
-String sAreaCode			= nullToString(request.getParameter("areacode"), "");		//監控電話的室話區碼
-String sPhoneNumber			= nullToString(request.getParameter("phonenumber1"), "");	//監控電話的電話號碼
-String sAuthorizationCode	= nullToString(request.getParameter("accesscode"), "");		//授權碼
-String sAPartyNumber = nullToString(request.getParameter("callerphone"), "");
-String sAPartyName = nullToString(request.getParameter("callername"), "");
-String sAPartyDetail = nullToString(request.getParameter("callerdetail"), "");
-
-if (beEmpty(sAreaCode) || beEmpty(sPhoneNumber) || beEmpty(sAuthorizationCode) || beEmpty(sAPartyNumber)){
-	writeLog("info", "Parameters not enough, areacode= " + sAreaCode + ", phonenumber1= " + sPhoneNumber + ", accesscode= " + sAuthorizationCode + ", callerphone= " + sAPartyNumber);
-	obj.put("resultCode", gcResultCodeParametersNotEnough);
-	obj.put("resultText", gcResultTextParametersNotEnough);
-	out.print(obj);
-	out.flush();
-	return;
-}
-
-//登入用戶的資訊，系統管理者可以直接發送測試通知
-String sLoginUserAccountType = (String)session.getAttribute("Account_Type");
-
-if (!isValidPhoneOwner(sAreaCode, sPhoneNumber, sAuthorizationCode, sLoginUserAccountType)){
-	writeLog("error", "Authorization failed, areacode= " + sAreaCode + ", phonenumber1= " + sPhoneNumber + ", accesscode= " + sAuthorizationCode + ", callerphone= " + sAPartyNumber);
-	obj.put("resultCode", gcResultCodeParametersValidationError);
-	obj.put("resultText", gcResultTextParametersValidationError);
-	out.print(obj);
-	out.flush();
-	return;
-}
 
 Hashtable	ht					= new Hashtable();
 String		sResultCode			= gcResultCodeSuccess;
@@ -71,41 +43,15 @@ String		sDate				= getDateTimeNow(gcDateFormatSlashYMDTime);
 int			i					= 0;
 int			j					= 0;
 
-String		sLineChannelName	= "";
-
-//確認門號主人狀態正常
-sSQL = "SELECT Line_Channel_Name FROM callpro_account";
-sSQL += " WHERE Audit_Phone_Number='" + sAreaCode + sPhoneNumber + "'";
-sSQL += " AND (Account_Type='O' OR Account_Type='T')";
-sSQL += " AND Expiry_Date>'" + sDate + "'";
-sSQL += " AND (Status='Active' OR Status='Google')";
-//sSQL += " AND Status='Active'";	//先不要這一行，也就是說若尚未註冊Google帳號也能收到通知
-//writeLog("debug", "sSQL: " + sSQL);
-
-ht = getDBData(sSQL, gcDataSourceName);
-
-sResultCode = ht.get("ResultCode").toString();
-sResultText = ht.get("ResultText").toString();
-
-if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
-	s = (String[][])ht.get("Data");
-	sLineChannelName = s[0][0];
-}else{
-	obj.put("resultCode", sResultCode);
-	obj.put("resultText", sResultText);
-	out.print(obj);
-	out.flush();
-	return;
-}	//if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
-
+String		sLineChannelName	= "CallProA";
 String		sRecepientType		= "";
 
-//找出通知對象
+//發給管理者
 sSQL = "SELECT Line_User_ID FROM callpro_account";
-sSQL += " WHERE Audit_Phone_Number='" + sAreaCode + sPhoneNumber + "'";
-sSQL += " AND Send_Instant_Notification='Y'";
-//sSQL += " AND Status='Active'";	//先不要這一行，也就是說若尚未註冊Google帳號也能收到通知
-sSQL += " AND (Status='Active' OR Status='Google')";
+sSQL += " WHERE Account_Type='A'";
+sSQL += " AND Line_Channel_Name='" + sLineChannelName + "'";
+sSQL += " AND Expiry_Date>'" + sDate + "'";
+sSQL += " AND Status='Active'";
 
 ht = getDBData(sSQL, gcDataSourceName);
 
@@ -136,7 +82,7 @@ if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
 String sMessageBody = "";
 String sPushMessage = "";
 
-sMessageBody = sAreaCode + sPhoneNumber + "來電自" + sAPartyNumber + "，對方為" + sAPartyName + "，個人資料如下：\n" + sAPartyDetail;
+sMessageBody = "Call-Pro 系統測試，測試時間：" + sDate;
 
 sPushMessage = generateLineTextMessage(sRecepientType, s, sMessageBody);
 
@@ -145,6 +91,15 @@ sPushMessage = generateLineTextMessage(sRecepientType, s, sMessageBody);
 if (!sendPushMessageToLine(sLineGatewayUrlSendTextPush + sLineChannelName + "&type=" + sRecepientType, sPushMessage)){
 	sResultCode = gcResultCodeUnknownError;
 	sResultText = gcResultTextUnknownError;
+
+	java.lang.Boolean bOK = false;
+	String sSubject = "Call-Pro系統障礙通知";
+	String sBody = "";
+	sBody = "系統管理者注意，";
+	sBody += "<p>系統測試發送LINE訊息失敗，測試時間：" + sDate + "，請檢查系統狀態是否正常。";
+	sBody += "<p>Call-Pro維運中心";
+	bOK = sendHTMLMail(gcDefaultEmailFromAddress, gcDefaultEmailFromName, gcAlarmEmailRecipientAddress, sSubject, sBody, "", "", "", "");
+
 }
 
 obj.put("resultCode", sResultCode);

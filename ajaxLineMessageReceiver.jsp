@@ -861,7 +861,7 @@ writeLog("debug", obj.toString());
 	/*********************************************************************************************************************/
 	private String generateMainMenu(String sReplyToken, String sSourceUserId, String sSourceRoomId, String sSourceGroupId, String sSourceType){	//產生主選單
 		/* 範例
-			{"replyToken":"e627c4070a944e808486c9230ec6cf17","messages":[{"template":{"thumbnailImageUrl":"https:\/\/cms.gslssd.com\/PhoneHousekeeper\/images\/call-center-2537390_1280.jpg","text":"歡迎您使用電話管家服務\n請點選下方的服務","type":"buttons","title":"親愛的用戶您好!","actions":[{"label":"申請啟用LINE通知功能","type":"uri","uri":"https:\/\/cms.gslssd.com\/PhoneHousekeeper\/ApplyLineNotifyEnable.html?lineUserId=Ue913331687d5757ccff454aab90f55cb&lineUserType=user"},{"label":"申請取消LINE通知功能","type":"uri","uri":"https:\/\/cms.gslssd.com\/PhoneHousekeeper\/ApplyLineNotifyDisable.html?lineUserId=Ue913331687d5757ccff454aab90f55cb&lineUserType=user"}]},"altText":"選擇服務功能","type":"template"}]}
+			{"replyToken":"e627c4070a944e808486c9230ec6cf17","messages":[{"template":{"thumbnailImageUrl":"https:\/\/www.call-pro.net\/PhoneHousekeeper\/images\/call-center-2537390_1280.jpg","text":"歡迎您使用電話管家服務\n請點選下方的服務","type":"buttons","title":"親愛的用戶您好!","actions":[{"label":"申請啟用LINE通知功能","type":"uri","uri":"https:\/\/www.call-pro.net\/PhoneHousekeeper\/ApplyLineNotifyEnable.html?lineUserId=Ue913331687d5757ccff454aab90f55cb&lineUserType=user"},{"label":"申請取消LINE通知功能","type":"uri","uri":"https:\/\/www.call-pro.net\/PhoneHousekeeper\/ApplyLineNotifyDisable.html?lineUserId=Ue913331687d5757ccff454aab90f55cb&lineUserType=user"}]},"altText":"選擇服務功能","type":"template"}]}
 		*/
 		JSONObject objReplyMessage=new JSONObject();
 
@@ -876,7 +876,7 @@ writeLog("debug", obj.toString());
 		Map mapTemplate = null;
 		mapTemplate = new HashMap();
 		mapTemplate.put("type", "buttons");
-		mapTemplate.put("thumbnailImageUrl", "https://cms.gslssd.com/PhoneHousekeeper/images/call-center-2537390_1024.jpg");
+		mapTemplate.put("thumbnailImageUrl", "https://www.call-pro.net/PhoneHousekeeper/images/call-center-2537390_1024.jpg");
 		mapTemplate.put("title", "親愛的用戶您好!");
 		mapTemplate.put("text", "歡迎您使用電話管家服務\n請點選下方的服務");
 		List  l2 = new LinkedList();
@@ -885,27 +885,27 @@ writeLog("debug", obj.toString());
 		mapAction = new HashMap();
 		mapAction.put("type", "uri");
 		mapAction.put("label", "申請啟用LINE通知功能");
-		//mapAction.put("uri", "https://cms.gslssd.com/PhoneHousekeeper/ApplyLineNotifyEnable.html?lineUserId=" + sSourceUserId + "&lineUserType=" + sSourceType);
-		mapAction.put("uri", "https://cms.gslssd.com/PhoneHousekeeper/index.html?action=applylinenotification&lineUserId=" + nullToString(sSourceUserId, "") + "&lineRoomId=" + nullToString(sSourceRoomId, "") + "&lineGroupId=" + nullToString(sSourceGroupId, "") + "&lineUserType=" + nullToString(sSourceType, ""));
+		//mapAction.put("uri", "https://www.call-pro.net/PhoneHousekeeper/ApplyLineNotifyEnable.html?lineUserId=" + sSourceUserId + "&lineUserType=" + sSourceType);
+		mapAction.put("uri", "https://www.call-pro.net/PhoneHousekeeper/index.html?action=applylinenotification&lineUserId=" + nullToString(sSourceUserId, "") + "&lineRoomId=" + nullToString(sSourceRoomId, "") + "&lineGroupId=" + nullToString(sSourceGroupId, "") + "&lineUserType=" + nullToString(sSourceType, ""));
 		l2.add(mapAction);
 
 		mapAction = new HashMap();
 		mapAction.put("type", "uri");
 		mapAction.put("label", "申請取消LINE通知功能");
-		//mapAction.put("uri", "https://cms.gslssd.com/PhoneHousekeeper/ApplyLineNotifyDisable.html?lineUserId=" + sSourceUserId + "&lineUserType=" + sSourceType);
-		mapAction.put("uri", "https://cms.gslssd.com/PhoneHousekeeper/index.html?action=cancellinenotification&lineUserId=" + nullToString(sSourceUserId, "") + "&lineRoomId=" + nullToString(sSourceRoomId, "") + "&lineGroupId=" + nullToString(sSourceGroupId, "") + "&lineUserType=" + nullToString(sSourceType, ""));
+		//mapAction.put("uri", "https://www.call-pro.net/PhoneHousekeeper/ApplyLineNotifyDisable.html?lineUserId=" + sSourceUserId + "&lineUserType=" + sSourceType);
+		mapAction.put("uri", "https://www.call-pro.net/PhoneHousekeeper/index.html?action=cancellinenotification&lineUserId=" + nullToString(sSourceUserId, "") + "&lineRoomId=" + nullToString(sSourceRoomId, "") + "&lineGroupId=" + nullToString(sSourceGroupId, "") + "&lineUserType=" + nullToString(sSourceType, ""));
 		l2.add(mapAction);
 
 		mapAction = new HashMap();
 		mapAction.put("type", "uri");
 		mapAction.put("label", "電話記錄查詢");
-		mapAction.put("uri", "https://cms.gslssd.com/PhoneHousekeeper/index.html?action=checkphonecallhistory");
+		mapAction.put("uri", "https://www.call-pro.net/PhoneHousekeeper/index.html?action=checkphonecallhistory");
 		l2.add(mapAction);
 
 		mapAction = new HashMap();
 		mapAction.put("type", "uri");
 		mapAction.put("label", "造訪電話管家網站");
-		mapAction.put("uri", "https://cms.gslssd.com/PhoneHousekeeper/index.html");
+		mapAction.put("uri", "https://www.call-pro.net/PhoneHousekeeper/index.html");
 		l2.add(mapAction);
 
 		mapTemplate.put("actions", l2);
@@ -918,7 +918,7 @@ writeLog("debug", obj.toString());
 	/*********************************************************************************************************************/
 	private String generateTextMessage(String sReplyToken, String sReplyMessageText){	//產生文字回覆訊息
 		/* 範例
-			{"replyToken":"e627c4070a944e808486c9230ec6cf17","messages":[{"template":{"thumbnailImageUrl":"https:\/\/cms.gslssd.com\/PhoneHousekeeper\/images\/call-center-2537390_1280.jpg","text":"歡迎您使用電話管家服務\n請點選下方的服務","type":"buttons","title":"親愛的用戶您好!","actions":[{"label":"申請啟用LINE通知功能","type":"uri","uri":"https:\/\/cms.gslssd.com\/PhoneHousekeeper\/ApplyLineNotifyEnable.html?lineUserId=Ue913331687d5757ccff454aab90f55cb&lineUserType=user"},{"label":"申請取消LINE通知功能","type":"uri","uri":"https:\/\/cms.gslssd.com\/PhoneHousekeeper\/ApplyLineNotifyDisable.html?lineUserId=Ue913331687d5757ccff454aab90f55cb&lineUserType=user"}]},"altText":"選擇服務功能","type":"template"}]}
+			{"replyToken":"e627c4070a944e808486c9230ec6cf17","messages":[{"template":{"thumbnailImageUrl":"https:\/\/www.call-pro.net\/PhoneHousekeeper\/images\/call-center-2537390_1280.jpg","text":"歡迎您使用電話管家服務\n請點選下方的服務","type":"buttons","title":"親愛的用戶您好!","actions":[{"label":"申請啟用LINE通知功能","type":"uri","uri":"https:\/\/www.call-pro.net\/PhoneHousekeeper\/ApplyLineNotifyEnable.html?lineUserId=Ue913331687d5757ccff454aab90f55cb&lineUserType=user"},{"label":"申請取消LINE通知功能","type":"uri","uri":"https:\/\/www.call-pro.net\/PhoneHousekeeper\/ApplyLineNotifyDisable.html?lineUserId=Ue913331687d5757ccff454aab90f55cb&lineUserType=user"}]},"altText":"選擇服務功能","type":"template"}]}
 		*/
 		JSONObject objReplyMessage=new JSONObject();
 

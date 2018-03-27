@@ -96,7 +96,6 @@ try{
 		email = payload.getEmail();
 		name = (String) payload.get("name");	//這是完整的 Sunny Sun
 		pictureUrl = (String) payload.get("picture");
-		writeLog("error", "picture: " + (String) payload.get("picture"));
 		//String locale = (String) payload.get("locale");
 		familyName = (String) payload.get("family_name");	//Sun
 		givenName = (String) payload.get("given_name");		//Sunny

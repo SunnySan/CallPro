@@ -27,7 +27,7 @@ out.clear();	//注意，一定要有out.clear();，要不然client端無法解�
 JSONObject obj=new JSONObject();
 
 /************************************呼叫範例*******************************
-https://cms.gslssd.com/CallPro/Event_PCClientNewCDR.jsp?areacode=02&phonenumber1=26585888&accesscode=123456&callerphone=0988123456&recordtime=30&recordtimestart=2018-01-23 10:42&call_direction=0&recordfile=ringtone_04.wav&ring_time=10&talked_time=20&callername=John&calleraddr=台北市內湖區成功路四段&callercompany=Call-Pro&calleremail=hello@gmail.com
+https://www.call-pro.net/CallPro/Event_PCClientNewCDR.jsp?areacode=02&phonenumber1=26585888&accesscode=123456&callerphone=0988123456&recordtime=30&recordtimestart=2018-01-23 10:42&call_direction=0&recordfile=ringtone_04.wav&ring_time=10&talked_time=20&callername=John&calleraddr=台北市內湖區成功路四段&callercompany=Call-Pro&calleremail=hello@gmail.com
 ************************************呼叫範例*******************************/
 
 String CLIENT_SECRET_FILE	= application.getRealPath(gcGoogleClientSecretFilePath);

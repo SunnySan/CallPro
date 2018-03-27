@@ -26,7 +26,7 @@ out.clear();	//注意，一定要有out.clear();，要不然client端無法解�
 JSONObject obj=new JSONObject();
 
 /************************************呼叫範例*******************************
-https://cms.gslssd.com/CallPro/Event_PCClientLogin.jsp?areacode=02&phonenumber1=26585888&accesscode=123456
+https://www.call-pro.net/CallPro/Event_PCClientLogin.jsp?areacode=02&phonenumber1=26585888&accesscode=123456
 ************************************呼叫範例*******************************/
 
 String sAreaCode			= nullToString(request.getParameter("areacode"), "");		//監控電話的室話區碼
