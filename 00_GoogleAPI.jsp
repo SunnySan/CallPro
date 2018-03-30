@@ -193,6 +193,7 @@ public Hashtable searchGoogleContact(HttpTransport httpTransport, JsonFactory js
 	String		sResultCode			= gcResultCodeNoDataFound;
 	String		sResultText			= gcResultTextNoDataFound;
 	int			i					= 0;
+	String		APPLICATION_NAME	= "Call-Pro";
 
 	if (beEmpty(sNumberToBeCompared)){
 		htResponse.put("ResultCode", gcResultCodeParametersNotEnough);
@@ -202,7 +203,9 @@ public Hashtable searchGoogleContact(HttpTransport httpTransport, JsonFactory js
 	//只比對最後 6 碼
 	if (sNumberToBeCompared.length()>6) sNumberToBeCompared = sNumberToBeCompared.substring(sNumberToBeCompared.length()-6);
 	try{
-		PeopleService peopleService = new PeopleService.Builder(httpTransport, jsonFactory, credential).build();
+		PeopleService peopleService = new PeopleService.Builder(httpTransport, jsonFactory, credential)
+										.setApplicationName(APPLICATION_NAME)
+										.build();
         // Request 10 connections.
         //https://developers.google.com/resources/api-libraries/documentation/people/v1/java/latest/
         ListConnectionsResponse response = peopleService.people().connections()
@@ -372,13 +375,15 @@ public Hashtable searchGoogleContactWithGoogleContactApi(String sAccessToken, St
 /*********************************************************************************************************************/
 //取得Google短網址
 //https://developers.google.com/api-client-library/java/apis/urlshortener/v1
-public String getShortenURL(HttpTransport httpTransport, JsonFactory jsonFactory, GoogleCredential credential, String sLongURL){
+public String getShortenURL(HttpTransport httpTransport, JsonFactory jsonFactory, GoogleCredential credential, String sApplicationName, String sLongURL){
 	String	sResponse		= "";
 	String	sPostMessage	= "{\"longUrl\": \"" + sLongURL + "\"}";
 	String	sShortURL		= "";
 	
 	try{
-		Urlshortener shortener = new Urlshortener.Builder(httpTransport, jsonFactory, credential).build();
+		Urlshortener shortener = new Urlshortener.Builder(httpTransport, jsonFactory, credential)
+									.setApplicationName(sApplicationName)
+									.build();
 		Url toInsert = new Url().setLongUrl(sLongURL);
 		toInsert = shortener.url().insert(toInsert).execute();
 		sShortURL = toInsert.getId();

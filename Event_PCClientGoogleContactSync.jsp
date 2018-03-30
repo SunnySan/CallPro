@@ -157,7 +157,9 @@ try{
 		return;
 	}
 	
-	PeopleService peopleService = new PeopleService.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential).build();
+	PeopleService peopleService = new PeopleService.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
+									.setApplicationName(APPLICATION_NAME)
+									.build();
 	
 	if (uploadUsers!=null && uploadUsers.getUserCount()>0){
 		//取得所有Google聯絡人姓名資料
