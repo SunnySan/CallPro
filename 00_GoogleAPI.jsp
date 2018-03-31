@@ -453,5 +453,90 @@ public Hashtable addGoogleCalendarEvent(HttpTransport httpTransport, JsonFactory
 }	//public java.lang.Boolean beEmpty(String s) {
 
 /*********************************************************************************************************************/
+//建立 Firebase Dynamic Links 的短網址
+public String getFirebaseDynamicLink(String sLongURL){
+	String	sResponse	= "";
+	String	sPostBody	= "";
+	String	line;
+
+	JSONParser parser = new JSONParser();
+	
+	//writeLog("debug", "Trying to get Firebase Dynamic Link...");
+
+	sResponse = "";
+
+	try{
+		JSONObject obj=new JSONObject();
+		JSONObject objOption=new JSONObject();
+		obj.put("longDynamicLink", "https://b8hrg.app.goo.gl/?link=" + URLEncoder.encode(sLongURL, "UTF-8"));
+		objOption.put("option", "SHORT");
+		obj.put("suffix", objOption);
+		sPostBody = obj.toString();
+		//writeLog("debug", "sPostBody= " + sPostBody);
+
+		byte[] postData = sPostBody.getBytes( "UTF-8" );
+		int postDataLength = postData.length;
+	
+		URL u;
+		u = new URL(gcFirebaseDynamicLinksUrl);
+		HttpURLConnection uc = (HttpURLConnection)u.openConnection();
+		uc.setRequestProperty( "Content-Length", Integer.toString( postDataLength ));
+		uc.setRequestProperty ("Content-Type", "application/json");
+		uc.setRequestProperty("contentType", "utf-8");
+		uc.setRequestMethod("POST");
+		uc.setDoOutput(true);
+		uc.setDoInput(true);
+	
+		/*
+		final BufferedWriter bfw = new BufferedWriter(new OutputStreamWriter(uc.getOutputStream()));
+		bfw.write(encodedUrl.toString());
+		bfw.flush();
+		bfw.close();        
+		*/
+		DataOutputStream wr = new DataOutputStream(uc.getOutputStream());
+		wr.writeBytes(sPostBody);
+		wr.flush();
+		wr.close();
+	
+		InputStream in = uc.getInputStream();
+		BufferedReader r = new BufferedReader(new InputStreamReader(in));
+		StringBuffer buf = new StringBuffer();
+		line = "";
+		while ((line = r.readLine())!=null) {
+			buf.append(line);
+		}
+		in.close();
+		sResponse = buf.toString();	//取得回應值
+	}catch (IOException e){ 
+		writeLog("error", "Exception when getting Firebase Dynamic Links: " + e.toString());
+		return "";
+	}
+
+	if (beEmpty(sResponse)){
+		writeLog("error", "Exception when getting Firebase Dynamic Links: " + "Firebase回覆空白資料");
+		return "";
+	}else{
+		//writeLog("debug", "Firebase Dynamic Links response: " + sResponse);
+	}
+	
+	//取得 Google 回傳的資料了，解析短網址
+	try {
+		Object objBody = parser.parse(sResponse);
+		JSONObject jsonObjectBody = (JSONObject) objBody;
+		sResponse = (String) jsonObjectBody.get("shortLink");
+		if (beEmpty(sResponse)){
+			writeLog("error", "Firebase Dynamic Links response didn't contain short link...");
+			return "";
+		}
+	} catch (Exception e) {
+		writeLog("error", "Parse short link failed exception: " + e.toString());
+		return "";
+	}
+
+	return sResponse;
+
+}	//public String getFirebaseDynamicLink(String sLongURL){
+
+/*********************************************************************************************************************/
 
 %>

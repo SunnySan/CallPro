@@ -223,17 +223,19 @@ try{
 	String sFileURL = "";
 	String sShortURL = "";
 	if (bHasFile && notEmpty(sGoogleDriveFileId)){
-		//sFileURL = "https://drive.google.com/file/d/" + sGoogleDriveFileId + "/view";
-		sFileURL = gcSystemUri + "Event_ListenToMyAudio.jsp?fid=" + sGoogleDriveFileId;
+		sFileURL = "https://drive.google.com/file/d/" + sGoogleDriveFileId + "/view";
+		//sFileURL = gcSystemUri + "Event_ListenToMyAudio.jsp?fid=" + sGoogleDriveFileId;
 		writeLog("debug", "錄音檔長網址： " + sFileURL);
-		sShortURL = getShortenURL(HTTP_TRANSPORT, JSON_FACTORY, credential, APPLICATION_NAME, sFileURL);
+		//sShortURL = getShortenURL(HTTP_TRANSPORT, JSON_FACTORY, credential, APPLICATION_NAME, sFileURL);
+		sShortURL = getFirebaseDynamicLink(sFileURL);
 		writeLog("debug", "錄音檔短網址： " + sShortURL);
 	}
 	
 	//取得Google短網址(Call Log 查詢)
 	//String sCallLogURL = gcSystemUri + "SimpleCallLog.html?auditphone=" + sAreaCode + sPhoneNumber + "&callerphone=" + sCallerNumber;
 	String sCallLogURL = gcSystemUri + "AdmOwnerCallLog.html?callerPhoneNumber=" + sCallerNumber;
-	String sCallLogShortURL = getShortenURL(HTTP_TRANSPORT, JSON_FACTORY, credential, APPLICATION_NAME, sCallLogURL);
+	//String sCallLogShortURL = getShortenURL(HTTP_TRANSPORT, JSON_FACTORY, credential, APPLICATION_NAME, sCallLogURL);
+	String sCallLogShortURL = getFirebaseDynamicLink(sCallLogURL);
 
 	//sMessageBody += "，通話時間" + sDuration + "秒，聽取通話內容: " + sShortURL;
 	if (bHasFile && notEmpty(sGoogleDriveFileId)){

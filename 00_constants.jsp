@@ -15,6 +15,9 @@ public static final String	gcGoogleUrlForGettingAccessToken			= "https://www.goo
 public static final String	gcGoogleAccessTokenRedirectUri				= "https://www.call-pro.net";
 public static final String	gcGoogleDriveFolderName						= "CallPro";
 
+//Firebase Dynamic Links REST API
+public static final String	gcFirebaseDynamicLinksUrl					= "https://firebasedynamiclinks.googleapis.com/v1/shortLinks?key=AIzaSyAxfOPV2LN752fnIleBB6Hq4vK-jXlCJ_s";
+
 //系統參數
 public static final String	gcSystemUri									= "https://www.call-pro.net/CallPro/";
 
