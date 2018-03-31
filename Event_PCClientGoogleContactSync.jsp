@@ -259,9 +259,12 @@ try{
 	ListConnectionsResponse lcr = getUpdatedContacts(peopleService, sContactSyncToken);
 	//ListConnectionsResponse lcr = getUpdatedContacts(peopleService, "");
 	if (lcr==null){
-		writeLog("error", "取得上次同步後，有異動的Google聯絡人詳細資料時發生錯誤");
-		out.print(ERROR_RESPONSE);
-		return;
+		writeLog("error", "取得上次同步後，有異動的Google聯絡人詳細資料時發生錯誤，清除sync token再試一次!");
+		lcr = getUpdatedContacts(peopleService, "");
+		if (lcr==null){
+			out.print(ERROR_RESPONSE);
+			return;
+		}
 	}
 	String sNewContactSyncToken = lcr.getNextSyncToken();
 	List<Person> connectionsUpdated = lcr.getConnections();
