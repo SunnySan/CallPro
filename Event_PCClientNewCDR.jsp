@@ -153,10 +153,10 @@ try{
     HttpTransport HTTP_TRANSPORT;
     HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
 
-	GoogleCredential credential = getGoogleCredential(sRefreshToken, CLIENT_SECRET_FILE);
+	GoogleCredential credential = getGoogleCredential(sRefreshToken, CLIENT_SECRET_FILE, sGoogleEmail);
 	if (credential==null){	//取得 credential 失敗
 		writeLog("error", "無法取得 Google credential");
-		sendFullLoginMailToGoogle(sGoogleEmail);
+		//sendFullLoginMailToGoogle(sGoogleEmail);
 		obj.put("resultCode", gcResultCodeUnknownError);
 		obj.put("resultText", "無法取得 Google credential");
 		out.print(obj);
@@ -211,13 +211,22 @@ try{
 	//準備Push訊息給客戶
 	String sMessageBody = "";
 	String sPushMessage = "";
+	String sCallerDetail = "";
 	
-	sMessageBody = sAreaCode + sPhoneNumber + (sType.equals("0")?"來電自":"撥出電話到") + sCallerNumber;
+	if (notEmpty(sCallerAddr)) sCallerDetail += "地址：" + sCallerAddr + "。";
+	if (notEmpty(sCallerCompany)) sCallerDetail += "公司：" + sCallerCompany + "。";
+	if (notEmpty(sCallerEmail)) sCallerDetail += "Email：" + sCallerEmail + "。";
+	if (notEmpty(sCallerDetail)) sCallerDetail = "個人資料：" + sCallerDetail;
+	
+	//sMessageBody = sAreaCode + sPhoneNumber + (sType.equals("0")?"來電自":"撥出電話到") + sCallerNumber;
+	sMessageBody = (sType.equals("0")?"來電：":"撥出：") + sCallerNumber;
 	if (beEmpty(sCallerName)){
-		sMessageBody += "，對方為未建檔";
+		sMessageBody += "，對方為[未建檔]，";
 	}else{
-		sMessageBody += "，對方為【" + sCallerName + "】";
+		sMessageBody += "，對方為[" + sCallerName + "]，";
 	}
+	
+	sMessageBody += sCallerDetail;
 	
 	//取得Google短網址(錄音檔)
 	String sFileURL = "";
@@ -239,14 +248,15 @@ try{
 
 	//sMessageBody += "，通話時間" + sDuration + "秒，聽取通話內容: " + sShortURL;
 	if (bHasFile && notEmpty(sGoogleDriveFileId)){
-		sMessageBody += "，通話時間為" + sTalkedTime + "秒，聽取錄音檔: \n" + (beEmpty(sShortURL)?sFileURL:sShortURL) + "\n，查詢歷史記錄：\n" + (beEmpty(sCallLogShortURL)?sCallLogURL:sCallLogShortURL);
+		sMessageBody += "通話時間：" + sTalkedTime + "秒，聽取錄音檔: \n" + (beEmpty(sShortURL)?sFileURL:sShortURL) + "\n，查詢通聯記錄：\n" + (beEmpty(sCallLogShortURL)?sCallLogURL:sCallLogShortURL);
 	}else{
-		sMessageBody += "，通話時間為" + sTalkedTime + "秒，此通話無錄音檔，查詢歷史記錄：\n" + (beEmpty(sCallLogShortURL)?sCallLogURL:sCallLogShortURL);
+		sMessageBody += "通話時間：" + sTalkedTime + "秒，聽取錄音檔: \n(無錄音檔)，查詢通聯記錄：\n" + (beEmpty(sCallLogShortURL)?sCallLogURL:sCallLogShortURL);
 	}
 	sPushMessage = generateLineTextMessage(sRecepientType, s, sMessageBody);
 	
 	//新增 Google 行事曆
-	ht = addGoogleCalendarEvent(HTTP_TRANSPORT, JSON_FACTORY, credential, Integer.parseInt(sTalkedTime), sAreaCode + sPhoneNumber + (sType.equals("0")?"來電自":"撥出電話到") + sCallerNumber, sMessageBody );
+	//ht = addGoogleCalendarEvent(HTTP_TRANSPORT, JSON_FACTORY, credential, Integer.parseInt(sTalkedTime), sAreaCode + sPhoneNumber + (sType.equals("0")?"來電自":"撥出電話到") + sCallerNumber, sMessageBody );
+	ht = addGoogleCalendarEvent(HTTP_TRANSPORT, JSON_FACTORY, credential, Integer.parseInt(sTalkedTime), (sType.equals("0")?"來電：":"撥出：") + sCallerNumber + (beEmpty(sCallerName)?"，對方為[未建檔]，":"，對方為[" + sCallerName + "]，") + sCallerDetail, sMessageBody );
 	
 	//Push Line 訊息給客戶
 	if (bSendLineNotification){

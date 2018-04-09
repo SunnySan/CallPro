@@ -146,10 +146,10 @@ try{
     HttpTransport HTTP_TRANSPORT;
     HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
 
-	GoogleCredential credential = getGoogleCredential(sRefreshToken, CLIENT_SECRET_FILE);
+	GoogleCredential credential = getGoogleCredential(sRefreshToken, CLIENT_SECRET_FILE, sGoogleEmail);
 	if (credential==null){	//取得 credential 失敗
 		writeLog("error", "無法取得 Google credential");
-		sendFullLoginMailToGoogle(sGoogleEmail);
+		//sendFullLoginMailToGoogle(sGoogleEmail);
 		obj.put("resultCode", gcResultCodeUnknownError);
 		obj.put("resultText", "無法取得 Google credential");
 		out.print(obj);

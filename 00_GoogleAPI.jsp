@@ -51,7 +51,7 @@
 
 /*********************************************************************************************************************/
 //經由 refresh token 取得 GoogleCredential
-public GoogleCredential getGoogleCredential(String sRefreshToken, String sClientSecretFile){
+public GoogleCredential getGoogleCredential(String sRefreshToken, String sClientSecretFile, String sGoogleEmail){
 	Hashtable			ht					= new Hashtable();
 	String				sResultCode			= gcResultCodeSuccess;
 	String				sResultText			= gcResultTextSuccess;
@@ -66,6 +66,9 @@ public GoogleCredential getGoogleCredential(String sRefreshToken, String sClient
 		
 		if (!sResultCode.equals(gcResultCodeSuccess)){	//取得新的Access Token失敗
 			writeLog("error", "無法 Refresh Google Access Token");
+			if (sResultText.indexOf("HTTP response code: 400")>0){	//可能用戶改密碼、取消與我們應用程式授權...，發mail請用戶重新執行授權
+				sendFullLoginMailToGoogle(sGoogleEmail);
+			}
 			return null;
 		}else{
 			sAccessToken = ht.get("AccessToken").toString();
