@@ -212,14 +212,18 @@ try{
 	String sMessageBody = "";
 	String sPushMessage = "";
 	String sCallerDetail = "";
+	String sCallType = "";
 	
 	if (notEmpty(sCallerAddr)) sCallerDetail += "地址：" + sCallerAddr + "。";
 	if (notEmpty(sCallerCompany)) sCallerDetail += "公司：" + sCallerCompany + "。";
 	if (notEmpty(sCallerEmail)) sCallerDetail += "Email：" + sCallerEmail + "。";
 	if (notEmpty(sCallerDetail)) sCallerDetail = "個人資料：" + sCallerDetail;
 	
+	sCallType = (sType.equals("0")?"來電：":"撥出：");
+	if (sType.equals("0") && sTalkedTime.equals("0")) sCallType = "未接：";
+	
 	//sMessageBody = sAreaCode + sPhoneNumber + (sType.equals("0")?"來電自":"撥出電話到") + sCallerNumber;
-	sMessageBody = (sType.equals("0")?"來電：":"撥出：") + sCallerNumber;
+	sMessageBody = sCallType + sCallerNumber;
 	if (beEmpty(sCallerName)){
 		sMessageBody += "，對方為[未建檔]，";
 	}else{
@@ -256,7 +260,7 @@ try{
 	
 	//新增 Google 行事曆
 	//ht = addGoogleCalendarEvent(HTTP_TRANSPORT, JSON_FACTORY, credential, Integer.parseInt(sTalkedTime), sAreaCode + sPhoneNumber + (sType.equals("0")?"來電自":"撥出電話到") + sCallerNumber, sMessageBody );
-	ht = addGoogleCalendarEvent(HTTP_TRANSPORT, JSON_FACTORY, credential, Integer.parseInt(sTalkedTime), (sType.equals("0")?"來電：":"撥出：") + sCallerNumber + (beEmpty(sCallerName)?"，對方為[未建檔]，":"，對方為[" + sCallerName + "]，") + sCallerDetail, sMessageBody );
+	ht = addGoogleCalendarEvent(HTTP_TRANSPORT, JSON_FACTORY, credential, Integer.parseInt(sTalkedTime), sCallType + sCallerNumber + (beEmpty(sCallerName)?"，對方為[未建檔]，":"，對方為[" + sCallerName + "]，") + sCallerDetail, sMessageBody );
 	
 	//Push Line 訊息給客戶
 	if (bSendLineNotification){
