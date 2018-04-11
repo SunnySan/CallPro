@@ -435,7 +435,11 @@
 						s += "</tr>";
 						*/
 						r.Call_Type = (r.Call_Type=="0"?"撥入":"撥出");
-						r.Record_File_URL = "<a href='" + r.Record_File_URL + "' target='_blank'>聽取</a>";
+						if (notEmpty(r.Record_File_URL)){
+							r.Record_File_URL = "<a href='" + r.Record_File_URL + "' target='_blank'>聽取</a>";
+						}else{
+							r.Record_File_URL = "&nbsp;";
+						}
 
 					});	//$.each( data.orders, function(i, r) {
 					if ($.fn.dataTable.isDataTable(table) ){

@@ -54,7 +54,7 @@ String sCallerAddr 			= nullToString(request.getParameter("calleraddr"), "");			
 String sCallerCompany 		= nullToString(request.getParameter("callercompany"), "");		//來電者公司
 String sCallerEmail 		= nullToString(request.getParameter("calleremail"), "");		//來電者email
 
-if (beEmpty(sAreaCode) || beEmpty(sPhoneNumber) || beEmpty(sAuthorizationCode) || beEmpty(sCallerNumber)){
+if (beEmpty(sAreaCode) || beEmpty(sPhoneNumber) || beEmpty(sAuthorizationCode) ){
 	writeLog("info", "Parameters not enough, areacode= " + sAreaCode + ", phonenumber1= " + sPhoneNumber + ", accesscode= " + sAuthorizationCode + ", callerphone= " + sCallerNumber);
 	obj.put("resultCode", gcResultCodeParametersNotEnough);
 	obj.put("resultText", gcResultTextParametersNotEnough);
@@ -62,6 +62,8 @@ if (beEmpty(sAreaCode) || beEmpty(sPhoneNumber) || beEmpty(sAuthorizationCode) |
 	//out.flush();
 	return;
 }
+
+if (beEmpty(sCallerNumber)) sCallerNumber = "無法辨識";
 
 //登入用戶的資訊，系統管理者可以直接發送測試通知
 String sLoginUserAccountType = (String)session.getAttribute("Account_Type");
@@ -250,11 +252,11 @@ try{
 	//String sCallLogShortURL = getShortenURL(HTTP_TRANSPORT, JSON_FACTORY, credential, APPLICATION_NAME, sCallLogURL);
 	String sCallLogShortURL = getFirebaseDynamicLink(sCallLogURL);
 
-	//sMessageBody += "，通話時間" + sDuration + "秒，聽取通話內容: " + sShortURL;
+	//sMessageBody += "，通話時間" + sDuration + "秒，聽取通話內容：" + sShortURL;
 	if (bHasFile && notEmpty(sGoogleDriveFileId)){
-		sMessageBody += "通話時間：" + sTalkedTime + "秒，聽取錄音檔: \n" + (beEmpty(sShortURL)?sFileURL:sShortURL) + "\n，查詢通聯記錄：\n" + (beEmpty(sCallLogShortURL)?sCallLogURL:sCallLogShortURL);
+		sMessageBody += "通話時間：" + sTalkedTime + "秒，聽取錄音檔：\n" + (beEmpty(sShortURL)?sFileURL:sShortURL) + "\n，查詢通聯記錄：\n" + (beEmpty(sCallLogShortURL)?sCallLogURL:sCallLogShortURL);
 	}else{
-		sMessageBody += "通話時間：" + sTalkedTime + "秒，聽取錄音檔: \n(無錄音檔)，查詢通聯記錄：\n" + (beEmpty(sCallLogShortURL)?sCallLogURL:sCallLogShortURL);
+		sMessageBody += "通話時間：" + sTalkedTime + "秒，聽取錄音檔：\n(無錄音檔)\n，查詢通聯記錄：\n" + (beEmpty(sCallLogShortURL)?sCallLogURL:sCallLogShortURL);
 	}
 	sPushMessage = generateLineTextMessage(sRecepientType, s, sMessageBody);
 	
