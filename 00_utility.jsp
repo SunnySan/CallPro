@@ -986,6 +986,94 @@ public void sendFullLoginMailToGoogle(String gmailAddress){
 }	//public void sendFullLoginMailToGoogle(String gmailAddress){
 
 /*********************************************************************************************************************/
+//搜尋中華黃頁
+public String getCallerNameFromHiPage(String sAPartyNumber){
+	String	sResponse	= "";
+	URL u;
+	int i = 0;
+	int j = 0;
+	
+	try
+	{
+		writeLog("debug", "get Caller Name From HiPage: " + sAPartyNumber);
+		//sAPartyNumber = "0226270927";
+		u = new URL("https://www.iyp.com.tw/phone.php?phone=" + sAPartyNumber);
+		HttpURLConnection uc = (HttpURLConnection)u.openConnection();
+		//uc.setRequestProperty ("Content-Type", "text/plain");
+		//uc.setRequestProperty("contentType", "utf-8");
+		uc.setRequestMethod("GET");
+		//add request header
+		uc.setRequestProperty("User-Agent", "Mozilla/5.0");
+		//uc.setDoOutput(false);
+		//uc.setDoInput(true);
+	
+		InputStream in = uc.getInputStream();
+		BufferedReader r = new BufferedReader(new InputStreamReader(in));
+		StringBuffer buf = new StringBuffer();
+		String line;
+		while ((line = r.readLine())!=null) {
+			buf.append(line);
+		}
+		in.close();
+		sResponse = buf.toString();	//取得回應值
+		//writeLog("debug", "Response from HiPage: " + sResponse);
+		if (notEmpty(sResponse)){
+			i = sResponse.indexOf("<ol class=\"general\">");
+			j = sResponse.indexOf("</ol>");
+			if (i>0 && j>0 && j>i){
+				sResponse = sResponse.substring(i+20, j);
+				i = sResponse.indexOf("target=\"_blank\">");
+				j = sResponse.indexOf("</a>");
+				if (i>0 && j>0 && j>i){
+					//writeLog("debug", "i= " + String.valueOf(i));
+					//writeLog("debug", "j= " + String.valueOf(j));
+					//writeLog("debug", "sResponse= " + sResponse.substring(i+16, j));
+					sResponse = sResponse.substring(i+16, j);
+				}else{
+					sResponse = "";
+				}
+			}else{
+				sResponse = "";
+			}
+		}else{
+			sResponse = "";
+		}
+	}catch (Exception e){
+		sResponse = "";
+		writeLog("error", "Exception when get data from HiPage: " + e.toString());
+	}
+
+	if (beEmpty(sResponse)) sResponse = getCallerNameFromMyPublicPhonebook(sAPartyNumber);
+	return sResponse;
+}
+
+/*********************************************************************************************************************/
+//搜尋我們自己的社群電話簿
+public String getCallerNameFromMyPublicPhonebook(String sAPartyNumber){
+	String		sResponse			= "";
+	Hashtable	ht					= new Hashtable();
+	String		sSQL				= "";
+	String		s[][]				= null;
+	String		sResultCode			= gcResultCodeSuccess;
+	String		sResultText			= gcResultTextSuccess;
+	
+	if (beEmpty(sAPartyNumber)) return "";
+	sSQL = "SELECT Owner_Name";
+	sSQL += " FROM callpro_public_phonebook";
+	sSQL += " WHERE Phone_Number='" + sAPartyNumber + "'";
+	//writeLog("debug", "SQL= " + sSQL);
+	ht = getDBData(sSQL, gcDataSourceName);
+	sResultCode = ht.get("ResultCode").toString();
+	sResultText = ht.get("ResultText").toString();
+	if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
+		s = (String[][])ht.get("Data");
+		sResponse = nullToString(s[0][0], "");
+	}
+
+	return sResponse;
+}
+
+/*********************************************************************************************************************/
 //讓單引號等字元可以寫入MySQL DB中，用法為escape(String)
 private static final HashMap<String,String> sqlTokens;
 private static java.util.regex.Pattern sqlTokenPattern;

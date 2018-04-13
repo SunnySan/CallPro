@@ -140,6 +140,8 @@
 		clearCookie();
 		var callerPhoneNumber = getParameterByName("callerPhoneNumber");
 		if (notEmpty(callerPhoneNumber)) setLocalValue("callerPhoneNumber", callerPhoneNumber);
+		var reportPhoneNumber = getParameterByName("reportPhoneNumber");
+		if (notEmpty(reportPhoneNumber)) setLocalValue("reportPhoneNumber", reportPhoneNumber);
 		$('#tblResult').footable();
 		initGoogleAuth();
 	});
@@ -327,9 +329,17 @@
 			s = "AdmDealerCRM.html";
 		}
 		if (myAccountType=="O" || myAccountType=="T"){	//電話主人
-			s = "AdmOwnerCallLog.html";
-			var callerPhoneNumber = getLocalValue("callerPhoneNumber");
-			if (notEmpty(callerPhoneNumber)) s += "?callerPhoneNumber=" + callerPhoneNumber;
+			s = "AdmOwnerPublishToPhonebook.html";
+			var reportPhoneNumber = getLocalValue("reportPhoneNumber");
+			if (notEmpty(reportPhoneNumber)){
+				s += "?reportPhoneNumber=" + reportPhoneNumber;
+			}else{
+				s = "AdmOwnerCallLog.html";
+				var callerPhoneNumber = getLocalValue("callerPhoneNumber");
+				if (notEmpty(callerPhoneNumber)){
+					s += "?callerPhoneNumber=" + callerPhoneNumber;
+				}
+			}
 		}
 		
 		if (beEmpty(s)){

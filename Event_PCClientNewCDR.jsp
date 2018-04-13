@@ -103,9 +103,10 @@ String		sRefreshToken		= "";
 String		sAccountSequence	= "";
 java.lang.Boolean	bSendLineNotification	= false;
 String			sGoogleEmail	= "";
+java.lang.Boolean	bIsAdvanceOwner	= false;	//電話主人是不是進階版用戶
 
 //確認門號主人狀態正常且已取得Google帳號
-sSQL = "SELECT A.Line_User_ID, A.Line_Channel_Name, B.Google_Refresh_Token, A.Account_Sequence, A.Send_CDR_Notification, B.Google_Email";
+sSQL = "SELECT A.Line_User_ID, A.Line_Channel_Name, B.Google_Refresh_Token, A.Account_Sequence, A.Send_CDR_Notification, B.Google_Email, A.Bill_Type";
 sSQL += " FROM callpro_account A, callpro_account_detail B";
 sSQL += " WHERE A.Audit_Phone_Number='" + sAreaCode + sPhoneNumber + "'";
 sSQL += " AND (A.Account_Type='O' OR A.Account_Type='T')";
@@ -133,6 +134,7 @@ if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
 	sAccountSequence = nullToString(s[0][3], "");
 	if (nullToString(s[0][4], "").equals("Y")) bSendLineNotification = true;
 	sGoogleEmail = nullToString(s[0][5], "");
+	if (notEmpty(s[0][6]) && s[0][6].equals("A")) bIsAdvanceOwner = true;	//進階版電話主人
 }else{
 	obj.put("resultCode", sResultCode);
 	obj.put("resultText", sResultText);
@@ -215,7 +217,8 @@ try{
 	String sPushMessage = "";
 	String sCallerDetail = "";
 	String sCallType = "";
-	
+	String sHiPageCallerName = "";	//從中華黃頁找到的對方資料
+
 	if (notEmpty(sCallerAddr)) sCallerDetail += "地址：" + sCallerAddr + "。";
 	if (notEmpty(sCallerCompany)) sCallerDetail += "公司：" + sCallerCompany + "。";
 	if (notEmpty(sCallerEmail)) sCallerDetail += "Email：" + sCallerEmail + "。";
@@ -231,8 +234,12 @@ try{
 	}else{
 		sMessageBody += "，對方為[" + sCallerName + "]，";
 	}
-	
+
+	if (notEmpty(sCallerNumber) && !sCallerNumber.equals("無法辨識") && !sCallerNumber.equals("0") && beEmpty(sCallerName) && bIsAdvanceOwner) sHiPageCallerName = getCallerNameFromHiPage(sCallerNumber);
+	//writeLog("debug", "sHiPageCallerName： " + sHiPageCallerName);
 	sMessageBody += sCallerDetail;
+	if (notEmpty(sHiPageCallerName)) sMessageBody += "\n網路社群回報：" + sHiPageCallerName + "。";
+	
 	
 	//取得Google短網址(錄音檔)
 	String sFileURL = "";
@@ -258,11 +265,26 @@ try{
 	}else{
 		sMessageBody += "通話時間：" + sTalkedTime + "秒，聽取錄音檔：\n(無錄音檔)\n，查詢通聯記錄：\n" + (beEmpty(sCallLogShortURL)?sCallLogURL:sCallLogShortURL);
 	}
+
+	if (notEmpty(sCallerNumber) && !sCallerNumber.equals("無法辨識") && !sCallerNumber.equals("0") && beEmpty(sCallerName) && bIsAdvanceOwner && beEmpty(sHiPageCallerName)){
+		String sReportPhonebookLongURL = "";
+		String sReportPhonebookShortURL = "";
+		sReportPhonebookLongURL = gcSystemUri + "AdmOwnerPublishToPhonebook.html?reportPhoneNumber=" + sCallerNumber;
+		sReportPhonebookShortURL = getFirebaseDynamicLink(sReportPhonebookLongURL);
+		sMessageBody += "\n回報網路社群本電話，請按下方連結：\n";
+		sMessageBody += (beEmpty(sReportPhonebookShortURL)?sReportPhonebookLongURL:sReportPhonebookShortURL);
+	}
+
+
 	sPushMessage = generateLineTextMessage(sRecepientType, s, sMessageBody);
 	
 	//新增 Google 行事曆
 	//ht = addGoogleCalendarEvent(HTTP_TRANSPORT, JSON_FACTORY, credential, Integer.parseInt(sTalkedTime), sAreaCode + sPhoneNumber + (sType.equals("0")?"來電自":"撥出電話到") + sCallerNumber, sMessageBody );
-	ht = addGoogleCalendarEvent(HTTP_TRANSPORT, JSON_FACTORY, credential, Integer.parseInt(sTalkedTime), sCallType + sCallerNumber + (beEmpty(sCallerName)?"，對方為[未建檔]，":"，對方為[" + sCallerName + "]，") + sCallerDetail, sMessageBody );
+	String sSubject = "";
+	sSubject = sCallType + sCallerNumber + (beEmpty(sCallerName)?"，對方為[未建檔]，":"，對方為[" + sCallerName + "]，");
+	sSubject += sCallerDetail;
+	if (notEmpty(sHiPageCallerName)) sSubject += "\n網路社群回報：" + sHiPageCallerName + "。";
+	ht = addGoogleCalendarEvent(HTTP_TRANSPORT, JSON_FACTORY, credential, Integer.parseInt(sTalkedTime), sSubject, sMessageBody );
 	
 	//Push Line 訊息給客戶
 	if (bSendLineNotification){

@@ -72,9 +72,10 @@ int			i					= 0;
 int			j					= 0;
 
 String		sLineChannelName	= "";
+java.lang.Boolean	bIsAdvanceOwner	= false;	//電話主人是不是進階版用戶
 
 //確認門號主人狀態正常
-sSQL = "SELECT Line_Channel_Name FROM callpro_account";
+sSQL = "SELECT Line_Channel_Name, Bill_Type FROM callpro_account";
 sSQL += " WHERE Audit_Phone_Number='" + sAreaCode + sPhoneNumber + "'";
 sSQL += " AND (Account_Type='O' OR Account_Type='T')";
 sSQL += " AND Expiry_Date>'" + sDate + "'";
@@ -90,6 +91,7 @@ sResultText = ht.get("ResultText").toString();
 if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
 	s = (String[][])ht.get("Data");
 	sLineChannelName = s[0][0];
+	if (notEmpty(s[0][1]) && s[0][1].equals("A")) bIsAdvanceOwner = true;	//進階版電話主人
 }else{
 	obj.put("resultCode", sResultCode);
 	obj.put("resultText", sResultText);
@@ -135,9 +137,13 @@ if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
 
 String sMessageBody = "";
 String sPushMessage = "";
+String sHiPageCallerName = "";	//從中華黃頁找到的對方資料
 
 //sMessageBody = sAreaCode + sPhoneNumber + "來電自" + sAPartyNumber + "，對方為" + sAPartyName + "，個人資料如下：\n" + sAPartyDetail;
 sMessageBody = "來電：" + sAPartyNumber + "，對方為[" + sAPartyName + "]，個人資料：" + sAPartyDetail + "。";
+
+if (notEmpty(sAPartyNumber) && !sAPartyNumber.equals("無法辨識") && !sAPartyNumber.equals("0") && (beEmpty(sAPartyName) || sAPartyName.equals("未建檔")) && bIsAdvanceOwner) sHiPageCallerName = getCallerNameFromHiPage(sAPartyNumber);
+if (notEmpty(sHiPageCallerName)) sMessageBody += "網路社群回報：" + sHiPageCallerName;
 
 sPushMessage = generateLineTextMessage(sRecepientType, s, sMessageBody);
 

@@ -151,8 +151,8 @@
 		<!-- Content Header (Page header) -->
 		<section class="content-header">
 			<h1>
-				LINE通知訊息測試
-				<small>發送測試訊息給電話主人及子帳號</small>
+				電話資料回報
+				<small>將電話主人資料回報至網路社群</small>
 			</h1>
 		</section>
 		
@@ -164,64 +164,57 @@
 				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
 				<h4><i class="icon fa fa-info"></i> 使用說明</h4>
 				<ul>
+					<li style="color:#FF0000;">
+						請注意：當您按下確認以後，此電話主人資料將公佈於Call-Pro網路社群供所有人查詢
+					</li>
 					<li>
-						請輸入電話主人的市話區碼及電話號碼，然後點選【發送】即可
+						請先輸入電話號碼，然後選擇電話類型，如果電話類型是一般個人或一般公司的話請再輸入電話主人資料(姓名或公司名稱)，按下【確認】後進行儲存及公布至網路社群
 					</li>
 				</ul>
 			</div>
 
-			<div class="box box-primary box-solid" id="boxResult">
+			<div class="box box-primary box-solid">
 				<div class="box-header with-border">
-					<h3 class="box-title">電話主人資料</h3>
+					<h3 class="box-title">回報電話主人資料</h3>
 				</div><!-- /.box-header -->
 
 				<!-- form start -->
 				<form role="form">
 					<div class="box-body">
 						<div class="form-group">
-							<label for="areacode">區碼</label>
-							<input type="text" class="form-control" id="areacode" placeholder="02" maxlength="4">
+							<label for="reportPhoneNumber">電話號碼</label>
+							<input type="text" class="form-control" id="reportPhoneNumber" placeholder="0988520178" maxlength="20">
 						</div>
 
 						<div class="form-group">
-							<label for="phonenumber1">電話號碼</label>
-							<input type="text" class="form-control" id="phonenumber1" placeholder="21234567" maxlength="10">
+							<label for="reportPhoneType">電話類型</label>
+							<select class="form-control" id="reportPhoneType">
+								<option value="1">一般個人</option>
+								<option value="2">一般公司</option>
+								<option value="3">行銷電話</option>
+								<option value="4">接起即掛斷</option>
+								<option value="5">詐騙電話</option>
+							</select>
 						</div>
 
 						<div class="form-group">
-							<label for="callerphone">來話號碼</label>
-							<input type="text" class="form-control" id="callerphone" value="0988888888" maxlength="20">
+							<label for="reportPhoneOwnerName">電話主人資料(最多50個字)</label>
+							<input type="text" class="form-control" id="reportPhoneOwnerName" maxlength="50">
 						</div>
-
-						<div class="form-group">
-							<label for="callername">來話人姓名</label>
-							<input type="text" class="form-control" id="callername" value="Call-Pro客服中心" maxlength="20">
-						</div>
-
-						<div class="form-group">
-							<label for="callerdetail">來話人明細資料</label>
-							<input type="text" class="form-control" id="callerdetail" value="Call-Pro客服中心測試，請確認是否有收到此訊息" maxlength="100">
-						</div>
-
-						<div class="form-group">
-							<label>即時通知訊息內容</label>
-							<textarea class="form-control" id="message1" rows="3" placeholder="點選發送後顯示" disabled></textarea>
-						</div>						
+						
+						
 					</div><!-- /.box-body -->
 					
 					<div class="box-footer">
-						<button type="button" class="btn btn-primary" onclick="doSend();">發送</button>
+						<button type="button" class="btn btn-primary" onclick="doQuery();">確認</button>
 					</div><!-- /.box-footer -->
 				</form>
-				
-				<div class="box-footer">
-				</div><!-- /.box-footer -->
 				<!-- Loading (remove the following to stop the loading)-->
 				<div class="overlay" style="display:none;">
 					<i class="fa fa-refresh fa-spin"></i>
 				</div>
 			</div><!-- /.box -->
-
+		
 		</section>
 		<!-- /.content -->
 	</div>
@@ -285,105 +278,65 @@
 
 <script>
 	$(function () {
+		var reportPhoneNumber = getParameterByName("reportPhoneNumber");
+		setLocalValue("reportPhoneNumber", reportPhoneNumber);
 		pageInit();
+
+		//如果用戶是從LINE通知裡面連過來的，就顯示電話號碼
+		if (notEmpty(reportPhoneNumber)){
+			$('#reportPhoneNumber').val(reportPhoneNumber);
+		}
 	});
 </script>
 
 <script>
-
-	function doSend(){
-		var areacode = $('#areacode').val();
-		var phonenumber1 = $('#phonenumber1').val();
+	function doQuery(){
+		var reportPhoneNumber = $('#reportPhoneNumber').val();
+		var reportPhoneType = $('#reportPhoneType').val();
+		var reportPhoneOwnerName = $('#reportPhoneOwnerName').val();
 		
-		if (beEmpty(areacode) || beEmpty(phonenumber1)){
-			msgBox("請輸入區碼及電話號碼!");
+		if (reportPhoneNumber.length>20){
+			msgBox("電話號碼長度不可超過20個字，請重新輸入!");
 			return;
 		}
-
-		var accesscode = "8888";
-		var callerphone = $('#callerphone').val();
-		var callername = $('#callername').val();
-		var callerdetail = $('#callerdetail').val();
-
-		/*
-		if (beEmpty(callerphone)){
-			msgBox("請輸入來話號碼!");
+		if (reportPhoneOwnerName.length>50){
+			msgBox("電話主人資料長度不可超過50個字，請重新輸入!");
 			return;
 		}
-		*/
+		if (reportPhoneType!="1" && reportPhoneType!="2"){
+			$('#reportPhoneOwnerName').val("");
+			reportPhoneOwnerName = "";
+		}
 
-		var message = areacode + phonenumber1 + "來電自" + callerphone + "，對方為" + callername + "，個人資料如下：\n" +  callerdetail;
-	
-		$('#message1').val(message);
 		$('.overlay').show();
 		
 		var sData = "";
-		sData = "areacode=" + areacode;
-		sData += "&phonenumber1=" + phonenumber1;
-		sData += "&accesscode=" + accesscode;
-		sData += "&callerphone=" + callerphone;
-		sData += "&callername=" + callername;
-		sData += "&callerdetail=" + callerdetail;
 		
-		getDataFromServer("Event_PCClientSendInstantNotification.jsp", sData, "json", function(data){
+		sData = "reportPhoneNumber=" + reportPhoneNumber;
+		sData += "&reportPhoneType=" + reportPhoneType;
+		sData += "&reportPhoneOwnerName=" + reportPhoneOwnerName;
+		getDataFromServer("ajaxDoReportToPublicPhonebook.jsp", sData, "json", function(data){
 			if (!data.resultCode || !data.resultText){
 				$('.overlay').hide();
-				msgBox("無法取得即時通知發送結果!");
+				msgBox("無法取得作業結果!");
+				setLocalValue("reportPhoneNumber", "");
 				return;
 			}else{
 				if (data.resultCode=="00000"){
-					msgBox("即時通知發送成功，將繼續發送錄音檔通知訊息!", doSendCDR);
+					msgBox("作業完成，謝謝您熱心的發揮社群的強大力量!");
+				}else if (data.resultCode=="00004"){	//需重新登入
+					var ss = "";
+					if (notEmpty(getParameterByName("reportPhoneNumber"))){
+						ss = "?reportPhoneNumber=" + getParameterByName("reportPhoneNumber");
+					}
+					msgBox(data.resultText, function(){location.href = "login_simple.html" + ss;});
 				}else{
-					msgBox("即時通知發送失敗:<br>" + data.resultText + "，將繼續嘗試發送錄音檔通知訊息!", doSendCDR);
+					msgBox("作業失敗:<br>" + data.resultText);
 				}
 				$('.overlay').hide();
+				setLocalValue("reportPhoneNumber", "");
 			}
-		});	//getDataFromServer("xxx.jsp", sData, "json", function(data){
-	}
 
-	function doSendCDR(){
-		var areacode = $('#areacode').val();
-		var phonenumber1 = $('#phonenumber1').val();
-		
-		if (beEmpty(areacode) || beEmpty(phonenumber1)){
-			msgBox("請輸入區碼及電話號碼!");
-			return;
-		}
-
-		var accesscode = "8888";
-		var callerphone = $('#callerphone').val();
-		var recordtime = "10";
-		var recordtimestart = getCurrentDate() + " " + getCurrentTime();
-		var call_direction = "0";
-		var recordfile = "callprotest.mp3";
-		var ring_time = "10";
-		var talked_time = "0";
-		var callername = $('#callername').val();
-		var calleraddr = $('#callerdetail').val();
-		var callercompany = "Call-Pro";
-		var calleremail = "m@call-pro.net";
-
-		$('.overlay').show();
-		
-		var sData = "";
-		sData = "areacode=" + areacode;
-		sData += "&phonenumber1=" + phonenumber1;
-		sData += "&accesscode=" + accesscode;
-		sData += "&callerphone=" + callerphone;
-		sData += "&recordtime=" + recordtime;
-		sData += "&recordtimestart=" + recordtimestart;
-		sData += "&call_direction=" + call_direction;
-		sData += "&recordfile=" + recordfile;
-		sData += "&ring_time=" + ring_time;
-		sData += "&talked_time=" + talked_time;
-		sData += "&callername=" + callername;
-		sData += "&calleraddr=" + calleraddr;
-		sData += "&callercompany=" + callercompany;
-		sData += "&calleremail=" + calleremail;
-		
-		getDataFromServer("Event_PCClientNewCDR.jsp", sData, "text", function(data){
-			$('.overlay').hide();
-			msgBox("錄音檔通知上傳Google/發送結果如下，若結果為【" + recordfile + "】，表示發送成功：<p>" + data);
 		});	//getDataFromServer("xxx.jsp", sData, "json", function(data){
 	}
 </script>
