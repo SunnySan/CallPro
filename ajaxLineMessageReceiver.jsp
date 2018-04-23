@@ -575,7 +575,7 @@ writeLog("debug", obj.toString());
 				sSQL += (sAccountType.equals("D")?"0":"1") + ",";
 				sSQL += (sAccountType.equals("D")?"0":"0") + ",";
 				sSQL += "null" + ",";
-				sSQL += "'" + sAccountSequence + "'";
+				sSQL += sAccountSequence;
 				sSQL += ")";
 				sSQLList.add(sSQL);
 				
@@ -587,6 +587,19 @@ writeLog("debug", obj.toString());
 					sSQL += " WHERE Main_Account_Sequence=" + s[0][5];
 					sSQLList.add(sSQL);
 					//writeLog("debug", "sSQL= " + sSQL);
+				}
+
+				if ((sAccountType.equals("O") || sAccountType.equals("T")) && !sBillType.equals("B")){	//這是進階版電話主人帳號，將主電話號碼寫入callpro_account_owner_phones
+					sSQL = "INSERT INTO callpro_account_owner_phones (Create_User, Create_Date, Update_User, Update_Date, Main_Account_Sequence, Phone_Number, Phone_Type) VALUES (";
+					sSQL += "'" + sUser + "',";
+					sSQL += "'" + sDate + "',";
+					sSQL += "'" + sUser + "',";
+					sSQL += "'" + sDate + "',";
+					sSQL += sAccountSequence + ",";
+					sSQL += "'" + nullToString(s[0][6], "") + "',";
+					sSQL += "'" + "M" + "'";
+					sSQL += ")";
+					sSQLList.add(sSQL);
 				}
 			}	//if (!sAccountType.equals("M") && !sAccountType.equals("U")){	//經銷商及門號擁有者須新增一筆資料至callpro_account_detail
 

@@ -330,6 +330,8 @@ function generateMainMenu() {
 		s += "<li" + (pageName==me?" class='active'":"") + "><a href='" + pageName + "'><i class='fa fa-table'></i> <span>通話記錄查詢</span></a></li>";
 		pageName = "AdmOwnerMemberManagement.html";
 		s += "<li" + (pageName==me?" class='active'":"") + "><a href='" + pageName + "'><i class='fa fa-user'></i> <span>子帳號管理</span></a></li>";
+		pageName = "AdmOwnerPhonesManagement.html";
+		s += "<li" + (pageName==me?" class='active'":"") + "><a href='" + pageName + "'><i class='fa fa-phone'></i> <span>電話號碼管理</span></a></li>";
 		pageName = "AdmOwnerMyProfile.html";
 		s += "<li" + (pageName==me?" class='active'":"") + "><a href='" + pageName + "'><i class='fa fa-check-square'></i> <span>我的設定</span></a></li>";
 		pageName = "AdmOwnerReportPhonebook.html";

@@ -93,6 +93,7 @@ PhoneNumbers	pnClientContactMobilePhoneNumbers	= null;
 PhoneNumbers	pnClientContactHomePhoneNumbers		= null;
 PhoneNumbers	pnClientContactWorkPhoneNumbers		= null;
 String			sGoogleEmail						= "";
+String			tmp									= "";
 
 //確認門號主人狀態正常且已取得Google帳號
 sSQL = "SELECT B.Google_Refresh_Token, B.Google_People_API_SyncToken, B.id, B.Google_Email";
@@ -171,15 +172,23 @@ try{
 		if (connectionsAllName.size()>0){	//找看看Client上傳的聯絡人姓名是否已在Google聯絡人中，如果有的話就將Google中的聯絡人刪除
 			for (i=0;i<aUploadUsers.length;i++){
 				sClientContactName = aUploadUsers[i].getName();
-	            for (Person person : connectionsAllName) {
-	            	if (sClientContactName.equals(person.getNames().get(0).getDisplayName())){	//找到了
-	            		//將Google中的聯絡人刪除
-	            		sContactResourceName = person.getResourceName();
-	            		writeLog("info", "刪除 Google 聯絡人，姓名= " + sClientContactName + ", ContactResourceName=" + sContactResourceName);
-	            		peopleService.people().deleteContact(sContactResourceName).execute();
-	            		break;
-	            	}	//if (sClientContactName.equals(person.getNames().get(0).getDisplayName())){	//找到了
-	            }	//for (Person person : connections) 
+				if (notEmpty(sClientContactName)){
+		            for (Person person : connectionsAllName) {
+		            	tmp = "";
+		            	try{
+		            		tmp = person.getNames().get(0).getDisplayName();
+		            	}catch (Exception e){
+		            		tmp = "";
+		            	}
+		            	if (notEmpty(tmp) && sClientContactName.equals(tmp)){	//找到了
+		            		//將Google中的聯絡人刪除
+		            		sContactResourceName = person.getResourceName();
+		            		writeLog("info", "刪除 Google 聯絡人，姓名= " + sClientContactName + ", ContactResourceName=" + sContactResourceName);
+		            		peopleService.people().deleteContact(sContactResourceName).execute();
+		            		break;
+		            	}	//if (sClientContactName.equals(person.getNames().get(0).getDisplayName())){	//找到了
+		            }	//for (Person person : connections) 
+	            }
 			}	//for (i=0;i<aUploadUsers.length;i++){
 		}	//if (connectionsAllName.size()>0){	//找看看Client上傳的聯絡人姓名是否已在Google聯絡人中，如果有的話就將Google中的聯絡人刪除
 		
