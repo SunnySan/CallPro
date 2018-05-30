@@ -308,7 +308,7 @@ public String readFileContent(String sPath){
 		bis = new BufferedInputStream(fis);
 		dis = new DataInputStream(bis);
 		while (dis.available() != 0) {
-			content += dis.readLine();
+			content += dis.readLine() + "\r\n";
 		}
 		content = new String(content.getBytes("8859_1"),"utf-8");
 	} catch (FileNotFoundException e) {

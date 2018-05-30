@@ -53,6 +53,10 @@ String sCallerName 			= nullToString(request.getParameter("callername"), "");			
 String sCallerAddr 			= nullToString(request.getParameter("calleraddr"), "");			//來電者地址
 String sCallerCompany 		= nullToString(request.getParameter("callercompany"), "");		//來電者公司
 String sCallerEmail 		= nullToString(request.getParameter("calleremail"), "");		//來電者email
+String sPhoneIndex 			= nullToString(request.getParameter("phoneindex"), "");			//監控電話為第幾支，從1開始
+String sCallerGroup 		= nullToString(request.getParameter("pgroup"), "");		//來電者群組
+String sCallerCity 			= nullToString(request.getParameter("area"), "");		//來電者城市
+String sCallerJob	 		= nullToString(request.getParameter("work1"), "");		//來電者職業職稱
 
 if (beEmpty(sAreaCode) || beEmpty(sPhoneNumber) || beEmpty(sAuthorizationCode) ){
 	writeLog("info", "Parameters not enough, areacode= " + sAreaCode + ", phonenumber1= " + sPhoneNumber + ", accesscode= " + sAuthorizationCode + ", callerphone= " + sCallerNumber);
@@ -104,9 +108,10 @@ String		sAccountSequence	= "";
 java.lang.Boolean	bSendLineNotification	= false;
 String			sGoogleEmail	= "";
 java.lang.Boolean	bIsAdvanceOwner	= false;	//電話主人是不是進階版用戶
+String		sOwnerPhoneLines	= "";
 
 //確認門號主人狀態正常且已取得Google帳號
-sSQL = "SELECT A.Line_User_ID, A.Line_Channel_Name, B.Google_Refresh_Token, A.Account_Sequence, A.Send_CDR_Notification, B.Google_Email, A.Bill_Type";
+sSQL = "SELECT A.Line_User_ID, A.Line_Channel_Name, B.Google_Refresh_Token, A.Account_Sequence, A.Send_CDR_Notification, B.Google_Email, A.Bill_Type, A.Owner_Phone_Lines";
 sSQL += " FROM callpro_account A, callpro_account_detail B";
 sSQL += " WHERE A.Audit_Phone_Number='" + sAreaCode + sPhoneNumber + "'";
 sSQL += " AND (A.Account_Type='O' OR A.Account_Type='T')";
@@ -135,6 +140,7 @@ if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
 	if (nullToString(s[0][4], "").equals("Y")) bSendLineNotification = true;
 	sGoogleEmail = nullToString(s[0][5], "");
 	if (notEmpty(s[0][6]) && s[0][6].equals("A")) bIsAdvanceOwner = true;	//進階版電話主人
+	sOwnerPhoneLines = nullToString(s[0][7], "0");
 }else{
 	obj.put("resultCode", sResultCode);
 	obj.put("resultText", sResultText);
@@ -143,7 +149,17 @@ if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
 	return;
 }	//if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
 
-
+//檢查此次的CDR是否是duplicate的(已經存在DB中)
+if (isDuplicatedCDR(sAreaCode + sPhoneNumber, sCallerNumber, sType, sRecordTime, sRecordTimeStart, sAccountSequence)){
+	writeLog("warn", "Duplicated CDR, areacode= " + sAreaCode + ", phonenumber1= " + sPhoneNumber + ", callerphone= " + sCallerNumber + ", sRecordTimeStart= " + sRecordTimeStart);
+	if (bHasFile){
+		out.print(sSavedFileName);
+		//將錄音檔刪除 (callprotest.mp3除外，這是系統管理者測試用的)
+		if (notEmpty(sSavedFileName) && !sSavedFileName.equals("callprotest.mp3")) DeleteFile(saveDirectory + sSavedFileName);
+	}else{
+		out.print("ok");
+	}
+}
 
 
 /****************上傳檔案給Google Drive*********************/
@@ -261,9 +277,13 @@ try{
 
 	//sMessageBody += "，通話時間" + sDuration + "秒，聽取通話內容：" + sShortURL;
 	if (bHasFile && notEmpty(sGoogleDriveFileId)){
-		sMessageBody += "通話時間：" + sTalkedTime + "秒，聽取錄音檔：\n" + (beEmpty(sShortURL)?sFileURL:sShortURL) + "\n，查詢通聯記錄：\n" + (beEmpty(sCallLogShortURL)?sCallLogURL:sCallLogShortURL);
+		sMessageBody += "通話時間：" + sTalkedTime + "秒，";
+		if (notEmpty(sPhoneIndex) && !sPhoneIndex.equals("1")) sMessageBody += "線路" + sPhoneIndex + "，";
+		sMessageBody += "聽取錄音檔：\n" + (beEmpty(sShortURL)?sFileURL:sShortURL) + "\n，查詢通聯記錄：\n" + (beEmpty(sCallLogShortURL)?sCallLogURL:sCallLogShortURL);
 	}else{
-		sMessageBody += "通話時間：" + sTalkedTime + "秒，聽取錄音檔：\n(無錄音檔)\n，查詢通聯記錄：\n" + (beEmpty(sCallLogShortURL)?sCallLogURL:sCallLogShortURL);
+		sMessageBody += "通話時間：" + sTalkedTime + "秒，";
+		if (notEmpty(sPhoneIndex) && !sPhoneIndex.equals("1")) sMessageBody += "線路" + sPhoneIndex + "，";
+		sMessageBody += "聽取錄音檔：\n(無錄音檔)\n，查詢通聯記錄：\n" + (beEmpty(sCallLogShortURL)?sCallLogURL:sCallLogShortURL);
 	}
 
 	if (notEmpty(sCallerNumber) && !sCallerNumber.equals("無法辨識") && !sCallerNumber.equals("0") && beEmpty(sCallerName) && bIsAdvanceOwner && beEmpty(sHiPageCallerName)){
@@ -316,6 +336,9 @@ try{
     
     //新增Call Log記錄至database
     insertIntoCallLog(sAreaCode + sPhoneNumber, sCallerNumber, sType, sRecordTime, sTalkedTime, sRecordTimeStart, (beEmpty(sShortURL)?sFileURL:sShortURL), sCallerName, sCallerAddr, sCallerCompany, sCallerEmail, sAccountSequence);
+    
+    //如果不是第一路電話，決定是否要更新callpro_account的Owner_Phone_Lines欄位
+    updateOwnerPhoneLines(sAccountSequence, sPhoneIndex, sOwnerPhoneLines);
 }catch (Exception e){
 	writeLog("error", "Google Drive Error" + e.toString());
 	sResultCode = gcResultCodeUnknownError;
@@ -427,6 +450,36 @@ body.setPermissionIds(list);
 %>
 
 <%!
+	//檢查此次的CDR是否是duplicate的(已經存在DB中)
+	private java.lang.Boolean isDuplicatedCDR(String sAuditPhoneNumber, String sCallerPhoneNumber, String sCallType, String sRecordLength, String sRecordTimeStart, String sAccountSequence){
+		Hashtable	ht					= new Hashtable();
+		String		sSQL				= "";
+		String		sResultCode			= gcResultCodeSuccess;
+		String		sResultText			= gcResultTextSuccess;
+		String		s[][]				= null;
+		
+		sSQL = "SELECT id FROM callpro_call_log WHERE";
+		sSQL += " Account_Sequence='" + sAccountSequence + "'";
+		sSQL += " AND Audit_Phone_Number='" + sAuditPhoneNumber + "'";
+		sSQL += " AND Caller_Phone_Number='" + sCallerPhoneNumber + "'";
+		sSQL += " AND Call_Type='" + sCallType + "'";
+		sSQL += " AND Record_Length='" + sRecordLength + "'";
+		sSQL += " AND Record_Time_Start='" + sRecordTimeStart + "'";
+
+		ht = getDBData(sSQL, gcDataSourceName);
+		
+		sResultCode = ht.get("ResultCode").toString();
+		sResultText = ht.get("ResultText").toString();
+		
+		if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
+			return true;
+		}else{
+			return false;
+		}
+
+	}
+	
+	
 	
 	//新增Call Log記錄至database
 	private void insertIntoCallLog(String sAuditPhoneNumber, String sCallerPhoneNumber, String sCallType, String sRecordLength, String sRecordTalkedTime, String sRecordTimeStart, String sRecordFileURL, String sCallerName, String sCallerAddress, String sCallerCompany, String sCallerEmail, String sAccountSequence){
@@ -468,5 +521,37 @@ body.setPermissionIds(list);
 		}	//if (sResultCode.equals(gcResultCodeSuccess)){	//成功
 
 	}	//private void insertIntoCallLog(String sAuditPhoneNumber, String sCallerPhoneNumber, String sCallType, String sRecordLength, String sRecordTalkedTime, String sRecordTimeStart, String sRecordFileURL, String sCallerName, String sCallerAddress, String sCallerCompany, String sCallerEmail){
+
+	//如果不是第一路電話，決定是否要更新callpro_account的Owner_Phone_Lines欄位
+	private void updateOwnerPhoneLines(String sAccountSequence, String sPhoneIndex, String sOwnerPhoneLines){
+		Hashtable	ht					= new Hashtable();
+		String		sSQL				= "";
+		String		sResultCode			= gcResultCodeSuccess;
+		String		sResultText			= gcResultTextSuccess;
+		List<String> sSQLList			= new ArrayList<String>();
+		int			i					= 0;
+		int			j					= 0;
+		
+		if (beEmpty(sPhoneIndex)) return;
+		if (beEmpty(sOwnerPhoneLines)) sOwnerPhoneLines = "0";
+		i = Integer.parseInt(sPhoneIndex);
+		j = Integer.parseInt(sOwnerPhoneLines);
+		if (i<=j) return;
+		
+		sSQL = "UPDATE callpro_account SET Owner_Phone_Lines=" + sPhoneIndex;
+		sSQL += " WHERE Account_Sequence=" + sAccountSequence;
+
+		sSQLList.add(sSQL);
+		ht = updateDBData(sSQLList, gcDataSourceName, false);
+		sResultCode = ht.get("ResultCode").toString();
+		sResultText = ht.get("ResultText").toString();
+		
+		if (sResultCode.equals(gcResultCodeSuccess)){	//成功
+			writeLog("info", "成功更新callpro_account的Owner_Phone_Lines欄位，Account_Sequence=" + sAccountSequence);
+		}else{
+			writeLog("error", "更新callpro_account的Owner_Phone_Lines欄位失敗，Account_Sequence=" + sAccountSequence + "：" + sResultText);
+		}	//if (sResultCode.equals(gcResultCodeSuccess)){	//成功
+
+	}	//private void updateOwnerPhoneLines(String sAccountSequence, String sPhoneIndex, String sOwnerPhoneLines){
 
 %>

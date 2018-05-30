@@ -29,6 +29,7 @@ String sAccountName	= nullToString(request.getParameter("accountName"), "");
 String sContactPhone	= nullToString(request.getParameter("contactPhone"), "");
 String sContactAddress	= nullToString(request.getParameter("contactAddress"), "");
 String sTaxIDNumber	= nullToString(request.getParameter("taxIDNumber"), "");
+String sExpiryDate	= nullToString(request.getParameter("expiryDate"), "");
 String sSendInstantNotification	= nullToString(request.getParameter("sendInstantNotification"), "");
 String sSendCDRNotification	= nullToString(request.getParameter("sendCDRNotification"), "");
 
@@ -126,6 +127,13 @@ if (notEmpty(sSendCDRNotification)){
 	}
 	sTemp = ",";
 }
+
+if (sLoginUserAccountType.equals("A") && notEmpty(sExpiryDate)){	//管理者可以重新設定電話主人帳號有效日期
+	sSQL += sTemp;
+	sSQL += "Expiry_Date='" + sExpiryDate + " 23:59:59'";
+	sTemp = ",";
+}
+
 if (beEmpty(sAccountSequence)){	//管理者或加盟商
 	sSQL += sTemp;
 	sSQL += "Account_Name='" + sAccountName + "'";
@@ -134,6 +142,7 @@ if (beEmpty(sAccountSequence)){	//管理者或加盟商
 	sSQL += " WHERE Account_Sequence=" + sAccountSequence;
 }
 sSQLList.add(sSQL);
+//writeLog("debug", "sSQL= " + sSQL);
 
 if (beEmpty(sAccountSequence)){	//管理者或加盟商
 	sSQL = "UPDATE callpro_account_detail SET ";

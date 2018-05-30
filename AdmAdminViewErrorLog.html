@@ -35,6 +35,8 @@
 	<link rel="stylesheet" href="bower_components/bootstrap-daterangepicker/daterangepicker.css">
 	<!-- bootstrap wysihtml5 - text editor -->
 	<link rel="stylesheet" href="plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css">
+  <!-- iCheck -->
+  <link rel="stylesheet" href="plugins/iCheck/square/green.css">
 	
 	<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
 	<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -151,8 +153,8 @@
 		<!-- Content Header (Page header) -->
 		<section class="content-header">
 			<h1>
-				LINE通知訊息測試
-				<small>發送測試訊息給電話主人及子帳號</small>
+				Error Log
+				<small>檢視今天系統紀錄檔中的錯誤記錄</small>
 			</h1>
 		</section>
 		
@@ -160,64 +162,18 @@
 		<section class="content">
 			<!-- 主要功能的內容在這裡 -->
 
-			<div class="alert alert-info alert-dismissible">
-				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-				<h4><i class="icon fa fa-info"></i> 使用說明</h4>
-				<ul>
-					<li>
-						請輸入電話主人的市話區碼及電話號碼，然後點選【發送】即可
-					</li>
-				</ul>
-			</div>
-
-			<div class="box box-primary box-solid" id="boxResult">
+			<div class="box box-success box-solid" id="boxResult">
 				<div class="box-header with-border">
-					<h3 class="box-title">電話主人資料</h3>
+					<h3 class="box-title">資料查詢結果</h3>
 				</div><!-- /.box-header -->
 
-				<!-- form start -->
-				<form role="form">
-					<div class="box-body">
-						<div class="form-group">
-							<label for="areacode">區碼</label>
-							<input type="text" class="form-control" id="areacode" placeholder="02" maxlength="4">
-						</div>
-
-						<div class="form-group">
-							<label for="phonenumber1">電話號碼</label>
-							<input type="text" class="form-control" id="phonenumber1" placeholder="21234567" maxlength="10">
-						</div>
-
-						<div class="form-group">
-							<label for="callerphone">來話號碼</label>
-							<input type="text" class="form-control" id="callerphone" value="0988888888" maxlength="20">
-						</div>
-
-						<div class="form-group">
-							<label for="callername">來話人姓名</label>
-							<input type="text" class="form-control" id="callername" value="Call-Pro客服中心" maxlength="20">
-						</div>
-
-						<div class="form-group">
-							<label for="callerdetail">來話人明細資料</label>
-							<input type="text" class="form-control" id="callerdetail" value="Call-Pro客服中心測試，請確認是否有收到此訊息" maxlength="100">
-						</div>
-
-						<div class="form-group">
-							<label for="phoneindex">線路編號</label>
-							<input type="text" class="form-control" id="phoneindex" value="1" maxlength="2">
-						</div>
-
-						<div class="form-group">
-							<label>即時通知訊息內容</label>
-							<textarea class="form-control" id="message1" rows="3" placeholder="點選發送後顯示" disabled></textarea>
-						</div>						
-					</div><!-- /.box-body -->
+				<div class="box-body">
+					<div>
+						<pre id="sResult">
+						</pre>
+					</div>
 					
-					<div class="box-footer">
-						<button type="button" class="btn btn-primary" onclick="doSend();">發送</button>
-					</div><!-- /.box-footer -->
-				</form>
+				</div><!-- /.box-body -->
 				
 				<div class="box-footer">
 				</div><!-- /.box-footer -->
@@ -281,6 +237,8 @@
 <!--<script src="bower_components/datatables.net/js/datatables.min.js"></script>-->
 <!-- AdminLTE App -->
 <script src="dist/js/adminlte.min.js"></script>
+<!-- iCheck -->
+<script src="./plugins/iCheck/icheck.min.js"></script>
 </body>
 </html>
 
@@ -291,106 +249,37 @@
 <script>
 	$(function () {
 		pageInit();
+		doQuery();
 	});
 </script>
 
 <script>
-
-	function doSend(){
-		var areacode = $('#areacode').val();
-		var phonenumber1 = $('#phonenumber1').val();
-		
-		if (beEmpty(areacode) || beEmpty(phonenumber1)){
-			msgBox("請輸入區碼及電話號碼!");
-			return;
-		}
-
-		var accesscode = "8888";
-		var callerphone = $('#callerphone').val();
-		var callername = $('#callername').val();
-		var callerdetail = $('#callerdetail').val();
-
-		/*
-		if (beEmpty(callerphone)){
-			msgBox("請輸入來話號碼!");
-			return;
-		}
-		*/
-
-		var message = areacode + phonenumber1 + "來電自" + callerphone + "，對方為" + callername + "，個人資料如下：\n" +  callerdetail;
-	
-		$('#message1').val(message);
+	function doQuery(){
 		$('.overlay').show();
 		
 		var sData = "";
-		sData = "areacode=" + areacode;
-		sData += "&phonenumber1=" + phonenumber1;
-		sData += "&accesscode=" + accesscode;
-		sData += "&callerphone=" + callerphone;
-		sData += "&callername=" + callername;
-		sData += "&callerdetail=" + callerdetail;
 		
-		getDataFromServer("Event_PCClientSendInstantNotification.jsp", sData, "json", function(data){
+		getDataFromServer("ajaxGetErrorLog.jsp", sData, "json", function(data){
 			if (!data.resultCode || !data.resultText){
 				$('.overlay').hide();
-				msgBox("無法取得即時通知發送結果!");
+				msgBox("無法取得Error Log資料!");
 				return;
 			}else{
 				if (data.resultCode=="00000"){
-					msgBox("即時通知發送成功，將繼續發送錄音檔通知訊息!", doSendCDR);
+					if (beEmpty(data.logText)){
+						msgBox("本日Log檔內無Error。");
+					}else{
+						var s = data.logText;
+						//s = s.replace(/(\r\n\t|\n|\r|\r\t)/gm,"test");
+						$('#sResult').text(s);
+					}
 				}else{
-					msgBox("即時通知發送失敗:<br>" + data.resultText + "，將繼續嘗試發送錄音檔通知訊息!", doSendCDR);
+					msgBox("取得Error Log資料失敗:<br>" + data.resultText);
 				}
 				$('.overlay').hide();
 			}
+
 		});	//getDataFromServer("xxx.jsp", sData, "json", function(data){
 	}
-
-	function doSendCDR(){
-		var areacode = $('#areacode').val();
-		var phonenumber1 = $('#phonenumber1').val();
-		
-		if (beEmpty(areacode) || beEmpty(phonenumber1)){
-			msgBox("請輸入區碼及電話號碼!");
-			return;
-		}
-
-		var accesscode = "8888";
-		var callerphone = $('#callerphone').val();
-		var recordtime = "10";
-		var recordtimestart = getCurrentDate() + " " + getCurrentTime();
-		var call_direction = "0";
-		var recordfile = "callprotest.mp3";
-		var ring_time = "10";
-		var talked_time = "0";
-		var callername = $('#callername').val();
-		var calleraddr = $('#callerdetail').val();
-		var callercompany = "Call-Pro";
-		var calleremail = "m@call-pro.net";
-		var phoneindex = $('#phoneindex').val();
-
-		$('.overlay').show();
-		
-		var sData = "";
-		sData = "areacode=" + areacode;
-		sData += "&phonenumber1=" + phonenumber1;
-		sData += "&accesscode=" + accesscode;
-		sData += "&callerphone=" + callerphone;
-		sData += "&recordtime=" + recordtime;
-		sData += "&recordtimestart=" + recordtimestart;
-		sData += "&call_direction=" + call_direction;
-		sData += "&recordfile=" + recordfile;
-		sData += "&ring_time=" + ring_time;
-		sData += "&talked_time=" + talked_time;
-		sData += "&callername=" + callername;
-		sData += "&calleraddr=" + calleraddr;
-		sData += "&callercompany=" + callercompany;
-		sData += "&calleremail=" + calleremail;
-		sData += "&phoneindex=" + phoneindex;
-		
-		getDataFromServer("Event_PCClientNewCDR.jsp", sData, "text", function(data){
-			$('.overlay').hide();
-			msgBox("錄音檔通知上傳Google/發送結果如下，若結果為【" + recordfile + "】，表示發送成功：<p>" + data);
-		});	//getDataFromServer("xxx.jsp", sData, "json", function(data){
-	}
+	
 </script>

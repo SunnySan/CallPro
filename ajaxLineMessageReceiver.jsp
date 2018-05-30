@@ -457,7 +457,7 @@ writeLog("debug", obj.toString());
 		if (aMsg.length==2){
 			sMessageText = aMsg[0];
 			sGoogleEmail = aMsg[1].toLowerCase();
-			if (sGoogleEmail.indexOf("@gmail.com")<1) return "GMail信箱格式錯誤";
+			//if (sGoogleEmail.indexOf("@gmail.com")<1) return "GMail信箱格式錯誤";
 		}
 		if (beEmpty(sMessageText)){
 			return "請輸入授權碼或用戶名稱";
@@ -589,6 +589,7 @@ writeLog("debug", obj.toString());
 					//writeLog("debug", "sSQL= " + sSQL);
 				}
 
+				/*
 				if ((sAccountType.equals("O") || sAccountType.equals("T")) && !sBillType.equals("B")){	//這是進階版電話主人帳號，將主電話號碼寫入callpro_account_owner_phones
 					sSQL = "INSERT INTO callpro_account_owner_phones (Create_User, Create_Date, Update_User, Update_Date, Main_Account_Sequence, Phone_Number, Phone_Type) VALUES (";
 					sSQL += "'" + sUser + "',";
@@ -601,6 +602,7 @@ writeLog("debug", obj.toString());
 					sSQL += ")";
 					sSQLList.add(sSQL);
 				}
+				*/
 			}	//if (!sAccountType.equals("M") && !sAccountType.equals("U")){	//經銷商及門號擁有者須新增一筆資料至callpro_account_detail
 
 			ht = updateDBData(sSQLList, gcDataSourceName, false);
