@@ -36,6 +36,7 @@ String		sResultCode			= gcResultCodeSuccess;
 String		sResultText			= gcResultTextSuccess;
 
 String		s[][]				= null;
+String		s1[][]				= null;
 String		sSQL				= "";
 List<String> sSQLList			= new ArrayList<String>();
 String		sDate				= getDateTimeNow(gcDateFormatSlashYMDTime);
@@ -45,6 +46,7 @@ int			j					= 0;
 
 String		sLineChannelName	= "CallProA";
 String		sRecepientType		= "";
+String		sTmp				= "";
 
 //發給管理者
 sSQL = "SELECT Line_User_ID FROM callpro_account";
@@ -83,6 +85,29 @@ String sMessageBody = "";
 String sPushMessage = "";
 
 sMessageBody = "Call-Pro 系統測試，測試時間：" + sDate;
+
+//找出已過期或即將過期的電話主人資料
+sSQL = "SELECT Account_Name, Audit_Phone_Number, DATE_FORMAT(Expiry_Date,'%m-%d %H:%i'), Status FROM callpro_account";
+sSQL += " WHERE (Account_Type='O' OR Account_Type='T') AND Status<>'Delete' AND Status<>'Expired' AND Expiry_Date<=now()+interval 3 day";
+sSQL += " ORDER BY Expiry_Date";
+
+ht = getDBData(sSQL, gcDataSourceName);
+
+sResultCode = ht.get("ResultCode").toString();
+sResultText = ht.get("ResultText").toString();
+
+if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
+	s1 = (String[][])ht.get("Data");
+	sMessageBody = "已過期或即將過期的電話主人資料(姓名、電話、帳號到期時間、目前狀態)：\n";
+	for (i=0;i<s1.length;i++){
+		sTmp = "";
+		for (j=0;j<4;j++){
+			sTmp += nullToString(s1[i][j], "") + ", ";
+		}
+		sTmp = sTmp.substring(0, sTmp.length()-2);
+		sMessageBody += sTmp + "\n";
+	}
+}	//if (sResultCode.equals(gcResultCodeSuccess)){	//有資料
 
 sPushMessage = generateLineTextMessage(sRecepientType, s, sMessageBody);
 
