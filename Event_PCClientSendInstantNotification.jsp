@@ -74,6 +74,8 @@ int			j					= 0;
 String		sLineChannelName	= "";
 java.lang.Boolean	bIsAdvanceOwner	= false;	//電話主人是不是進階版用戶
 
+writeLog("debug", "來電即時通知，電話主人： " + sAreaCode + sPhoneNumber + ", 通話對象： " + sAPartyNumber);
+
 //確認門號主人狀態正常
 sSQL = "SELECT Line_Channel_Name, Bill_Type FROM callpro_account";
 sSQL += " WHERE Audit_Phone_Number='" + sAreaCode + sPhoneNumber + "'";
