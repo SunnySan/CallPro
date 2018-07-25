@@ -144,7 +144,7 @@ String sHiPageCallerName = "";	//從中華黃頁找到的對方資料
 //sMessageBody = sAreaCode + sPhoneNumber + "來電自" + sAPartyNumber + "，對方為" + sAPartyName + "，個人資料如下：\n" + sAPartyDetail;
 sMessageBody = "來電：" + sAPartyNumber + "，對方為[" + sAPartyName + "]，個人資料：" + sAPartyDetail + "。";
 
-if (notEmpty(sAPartyNumber) && !sAPartyNumber.equals("無法辨識") && !sAPartyNumber.equals("0") && !sAPartyNumber.equals("無來電顯示") && (beEmpty(sAPartyName) || sAPartyName.equals("未建檔")) && bIsAdvanceOwner) sHiPageCallerName = getCallerNameFromHiPage(sAPartyNumber);
+if (notEmpty(sAPartyNumber) && !sAPartyNumber.equals("無來電號碼") && !sAPartyNumber.equals("0") && !sAPartyNumber.equals("無來電顯示") && (beEmpty(sAPartyName) || sAPartyName.equals("未建檔")) && bIsAdvanceOwner) sHiPageCallerName = getCallerNameFromHiPage(sAPartyNumber);
 if (notEmpty(sHiPageCallerName)) sMessageBody += "網路社群回報：" + sHiPageCallerName;
 
 sPushMessage = generateLineTextMessage(sRecepientType, s, sMessageBody);

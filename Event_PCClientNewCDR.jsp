@@ -67,7 +67,7 @@ if (beEmpty(sAreaCode) || beEmpty(sPhoneNumber) || beEmpty(sAuthorizationCode) )
 	return;
 }
 
-if (beEmpty(sCallerNumber)) sCallerNumber = "無法辨識";
+if (beEmpty(sCallerNumber)) sCallerNumber = "無電話號碼";
 
 //登入用戶的資訊，系統管理者可以直接發送測試通知
 String sLoginUserAccountType = (String)session.getAttribute("Account_Type");
@@ -251,7 +251,7 @@ try{
 		sMessageBody += "，對方為[" + sCallerName + "]，";
 	}
 
-	if (notEmpty(sCallerNumber) && !sCallerNumber.equals("無法辨識") && !sCallerNumber.equals("0") && beEmpty(sCallerName) && bIsAdvanceOwner) sHiPageCallerName = getCallerNameFromHiPage(sCallerNumber);
+	if (notEmpty(sCallerNumber) && !sCallerNumber.equals("無電話號碼") && !sCallerNumber.equals("0") && beEmpty(sCallerName) && bIsAdvanceOwner) sHiPageCallerName = getCallerNameFromHiPage(sCallerNumber);
 	//writeLog("debug", "sHiPageCallerName： " + sHiPageCallerName);
 	sMessageBody += sCallerDetail;
 	if (notEmpty(sHiPageCallerName)) sMessageBody += "\n網路社群回報：" + sHiPageCallerName + "。";
@@ -286,7 +286,7 @@ try{
 		sMessageBody += "聽取錄音檔：\n(無錄音檔)\n，查詢通聯記錄：\n" + (beEmpty(sCallLogShortURL)?sCallLogURL:sCallLogShortURL);
 	}
 
-	if (notEmpty(sCallerNumber) && !sCallerNumber.equals("無法辨識") && !sCallerNumber.equals("0") && beEmpty(sCallerName) && bIsAdvanceOwner && beEmpty(sHiPageCallerName)){
+	if (notEmpty(sCallerNumber) && !sCallerNumber.equals("無電話號碼") && !sCallerNumber.equals("0") && beEmpty(sCallerName) && bIsAdvanceOwner && beEmpty(sHiPageCallerName)){
 		String sReportPhonebookLongURL = "";
 		String sReportPhonebookShortURL = "";
 		sReportPhonebookLongURL = gcSystemUri + "AdmOwnerPublishToPhonebook.html?reportPhoneNumber=" + sCallerNumber;
