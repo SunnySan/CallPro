@@ -1,0 +1,174 @@
+<!DOCTYPE HTML>
+<!--
+	Halcyonic by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Call-Pro</title>
+		<link rel="shortcut icon" href="images/favicon.ico">
+		<meta charset="utf-8" />
+		<META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
+		<META HTTP-EQUIV="EXPIRES" CONTENT="0">
+		<META HTTP-EQUIV="CACHE-CONTROL" CONTENT="NO-CACHE">
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<!--[if lte IE 8]><script src="homepage_files/assets/js/ie/html5shiv.js"></script><![endif]-->
+		<link rel="stylesheet" href="homepage_files/assets/css/main.css" />
+		<!--[if lte IE 9]><link rel="stylesheet" href="homepage_files/assets/css/ie9.css" /><![endif]-->
+	</head>
+	<body>
+		<div id="page-wrapper">
+
+			<!-- Header -->
+				<div id="header-wrapper">
+					<header id="header" class="container">
+						<div class="row">
+							<div class="12u">
+
+								<!-- Logo -->
+									<h1><a href="#" id="logo">Call-Pro</a></h1>
+
+								<!-- Nav -->
+									<nav id="nav">
+										<a href="download.html">使用手冊下載</a>
+										<a href="aboutus.html">關於我們</a>
+									</nav>
+
+							</div>
+						</div>
+					</header>
+					<div id="banner">
+						<div class="container">
+							<div class="row">
+								<div class="6u 12u(mobile)">
+
+									<!-- Banner Copy -->
+										<p>Call-Pro提供您市話的來電通知、雙向電話錄音、雲端儲存等貼心功能，是您最好的電話秘書</p>
+										<a href="login_simple.html" class="button-big">用戶登入</a>
+
+								</div>
+								<div class="6u 12u(mobile)">
+
+									<!-- Banner Image -->
+										<div class="bordered-feature-image"><img src="homepage_files/images/banner_568X191.jpg" alt="" /></div>
+
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+			<!-- Features -->
+				<div id="features-wrapper">
+					<div id="features">
+						<div class="container">
+							<div class="row">
+								<div class="3u 12u(mobile)">
+
+									<!-- Feature #1 -->
+										<section>
+											<div class="bordered-feature-image"><img src="homepage_files/images/pic01.jpg" alt="" /></div>
+											<h2>來電通知</h2>
+											<p>
+												當您的電話有來電時，系統將即時發送通知訊息至您的LINE帳號，您可以在電話響鈴時即得知來電人的姓名，當您不在家時也可以立即得知何人打電話給您，以便立即與對方聯絡。系統並可自動同步Google聯絡人的資料，讓您不用再另外建立本服務所需的聯絡人。
+											</p>
+										</section>
+
+								</div>
+								<div class="3u 12u(mobile)">
+
+									<!-- Feature #2 -->
+										<section>
+											<div class="bordered-feature-image"><img src="homepage_files/images/pic02.jpg" alt="" /></div>
+											<h2>雙向電話錄音</h2>
+											<p>
+												進階版用戶享有自動電話錄音功能，系統將針對撥入及撥出電話進行自動錄音，供您日後隨時查詢及回放通話內容之用，從此再也不必擔心忘記重要通話內容。
+											</p>
+										</section>
+
+								</div>
+								<div class="3u 12u(mobile)">
+
+									<!-- Feature #3 -->
+										<section>
+											<div class="bordered-feature-image"><img src="homepage_files/images/pic03.jpg" alt="" /></div>
+											<h2>雲端儲存</h2>
+											<p>
+												電話錄音檔案可自動儲存在您的Google雲端硬碟中，同時會發送LINE通知訊息並建立Google行事曆項目，讓您可以隨時聆聽通話內容，此外亦提供歷史記錄查詢功能，讓您可以隨時取得各個聯絡人過往的所有通話記錄及錄音內容。
+											</p>
+										</section>
+
+								</div>
+								<div class="3u 12u(mobile)">
+
+									<!-- Feature #4 -->
+										<section>
+											<div class="bordered-feature-image"><img src="homepage_files/images/pic04.jpg" alt="" /></div>
+											<h2>隱私及安全性</h2>
+											<p>
+												隱私及安全性是Call-Pro服務最重要的設計精神，也是我們最在乎的承諾，您的所有通話錄音將只儲存在您的個人電腦或您的Google雲端硬碟，若您選擇將錄音檔上傳至您個人的Google雲端硬碟，則只有您的Google帳號可以聽取，本服務絕不會以任何形式儲存您的通話錄音，且通話錄音在傳送至Google雲端硬碟的過程中採用安全加密機制，以避免資料被竊取的風險，您可安心使用本服務而無須擔心任何隱私權及資料安全問題。
+											</p>
+										</section>
+
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+
+
+
+
+
+
+			<!-- Content -->
+				<div id="content-wrapper">
+					<div id="content">
+						<div class="container">
+							<div class="row">
+								<div class="12u">
+
+									<!-- Main Content -->
+										<section>
+											<header style="margin-bottom:0px;">
+												<h2>使用情境</h2>
+												<h3>若有人撥打您家中、公司電話，當電話開始響鈴時，您的手機就會立即接到一通LINE的訊息通知，通知內容包含了來電者的姓名及電話等資訊。
+													<br>
+													當家中、公司電話通話結束時，系統會將此次通話的錄音檔儲存在您的電腦中、或上傳至您的Google雲端硬碟中，您可以隨時聆聽每次撥出或接到的電話內容。
+												</h3>
+											</header>
+											<div class="12u">
+												<img src="homepage_files/images/1.png" style="width:100%;" alt="" />
+											</div>
+										</section>
+
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+
+
+
+
+
+			<!-- Copyright -->
+				<div id="copyright">
+					&copy; Call-Pro. All rights reserved. | <span style="font-size:6px;">Design: <a href="http://html5up.net">HTML5 UP</a></span>
+				</div>
+
+		</div>
+
+		<!-- Scripts -->
+			<script src="homepage_files/assets/js/jquery.min.js"></script>
+			<script src="homepage_files/assets/js/skel.min.js"></script>
+			<script src="homepage_files/assets/js/skel-viewport.min.js"></script>
+			<script src="homepage_files/assets/js/util.js"></script>
+			<!--[if lte IE 8]><script src="homepage_files/assets/js/ie/respond.min.js"></script><![endif]-->
+			<script src="homepage_files/assets/js/main.js"></script>
+
+	</body>
+</html>

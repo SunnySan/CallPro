@@ -156,6 +156,8 @@ if (isDuplicatedCDR(sAreaCode + sPhoneNumber, sCallerNumber, sType, sRecordTime,
 		out.print(sSavedFileName);
 		//將錄音檔刪除 (callprotest.mp3除外，這是系統管理者測試用的)
 		if (notEmpty(sSavedFileName) && !sSavedFileName.equals("callprotest.mp3")) DeleteFile(saveDirectory + sSavedFileName);
+		out.print("ok");
+		return;	//結束程式
 	}else{
 		out.print("ok");
 	}
@@ -179,8 +181,8 @@ try{
 		//sendFullLoginMailToGoogle(sGoogleEmail);
 		obj.put("resultCode", gcResultCodeUnknownError);
 		obj.put("resultText", "無法取得 Google credential");
-		out.print(obj);
-		out.flush();
+		//out.print(obj);
+		//out.flush();
 		return;
 	}
 	
