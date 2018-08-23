@@ -336,8 +336,10 @@ function generateMainMenu() {
 		*/
 		pageName = "AdmOwnerMyProfile.html";
 		s += "<li" + (pageName==me?" class='active'":"") + "><a href='" + pageName + "'><i class='fa fa-check-square'></i> <span>我的設定</span></a></li>";
+		/*
 		pageName = "AdmOwnerReportPhonebook.html";
 		s += "<li" + (pageName==me?" class='active'":"") + "><a href='" + pageName + "'><i class='fa fa-table'></i> <span>電話資料回報</span></a></li>";
+		*/
 
 		s1 = "";
 		pageName = "AdmOwnerReport_DailyCallStatistics.html";
